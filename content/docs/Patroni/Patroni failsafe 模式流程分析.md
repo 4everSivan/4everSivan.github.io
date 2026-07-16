@@ -2,8 +2,6 @@
 title: "Patroni failsafe 模式分析"
 ---
 
-# Patroni failsafe 模式分析
-
 [TOC]
 
 ## 1. 功能目标

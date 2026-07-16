@@ -1,0 +1,42 @@
+{{- $docs := site.GetPage "/docs" -}}
+{{- if not $docs -}}
+  {{- errorf "knowledge-stats: controlled /docs content root is missing" -}}
+{{- end -}}
+
+{{- $documentCount := len $docs.RegularPagesRecursive -}}
+{{- $categoryCount := 0 -}}
+{{- range site.Pages -}}
+  {{- if and (eq .Kind "section") (ne .RelPermalink $docs.RelPermalink) (strings.HasPrefix .RelPermalink $docs.RelPermalink) -}}
+    {{- $categoryCount = add $categoryCount 1 -}}
+  {{- end -}}
+{{- end -}}
+
+<div
+  class="hextra-cards hx:mt-4 hx:gap-4 hx:grid not-prose"
+  style="--hextra-cards-grid-cols: 3;"
+  data-knowledge-stats
+  data-published-documents="{{ $documentCount }}"
+  data-published-categories="{{ $categoryCount }}"
+>
+  {{- partial "shortcodes/card" (dict
+    "page" .Page
+    "link" "/docs/"
+    "title" (printf "%d 篇已发布文档" $documentCount)
+    "subtitle" "全部来自受控内容快照"
+    "icon" "document-text"
+  ) -}}
+  {{- partial "shortcodes/card" (dict
+    "page" .Page
+    "link" "/docs/"
+    "title" (printf "%d 个可浏览分类" $categoryCount)
+    "subtitle" "保留源目录的知识分类结构"
+    "icon" "collection"
+  ) -}}
+  {{- partial "shortcodes/card" (dict
+    "page" .Page
+    "link" "/docs/"
+    "title" "逐文件安全筛选"
+    "subtitle" "源内容与发布副本均通过安全扫描"
+    "icon" "shield-check"
+  ) -}}
+</div>

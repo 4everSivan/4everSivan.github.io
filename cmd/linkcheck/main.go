@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"html"
@@ -10,10 +11,17 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
-var attributePattern = regexp.MustCompile(`(?is)\b(?:href|src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^[:space:]"'=<>]+))`)
+var (
+	attributePattern     = regexp.MustCompile(`(?is)\b(?:href|src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^[:space:]"'=<>]+))`)
+	headingPattern       = regexp.MustCompile(`(?is)<h1\b[^>]*>(.*?)</h1>`)
+	tagPattern           = regexp.MustCompile(`(?is)<[^>]+>`)
+	documentCountPattern = regexp.MustCompile(`(?i)\bdata-published-documents\s*=\s*"?([0-9]+)`)
+	categoryCountPattern = regexp.MustCompile(`(?i)\bdata-published-categories\s*=\s*"?([0-9]+)`)
+)
 
 func main() {
 	if len(os.Args) != 2 {
@@ -62,6 +70,9 @@ func check(root string) ([]string, error) {
 		if err != nil {
 			return err
 		}
+		relativeFile, _ := filepath.Rel(absoluteRoot, filename)
+		relativeFile = filepath.ToSlash(relativeFile)
+		checkPresentation(relativeFile, data, problems)
 		for _, match := range attributePattern.FindAllSubmatch(data, -1) {
 			if len(match) < 4 {
 				continue
@@ -76,16 +87,18 @@ func check(root string) ([]string, error) {
 			raw = html.UnescapeString(strings.TrimSpace(raw))
 			target, internal, err := resolve(absoluteRoot, filename, raw)
 			if err != nil {
-				relative, _ := filepath.Rel(absoluteRoot, filename)
-				problems[fmt.Sprintf("%s: 无效内部链接", filepath.ToSlash(relative))] = struct{}{}
+				problems[fmt.Sprintf("%s: 无效内部链接", relativeFile)] = struct{}{}
 				continue
 			}
-			if !internal || exists(target) {
+			if !internal {
 				continue
 			}
-			relativeFile, _ := filepath.Rel(absoluteRoot, filename)
+			_, found := existingTarget(target)
+			if found {
+				continue
+			}
 			relativeTarget, _ := filepath.Rel(absoluteRoot, target)
-			problems[fmt.Sprintf("%s: 缺少内部目标 %s", filepath.ToSlash(relativeFile), filepath.ToSlash(relativeTarget))] = struct{}{}
+			problems[fmt.Sprintf("%s: 缺少内部目标 %s", relativeFile, filepath.ToSlash(relativeTarget))] = struct{}{}
 		}
 		return nil
 	})
@@ -98,6 +111,43 @@ func check(root string) ([]string, error) {
 	}
 	sort.Strings(result)
 	return result, nil
+}
+
+func checkPresentation(relativeFile string, data []byte, problems map[string]struct{}) {
+	if relativeFile == "index.html" {
+		_, documentsOK := positiveAttribute(data, documentCountPattern)
+		_, categoriesOK := positiveAttribute(data, categoryCountPattern)
+		featured := bytes.Count(data, []byte("hextra-feature-card"))
+		if !bytes.Contains(data, []byte("data-knowledge-stats")) || !documentsOK || !categoriesOK || featured < 6 || featured > 8 {
+			problems["index.html: 知识导航首页标记不完整"] = struct{}{}
+		}
+	}
+	if !strings.HasPrefix(relativeFile, "docs/") || filepath.Base(relativeFile) != "index.html" {
+		return
+	}
+	headings := headingPattern.FindAllSubmatch(data, 2)
+	if len(headings) < 2 {
+		return
+	}
+	first := normalizedHeading(headings[0][1])
+	second := normalizedHeading(headings[1][1])
+	if first != "" && first == second {
+		problems[fmt.Sprintf("%s: 连续重复页面标题", relativeFile)] = struct{}{}
+	}
+}
+
+func positiveAttribute(data []byte, pattern *regexp.Regexp) (int, bool) {
+	match := pattern.FindSubmatch(data)
+	if len(match) != 2 {
+		return 0, false
+	}
+	value, err := strconv.Atoi(string(match[1]))
+	return value, err == nil && value > 0
+}
+
+func normalizedHeading(value []byte) string {
+	plain := tagPattern.ReplaceAll(value, nil)
+	return strings.Join(strings.Fields(html.UnescapeString(string(plain))), " ")
 }
 
 func resolve(root, page, raw string) (string, bool, error) {
@@ -137,20 +187,21 @@ func resolve(root, page, raw string) (string, bool, error) {
 	return target, true, nil
 }
 
-func exists(target string) bool {
+func existingTarget(target string) (string, bool) {
 	info, err := os.Stat(target)
 	if err == nil {
 		if info.IsDir() {
-			_, err = os.Stat(filepath.Join(target, "index.html"))
-			return err == nil
+			candidate := filepath.Join(target, "index.html")
+			info, err = os.Stat(candidate)
+			return candidate, err == nil && info.Mode().IsRegular()
 		}
-		return info.Mode().IsRegular()
+		return target, info.Mode().IsRegular()
 	}
 	if info, candidateErr := os.Stat(filepath.Join(target, "index.html")); candidateErr == nil && info.Mode().IsRegular() {
-		return true
+		return filepath.Join(target, "index.html"), true
 	}
 	if info, candidateErr := os.Stat(target + ".html"); candidateErr == nil && info.Mode().IsRegular() {
-		return true
+		return target + ".html", true
 	}
-	return false
+	return "", false
 }

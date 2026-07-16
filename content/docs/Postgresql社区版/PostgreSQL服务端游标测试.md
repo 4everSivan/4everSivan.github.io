@@ -2,8 +2,6 @@
 title: "PostgreSQL服务端游标测试"
 ---
 
-# PostgreSQL服务端游标测试
-
 ## 测试环境
 
 ```sql

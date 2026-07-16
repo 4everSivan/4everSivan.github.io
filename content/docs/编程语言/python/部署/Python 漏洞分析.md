@@ -2,8 +2,6 @@
 title: "Python 漏洞分析"
 ---
 
-# Python 漏洞分析
-
 [TOC]
 
 ## Python 输入验证错误漏洞（CVE-2023-24329）

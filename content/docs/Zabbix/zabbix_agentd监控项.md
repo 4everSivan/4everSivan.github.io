@@ -2,8 +2,6 @@
 title: "flyingdb监控项整理"
 ---
 
-# flyingdb监控项整理
-
 [TOC]
 
 ------

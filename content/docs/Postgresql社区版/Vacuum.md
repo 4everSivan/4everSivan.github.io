@@ -2,8 +2,6 @@
 title: "Vacuum"
 ---
 
-# Vacuum
-
 ## 1. 概念
 
 ### 1.1 VACUUM 真空清理

@@ -2,8 +2,6 @@
 title: "PostgreSQL prepare"
 ---
 
-# PostgreSQL prepare
-
 prepare的使用：
 
 在执行一个SQL时，首先生成执行计划（进行语义分析、词法解析、逻辑优化、物理优化）、执行、结果传输等操作。

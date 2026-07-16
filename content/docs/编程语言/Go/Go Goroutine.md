@@ -2,8 +2,6 @@
 title: "Goroutine"
 ---
 
-# Goroutine
-
 [TOC]
 
 ## 1. 简介

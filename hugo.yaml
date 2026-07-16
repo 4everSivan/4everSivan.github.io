@@ -47,6 +47,7 @@ menu:
 
 params:
   description: 从本地学习文档安全同步生成的静态知识库
+  externalLinkDecoration: true
   navbar:
     displayTitle: true
     displayLogo: false

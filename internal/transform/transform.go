@@ -26,9 +26,15 @@ func Document(relativePath string, source []byte) ([]byte, error) {
 		return nil, errors.New("existing front matter is not supported")
 	}
 
-	title := firstHeading(content)
+	heading := firstHeading(content)
+	title := heading.title
+	body := content
 	if title == "" {
 		title = strings.TrimSuffix(path.Base(relativePath), ".md")
+	} else {
+		body = make([]byte, 0, len(content)-(heading.end-heading.start))
+		body = append(body, content[:heading.start]...)
+		body = append(body, content[heading.end:]...)
 	}
 	if title == "" {
 		return nil, errors.New("document title is empty")
@@ -36,8 +42,8 @@ func Document(relativePath string, source []byte) ([]byte, error) {
 
 	var out bytes.Buffer
 	fmt.Fprintf(&out, "---\ntitle: %s\n---\n\n", quoteYAML(title))
-	out.Write(content)
-	if len(content) > 0 && content[len(content)-1] != '\n' {
+	out.Write(body)
+	if len(body) > 0 && body[len(body)-1] != '\n' {
 		out.WriteByte('\n')
 	}
 	return out.Bytes(), nil
@@ -74,12 +80,18 @@ func hasFrontMatter(content []byte) bool {
 	return bytes.HasPrefix(trimmed, []byte("---\n")) || bytes.HasPrefix(trimmed, []byte("---\r\n")) || bytes.HasPrefix(trimmed, []byte("+++\n")) || bytes.HasPrefix(trimmed, []byte("{\n"))
 }
 
-func firstHeading(content []byte) string {
-	lines := strings.Split(strings.ReplaceAll(string(content), "\r\n", "\n"), "\n")
+type headingMatch struct {
+	title string
+	start int
+	end   int
+}
+
+func firstHeading(content []byte) headingMatch {
 	inFence := false
 	fence := ""
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
+	for start := 0; start < len(content); {
+		lineEnd, next := physicalLineEnd(content, start)
+		trimmed := strings.TrimSpace(string(content[start:lineEnd]))
 		if strings.HasPrefix(trimmed, "```") || strings.HasPrefix(trimmed, "~~~") {
 			marker := trimmed[:3]
 			if !inFence {
@@ -87,18 +99,48 @@ func firstHeading(content []byte) string {
 			} else if marker == fence {
 				inFence, fence = false, ""
 			}
+			start = next
 			continue
 		}
 		if inFence || !strings.HasPrefix(trimmed, "# ") {
+			start = next
 			continue
 		}
-		title := strings.TrimSpace(strings.TrimPrefix(trimmed, "# "))
-		title = strings.TrimSpace(strings.TrimSuffix(title, "#"))
+		title := headingTitle(trimmed)
 		if title != "" {
-			return title
+			end := next
+			if end < len(content) {
+				blankEnd, blankNext := physicalLineEnd(content, end)
+				if strings.TrimSpace(string(content[end:blankEnd])) == "" {
+					end = blankNext
+				}
+			}
+			return headingMatch{title: title, start: start, end: end}
 		}
+		start = next
 	}
-	return ""
+	return headingMatch{}
+}
+
+func physicalLineEnd(content []byte, start int) (end, next int) {
+	relativeEnd := bytes.IndexByte(content[start:], '\n')
+	if relativeEnd < 0 {
+		return len(content), len(content)
+	}
+	end = start + relativeEnd
+	return end, end + 1
+}
+
+func headingTitle(line string) string {
+	title := strings.TrimSpace(strings.TrimPrefix(line, "# "))
+	hashes := len(title)
+	for hashes > 0 && title[hashes-1] == '#' {
+		hashes--
+	}
+	if hashes < len(title) && hashes > 0 && (title[hashes-1] == ' ' || title[hashes-1] == '\t') {
+		title = strings.TrimSpace(title[:hashes])
+	}
+	return title
 }
 
 func quoteYAML(value string) string {

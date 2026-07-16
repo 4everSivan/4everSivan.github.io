@@ -1,85 +1,85 @@
 version: 2
 gitleaks_version: 8.30.1
-ruleset_sha256: 3b026d9c892f43a80911c6bc0be52b28dc29051f4da81b5a2e935261cf677b68
+ruleset_sha256: 4b3e92e663667e76398047a627afbc9f6843f144f66b7ed7bc373c905d21ebb7
 documents:
     - path: AI/Python-CLAUDE-template.md
       source_sha256: 448ef7da7edb582f29cb7f0779f20cc5f6615ccd6a0977f43528429e1db9baff
-      output_sha256: d51764f8552e8b7162e4098459579e734f375853aee82235a97600093bc8858e
+      output_sha256: d7555636669af55d55364070052a518cd7efd8273ba0cfbc2f98677be82bb76e
     - path: NoSQL/Redis与数据库.md
       source_sha256: 0f2cb97697e72eca17ede31005870c069b884dcb87a49a496c5882f025028aa5
-      output_sha256: dd8868050e953c41427b869a401e932720602f3917891261912d9313a2c0473d
+      output_sha256: c5f0b80b36289a011540f1bb2d3e6532979b8cc70b107e4ec1d8f86b8af8c8a9
     - path: Patroni/Patroni failsafe 模式流程分析.md
       source_sha256: 8754c610709d71f177e0768e65480623f8133a8743aaedc773a896712d911530
-      output_sha256: 5df11083e5e2527be7a4b6d6e2d8e13c4219ac60c9f64ecb2e4fb18eea3e8f17
+      output_sha256: fa16a2df83f806c419f4ec2a6f84843dfc2a24d26686ce634ddc7a3985964363
     - path: Patroni/Patroni 同步复制.md
       source_sha256: f9d744b92d5eb5ca5d6993136fad63374c777c95b91d91c2744f85a9c59227fe
       output_sha256: 02fafdab7069ed2df0f241954ed609dea80c2d186f7371974b62b1f7922dc8e3
     - path: Patroni/patroni版本日志.md
       source_sha256: 6f0dd4e56987fd81110635a2508000e03a26c63fbb8d25a67d10b54bcd0d1e9c
-      output_sha256: 63ac68245b598b86f34f4853fa49a97c821f2553107247a953aa733cdd9f0427
+      output_sha256: e77e70691a2d9d994324f282e0d80cbb6bdd9d8d3e00529732d89263f60e29fe
     - path: Postgresql社区版/Bug描述：按时间戳排序.md
       source_sha256: ecef9b4471f74d5ce350f7eb88cc8c246521c2ba3954ef2ab0cfc73cb30e3b2a
-      output_sha256: edc359bacf4587820a028f36e8f50cc841569e2676b6fd9adf965790e9346909
+      output_sha256: 8856b7c839425d86fb4c4b054db4ce51bcf109cd5d8226fc0adc22f667aad0e2
     - path: Postgresql社区版/PostgreSQL schema.md
       source_sha256: 07f62e2e054ad84e611c5d9c142ea05048fee7a3ece381b40b8d3ae73e3402b2
-      output_sha256: 7a48a283a2c888efacffebe38631903b6563b2bce9331ccd67b5d12b9caa76eb
+      output_sha256: d6d097299b75bdcfd979028bc38717cce7a38eb6329adaf640ac068146991ce7
     - path: Postgresql社区版/PostgreSQL优化：Autovacuum 调优基础知识.md
       source_sha256: 07307ad1da857ad51e808e947d9835ffc9a043b534446111b5de0e069c80d891
-      output_sha256: 2e6fb27fb7b105051e6414deaad070fa0dc7a8501befd1a7270bc5a8f1b88b6b
+      output_sha256: 8a5b11862dd7195c522ac70cab8d9afe434c4b9b52545e159c7efb9eb176f323
     - path: Postgresql社区版/PostgreSQL服务端游标测试.md
       source_sha256: 13704499f3ec87d7e52a882df40141bf6b2ea34fd41096f5e4284b3e6797b5b1
-      output_sha256: cef72b6a576d4c1d1b0aac7fe62678c3e1aed5481883036e1483b5e6a620a3f7
+      output_sha256: f483556f05479b4a24a112737c8210670f79bea91d85d6c61fe5d1289da7e299
     - path: Postgresql社区版/Vacuum.md
       source_sha256: a9b8b5f1347da6532824519857a1e5acab15d49c93104abeb9821821ce92b8b0
-      output_sha256: 631fd97a8382c0d906397de79ab766664e26e319d0f6e8b70de009dc9a9888d4
+      output_sha256: 78fa99e734f505f8496ee1cf2ab4f84596ff116e14cb16ab5007cbf284716f1c
     - path: Postgresql社区版/索引/何时使用BRIN索引.md
       source_sha256: 2c26c0b3c0ef5227716cb5bd0d0b900caf1366babfcdfde880ef1a9b3e7b3a22
-      output_sha256: 6a1ab90d8b5cad0af8a37f2680b27c8e10d49163616c62975a7a3aa6ebd737d1
+      output_sha256: d175036adddbcbb0676af8a540dcc0b21e5d4d90a2e9abb9931552dfb35ad251
     - path: Postgresql社区版/逻辑复制.md
       source_sha256: 0d349112b80bf8f4d9119f5decdc4be663b0d1305388997ff5f2850de1636901
-      output_sha256: 3f25f0cced462f5d9254b13e967fcbf39a25fe39596fdbf06f07aa91e39e1325
+      output_sha256: 99c8c109daf69e13112532dcadc3fc30aa05c19d4d9157b7c666bb824d582459
     - path: Postgresql社区版/配置/log配置相关参数.md
       source_sha256: 6bd194bf177ff775fe456dcc8ba8b3e805c844244f7e07f476d53422d3c1313e
       output_sha256: 465dae0069d6f770bc0f7a60b30bde8ddcb2b8fb3b4b60123e1affe793f4bd35
     - path: Postgresql社区版/预处理语句prepare.md
       source_sha256: 3e390ca105b7db906e6d2615c68592d2ef4207b72ef2f7ac2ea60fd75b1f59ce
-      output_sha256: 4e4ace017317c830389939595c67455ae6b7493e5258354ba5b07becf5676cf1
+      output_sha256: 5b873c87f6f0b8d6f508f2d3c5ffdcef12c2ba8009879436deb17879c5593466
     - path: Postgresql社区版/预处理语句和游标.md
       source_sha256: 25e79eb58a35b291449e768bfc9df2ed1efe349afb0175b1eef92e400b06c450
-      output_sha256: 77e4bcb0c0e5569d11b0d716714a6c9b27c2e71621dc90879dac01667edcd6d7
+      output_sha256: b21786ef56261e8a839dfd33a2f950f9d7b0c86c8ac27f8ba9f1d1bbd2a0bb28
     - path: Zabbix/zabbix_agentd监控项.md
       source_sha256: c920101ed4c1094ee17718d6296260de4cf7073cff6906162fb00cb341a05cf5
-      output_sha256: 7e10d33f01cca9c1bf73f3b3f292f70190eabc196fcb522bfe6d082a9f847f32
+      output_sha256: 00b9ed0fd41615170f962bc84842fefbe1c7ee397ca2a17f823a91c2552e4e70
     - path: 编程语言/Go/Go Goroutine.md
       source_sha256: b23f09d0abfce90a203c352495524ffa6f88a6c3138ea7cc07437a19b6c994e5
-      output_sha256: 6facabc25d2bfe3e56600ed6bd7699c1760999aba21bd62aab24b8f29ef7ba18
+      output_sha256: aa0684ae3b949fb106c72eabdcd62c9d7e789e0d18d1d41f23c9893745d0c302
     - path: 编程语言/Go/Go.md
       source_sha256: 8befdd4d5070177b12f951d41ea521ed055d968ae496eeb942ff4f2abd12b8d3
-      output_sha256: 9ab3ce4dfa05d7f9eb514d3769bef0491009e5cb271000770e3f1507d474f720
+      output_sha256: 1946251639af6846e369e0a5fc40c26ff1447dd6c93fe42c86e2f6fa3b0eb2a1
     - path: 编程语言/Go/Go开发规范.md
       source_sha256: 5ecd28e64aa781de71b478073b9ca72d9c13b76118aa34ecb8d82deed7191cca
-      output_sha256: 7703a229b36aeef8487a8c22c62bbbccddb96c86b1cf79b691714ed43d3bcedf
+      output_sha256: 44df5351a6ae4eb26a2d1384d14f878ff551190b05c46b8d548a28578fd97178
     - path: 编程语言/Go/Go数据类型-数字类型.md
       source_sha256: bd70d3ee7a7986cc60553775ae24c32545ff26a237fcc8d460682c261f6b7888
-      output_sha256: 8ca9feb87485d9676cf5e6a19870fdf571964d0a8ac53f59a1642de7c135d1cd
+      output_sha256: 1c6c7661f1eaaef407821f022a894c4705a774b9e923404a521a20501c75b7d9
     - path: 编程语言/Go/Go数据类型-派生类型.md
       source_sha256: f14ea7881a3ef1b4b5385c201a972455d26e63e142fc16e7a99a9d57d0d07234
-      output_sha256: 7926c1b5f11aa669e68dfb120eeb9e53dacfc7b0eb9a0eced9b67eec5222ec80
+      output_sha256: b108722917e2ca8937aef6c4da9bd29cb632f3874793409cbb8d6eb118885bc1
     - path: 编程语言/Go/库/TUI/TUI Package - Lipgloss.md
       source_sha256: cf13f2ec3ed056c3ed0ed849dc1fda72b4d221131b388b0b9cd4b810436ca11e
-      output_sha256: 2a4724c3e0751d0372dbb43783391da56f8591d634d644b40bc062a59148c606
+      output_sha256: b9267d7068f4c44ff41dd26d3ac9ac6fb33fdb20caf2e6d4d9968a293df2aa21
     - path: 编程语言/python/Pydantic 学习.md
       source_sha256: bfa1df779eb6cf8f0a54f35616fc3218a1e0b1fc45119afdad74ecbfe36e9eb5
-      output_sha256: 0d0c663e37159611a994f3cf1130ab435dac4c9e988cd623bf98ef167f41736c
+      output_sha256: f453e35c8742ba49b08d2dbb0a688b38fd447140ba49f82c758928c50d6a82a2
     - path: 编程语言/python/psycopg async support.md
       source_sha256: ce3fbfa8e94046fca80678d38ec2c06607274d1c0488f8070006e0fad1cbca0b
-      output_sha256: 1d382b8b1ecc5914532d2169fa2a84b52646c01ee6bb9c3ef13ba84ffeda9404
+      output_sha256: fda2706a528ac27ca4b75beaf7e8ed969c7b05a86fad47e3a412cba84bc2bf1f
     - path: 编程语言/python/python开发规范.md
       source_sha256: cff7f0d9aaa9b5edeb42f677a8add3d860f4aaa394b012d15bcdf64d3751c2f3
-      output_sha256: df4ce9f4e946704b6dae5df45bc222565afffed6eb23de51935b273c3da96b04
+      output_sha256: cdfd52239f5836229d33c1dd94dbd0b2b03b4539f0a60102ffe2af0b1fe126fe
     - path: 编程语言/python/部署/Python 漏洞分析.md
       source_sha256: cf82242034817e50d29b9f649d51b4f1969bf26f53ca51f161a9414d02f9de3e
-      output_sha256: 564fdd4a7023f22a5e4dcfb9854d41d4d2a48c8ae96a9c98b52a91be5a5094b4
+      output_sha256: 6338bb8a7e9febefbd5ab95e90622b694d0313bd489220cc3292e2a17d03abba
 generated_indexes:
     - path: AI/_index.md
       sha256: 4d6bfe431fafbac8abdb155a206809f5410b48eed8c69b78fb9fadf239459da0

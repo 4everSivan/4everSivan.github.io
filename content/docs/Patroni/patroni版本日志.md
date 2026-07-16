@@ -2,8 +2,6 @@
 title: "Patroni版本日志"
 ---
 
-# Patroni版本日志
-
 [TOC]
 
 ## Version 3.1.0

@@ -2,8 +2,6 @@
 title: "PostgreSQL优化：Autovacuum 调优基础知识"
 ---
 
-# PostgreSQL优化：Autovacuum 调优基础知识
-
 *原文链接：https://www.enterprisedb.com/blog/autovacuum-tuning-basics*
 
 ## **前言**

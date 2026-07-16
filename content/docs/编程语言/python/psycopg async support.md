@@ -2,8 +2,6 @@
 title: "Psycopg2 Asynchronous support"
 ---
 
-# Psycopg2 Asynchronous support
-
 Psycopg可以向PostgreSQL数据库发出异步查询。通过将参数 `async=1` 传递给connect()函数来建立异步通信样式:返回的连接将在异步模式下工作。
 
 在异步模式下，Psycopg连接将依赖于调用者轮询套接字文件描述符，检查它是否准备好接受数据，或者查询结果是否已经传输并准备好在客户机上读取。调用者可以使用方法 `fileno()` 来获取连接文件描述符和poll()来根据当前连接状态进行通信。

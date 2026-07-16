@@ -2,8 +2,6 @@
 title: "Pydantic 学习"
 ---
 
-# Pydantic 学习 
-
 [TOC]
 
 ## 1. 简介
