@@ -38,10 +38,12 @@ func TestPagesWorkflowKeepsSecurityGatesBeforeArtifactAndDeploy(t *testing.T) {
 		"--redact=100",
 		"hugo --gc --minify",
 		"linkcheck public",
-		"actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa",
+		"actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+		"actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c",
+		"actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9",
 		"needs: build",
 		"if: ${{ inputs.deploy == true }}",
-		"actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e",
+		"actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128",
 	}
 	for _, value := range required {
 		if !strings.Contains(text, value) {
@@ -57,7 +59,7 @@ func TestPagesWorkflowKeepsSecurityGatesBeforeArtifactAndDeploy(t *testing.T) {
 		"Run independent redacted tracked-tree Gitleaks check",
 		"Build production site",
 		"Check generated internal links",
-		"actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa",
+		"actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9",
 	}
 	previous := -1
 	for _, marker := range ordered {
