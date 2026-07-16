@@ -13,7 +13,7 @@ Sivan 学习文档
 {{< /hextra/hero-headline >}}
 
 {{< hextra/hero-subtitle >}}
-把日常积累整理成可搜索、可导航、持续更新的个人技术知识库.
+体系化整理个人技术积累，提供高安全、可搜索、结构化的静态知识库.
 {{< /hextra/hero-subtitle >}}
 
 {{< hextra/hero-button text="进入文档库" link="/docs/" >}}
@@ -29,13 +29,13 @@ Sivan 学习文档
 {{< /hextra/hero-section >}}
 
 {{< hextra/feature-grid cols="3" >}}
-  {{< hextra/feature-card title="PostgreSQL" subtitle="查询、索引、复制、配置与性能调优笔记." icon="database" link="/docs/postgresql社区版/" >}}
-  {{< hextra/feature-card title="Go" subtitle="语言基础、开发规范、并发与常用库实践." icon="code" link="/docs/编程语言/go/" >}}
-  {{< hextra/feature-card title="Python" subtitle="工程规范、异步数据库与部署安全记录." icon="terminal" link="/docs/编程语言/python/" >}}
-  {{< hextra/feature-card title="Patroni" subtitle="高可用、同步复制与故障保护机制分析." icon="server" link="/docs/patroni/" >}}
-  {{< hextra/feature-card title="AI" subtitle="AI Agent 协作与工程化开发指南." icon="sparkles" link="/docs/ai/" >}}
-  {{< hextra/feature-card title="NoSQL" subtitle="Redis 等非关系型数据系统学习记录." icon="cube" link="/docs/nosql/" >}}
-  {{< hextra/feature-card title="Zabbix" subtitle="监控项配置与运维实践." icon="collection" link="/docs/zabbix/" >}}
+  {{< hextra/feature-card title="PostgreSQL" subtitle="多维查询、深度索引、主备复制、高可用配置与性能调优." icon="database" link="/docs/postgresql社区版/" >}}
+  {{< hextra/feature-card title="Go" subtitle="并发模型、底线规范、调度机制与标准库工程实践." icon="code" link="/docs/编程语言/go/" >}}
+  {{< hextra/feature-card title="Python" subtitle="工程架构规范、异步协程数据库驱动与线上部署安全." icon="terminal" link="/docs/编程语言/python/" >}}
+  {{< hextra/feature-card title="Patroni" subtitle="高可用哨兵集群、同步复制状态机与故障自愈机制." icon="server" link="/docs/patroni/" >}}
+  {{< hextra/feature-card title="AI" subtitle="大语言模型 Agent 协同网络与生产级工程化应用指南." icon="sparkles" link="/docs/ai/" >}}
+  {{< hextra/feature-card title="NoSQL" subtitle="Redis 内存数据结构、持久化机制与缓存高并发架构." icon="cube" link="/docs/nosql/" >}}
+  {{< hextra/feature-card title="Zabbix" subtitle="企业级监控系统指标采量、触发器阈值与预警治理." icon="collection" link="/docs/zabbix/" >}}
 {{< /hextra/feature-grid >}}
 
 {{< hextra/hero-section heading="h2" >}}

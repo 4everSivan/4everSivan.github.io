@@ -1,3 +1,61 @@
+<style>
+  /* 渐变标题 */
+  .hextra-home-headline {
+    background: linear-gradient(135deg, #a855f7 10%, #3b82f6 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* 整体卡片微调 - 收拢间距 */
+  .hextra-cards {
+    gap: 1rem !important;
+  }
+  .hextra-feature-grid {
+    gap: 1rem !important;
+  }
+
+  /* 毛玻璃卡片基本样式 */
+  .hextra-cards a,
+  [class*="hextra-feature-"][class*="-card"] {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease !important;
+  }
+
+  /* 亮色模式毛玻璃 */
+  .hextra-cards a,
+  [class*="hextra-feature-"][class*="-card"] {
+    background-color: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  }
+
+  /* 亮色模式 Hover */
+  .hextra-cards a:hover,
+  [class*="hextra-feature-"][class*="-card"]:hover {
+    transform: translateY(-4px) !important;
+    border-color: rgba(59, 130, 246, 0.45) !important;
+    box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  /* 暗色模式毛玻璃 */
+  .dark .hextra-cards a,
+  .dark [class*="hextra-feature-"][class*="-card"] {
+    background-color: rgba(23, 23, 23, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  /* 暗色模式 Hover */
+  .dark .hextra-cards a:hover,
+  .dark [class*="hextra-feature-"][class*="-card"]:hover {
+    transform: translateY(-4px) !important;
+    border-color: rgba(168, 85, 247, 0.45) !important;
+    box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.25) !important;
+  }
+</style>
+
 {{- $docs := site.GetPage "/docs" -}}
 {{- if not $docs -}}
   {{- errorf "knowledge-stats: controlled /docs content root is missing" -}}
