@@ -1,6 +1,9 @@
 name: Validate and deploy Hextra site
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       source_ref:
@@ -176,7 +179,7 @@ jobs:
           path: public
 
   deploy:
-    if: ${{ inputs.deploy == true }}
+    if: ${{ github.event_name == 'push' || inputs.deploy == true }}
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15

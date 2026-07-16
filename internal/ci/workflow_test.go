@@ -23,6 +23,7 @@ func TestPagesWorkflowKeepsSecurityGatesBeforeArtifactAndDeploy(t *testing.T) {
 	}
 	text := string(data)
 	required := []string{
+		"push:\n    branches:\n      - main",
 		"workflow_dispatch:",
 		"source_ref:",
 		"BUILD_MODE=legacy",
@@ -42,7 +43,7 @@ func TestPagesWorkflowKeepsSecurityGatesBeforeArtifactAndDeploy(t *testing.T) {
 		"actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c",
 		"actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9",
 		"needs: build",
-		"if: ${{ inputs.deploy == true }}",
+		"if: ${{ github.event_name == 'push' || inputs.deploy == true }}",
 		"actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128",
 	}
 	for _, value := range required {
@@ -50,8 +51,8 @@ func TestPagesWorkflowKeepsSecurityGatesBeforeArtifactAndDeploy(t *testing.T) {
 			t.Fatalf("workflow is missing %q", value)
 		}
 	}
-	if strings.Contains(text, "\n  push:") {
-		t.Fatal("automatic main push deployment must remain disabled until preview confirmation")
+	if strings.Count(text, "\n  push:") != 1 {
+		t.Fatal("workflow must enable exactly one automatic push trigger")
 	}
 	ordered := []string{
 		"go test -race -count=1 ./...",
