@@ -92,10 +92,14 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		"data-published-documents",
 		"data-published-categories",
 		".hextra-home h2 {",
+		"margin-top: 4.5rem !important;",
 		"margin-bottom: 0.5rem !important;",
 		".hextra-home .hextra-cards,",
 		".hextra-home .hextra-feature-grid {",
 		"margin-top: 0.5rem !important;",
+		".hextra-home .hextra-cards + h2,",
+		".hextra-home .hextra-feature-grid + h2 {",
+		"margin-top: 1rem !important;",
 	} {
 		if !strings.Contains(stats, required) {
 			t.Fatalf("knowledge stats shortcode is missing %q", required)
