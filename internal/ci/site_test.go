@@ -21,11 +21,11 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		"layout: hextra-home",
 		"{{< hextra/hero-headline >}}",
 		"{{< hextra/hero-subtitle >}}",
-		"{{< hextra/hero-button ",
+		`{{< hextra/hero-button text="进入文档库" link="/docs/" style="margin-top: 2.2rem; margin-bottom: 2.2rem; display: inline-block;" >}}`,
 		"{{< knowledge-stats >}}",
 		"{{< hextra/feature-grid ",
 		"{{< hextra/feature-card ",
-		"{{< cards ",
+		`{{< cards cols="2" >}}`,
 		"查看全部文档",
 		"全文搜索",
 	} {
@@ -39,6 +39,9 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 	}
 	if strings.Contains(home, "https://") || strings.Contains(home, "http://") {
 		t.Fatal("home page must not add remote assets or links")
+	}
+	if strings.Contains(home, "首页统计仅包含已通过安全门禁并进入当前构建的内容") {
+		t.Fatal("home page must not render the obsolete publication footnote")
 	}
 	featuredCategories := []struct {
 		link string
@@ -88,9 +91,23 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		`partial "shortcodes/card"`,
 		"data-published-documents",
 		"data-published-categories",
+		".hextra-home h2 {",
+		"margin-bottom: 0.5rem !important;",
+		".hextra-home .hextra-cards,",
+		".hextra-home .hextra-feature-grid {",
+		"margin-top: 0.5rem !important;",
 	} {
 		if !strings.Contains(stats, required) {
 			t.Fatalf("knowledge stats shortcode is missing %q", required)
+		}
+	}
+	for _, forbidden := range []string{
+		`a[href*="/docs/"]`,
+		`a[href="/docs/"]`,
+		".hextra-home em",
+	} {
+		if strings.Contains(stats, forbidden) {
+			t.Fatalf("knowledge stats shortcode contains over-broad or obsolete style %q", forbidden)
 		}
 	}
 

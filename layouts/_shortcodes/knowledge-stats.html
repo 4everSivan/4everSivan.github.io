@@ -7,19 +7,16 @@
     background-clip: text;
   }
 
-  /* 按钮与其上方副标题、下方标题的间距拉伸 */
-  a[href="/docs/"],
-  a[href*="/docs/"] {
-    margin-top: 2.2rem !important;
-    margin-bottom: 2.2rem !important;
-    display: inline-block !important;
+  /* 首页板块标题保持舒展，标题与卡片采用均衡间距 */
+  .hextra-home h2 {
+    margin-top: 4.5rem !important;
+    margin-bottom: 0.5rem !important;
+    font-weight: 700 !important;
   }
 
-  /* 首页板块标题 h2 间距舒展 */
-  h2 {
-    margin-top: 4.5rem !important;
-    margin-bottom: 1.8rem !important;
-    font-weight: 700 !important;
+  .hextra-home .hextra-cards,
+  .hextra-home .hextra-feature-grid {
+    margin-top: 0.5rem !important;
   }
 
   /* 整体卡片间距收拢 */
@@ -89,19 +86,6 @@
     box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.25) !important;
   }
 
-  /* 尾部脚注排版美化 (对应被 * 包裹的 em 标签) */
-  .hextra-home em {
-    display: block !important;
-    text-align: center !important;
-    font-size: 0.825rem !important;
-    color: rgba(115, 115, 115, 0.75) !important;
-    margin-top: 3.5rem !important;
-    font-style: normal !important;
-    letter-spacing: 0.04em !important;
-  }
-  .dark .hextra-home em {
-    color: rgba(163, 163, 163, 0.7) !important;
-  }
 </style>
 
 {{- $docs := site.GetPage "/docs" -}}

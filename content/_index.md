@@ -16,7 +16,7 @@ Sivan 学习文档
 体系化整理个人技术积累，提供高安全、可搜索、结构化的静态知识库.
 {{< /hextra/hero-subtitle >}}
 
-{{< hextra/hero-button text="进入文档库" link="/docs/" >}}
+{{< hextra/hero-button text="进入文档库" link="/docs/" style="margin-top: 2.2rem; margin-bottom: 2.2rem; display: inline-block;" >}}
 
 {{< hextra/hero-section heading="h2" >}}
 知识库概览
@@ -46,5 +46,3 @@ Sivan 学习文档
   {{< card link="/docs/" title="查看全部文档" subtitle="从左侧分类导航逐层浏览全部已发布内容." icon="book-open" >}}
   {{< card link="/" title="使用全文搜索" subtitle="通过页面顶部的搜索入口快速定位标题和正文内容." icon="search" >}}
 {{< /cards >}}
-
-*首页统计仅包含已通过安全门禁并进入当前构建的内容.*
