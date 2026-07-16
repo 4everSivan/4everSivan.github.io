@@ -151,6 +151,7 @@ func TestLegacyRecoveryUsesPinnedStaticTreeAndIntegrityChecks(t *testing.T) {
 		"git hash-object",
 		"legacy static archive file set differs",
 		"day_log me sql_server translation",
+		"python/python3.10安装.html",
 	} {
 		if !strings.Contains(text, required) {
 			t.Fatalf("legacy recovery script is missing %q", required)

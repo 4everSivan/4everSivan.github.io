@@ -65,6 +65,14 @@ for section in day_log me sql_server translation; do
   mkdir -p "${PUBLIC_DIR}/${section}"
   printf '%s\n' "${placeholder}" > "${PUBLIC_DIR}/${section}/index.html"
 done
+# One archived navigation link used a lower-case filename while the blob used
+# an upper-case prefix. Add a byte-identical alias only on case-sensitive
+# filesystems so the same recovery artifact works on Linux runners and macOS.
+legacy_python="${PUBLIC_DIR}/python/Python3.10安装.html"
+legacy_python_alias="${PUBLIC_DIR}/python/python3.10安装.html"
+if [[ ! -e "${legacy_python_alias}" ]]; then
+  cp "${legacy_python}" "${legacy_python_alias}"
+fi
 printf '' > "${PUBLIC_DIR}/.nojekyll"
 
 if [[ -n "$(find "${PUBLIC_DIR}" -type l -print -quit)" ]]; then
