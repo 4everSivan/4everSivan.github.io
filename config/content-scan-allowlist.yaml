@@ -1,0 +1,4 @@
+# 仅由 contentctl approve 写入. 每项同时绑定源文件与转换后输出的
+# SHA-256 和脱敏 finding, 并包含规则、理由、批准时间与失效时间.
+version: 2
+approvals: []

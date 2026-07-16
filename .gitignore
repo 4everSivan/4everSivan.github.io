@@ -1,0 +1,24 @@
+# Local AI governance and planning artifacts
+/AGENTS.md
+/CLAUDE.md
+/constitution.md
+/.agent/
+/.agents/
+/.claude/
+/.codex/
+/openspec/
+/docs/superpowers/specs/
+
+# Local review and scan reports
+/.local/
+
+# Hugo generated output
+/public/
+/resources/_gen/
+/.hugo_build.lock
+
+# Local editor and legacy caches
+/.idea/
+/node_modules/
+/assets/vendor/
+**/.DS_Store

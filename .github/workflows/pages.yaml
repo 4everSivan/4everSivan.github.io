@@ -1,0 +1,192 @@
+name: Validate and deploy Hextra site
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Optional full main-branch commit SHA for a controlled rollback build
+        required: false
+        default: ""
+        type: string
+      deploy:
+        description: Deploy the validated artifact to GitHub Pages
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout workflow source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Select current or rollback source commit
+        env:
+          REQUESTED_REF: ${{ inputs.source_ref }}
+        run: |
+          source config/versions.env
+          target="${REQUESTED_REF:-${GITHUB_SHA}}"
+          if [[ ! "${target}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "source_ref must be a full lower-case commit SHA" >&2
+            exit 1
+          fi
+          git cat-file -e "${target}^{commit}"
+          git merge-base --is-ancestor "${target}" origin/main
+          if [[ "${target}" == "${LEGACY_STATIC_COMMIT}" ]]; then
+            echo "BUILD_MODE=legacy" >> "${GITHUB_ENV}"
+          else
+            git cat-file -e "${target}:config/versions.env"
+            git cat-file -e "${target}:go.mod"
+            git checkout --detach "${target}"
+            echo "BUILD_MODE=hextra" >> "${GITHUB_ENV}"
+          fi
+          echo "TARGET_COMMIT=${target}" >> "${GITHUB_ENV}"
+
+      - name: Load pinned project versions
+        run: |
+          source config/versions.env
+          required=(
+            GO_VERSION HUGO_VERSION HEXTRA_VERSION GITLEAKS_VERSION
+            HUGO_LINUX_AMD64_SHA256 LEGACY_STATIC_COMMIT
+            GITLEAKS_LINUX_AMD64_ARCHIVE_SHA256 GITLEAKS_LINUX_AMD64_BINARY_SHA256
+            FLEXSEARCH_VERSION FLEXSEARCH_SHA256 MERMAID_VERSION MERMAID_SHA256
+          )
+          for name in "${required[@]}"; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "missing pinned version variable: ${name}" >&2
+              exit 1
+            fi
+            echo "${name}=${!name}" >> "${GITHUB_ENV}"
+          done
+          if [[ "$(awk '$1 == "go" { print $2 }' go.mod)" != "${GO_VERSION}" ]]; then
+            echo "go.mod and config/versions.env Go versions differ" >&2
+            exit 1
+          fi
+
+      - name: Set up pinned Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify exact Go toolchain
+        run: |
+          if [[ "$(go env GOVERSION)" != "go${GO_VERSION}" ]]; then
+            echo "unexpected Go toolchain" >&2
+            exit 1
+          fi
+
+      - name: Install pinned Hugo Extended
+        if: env.BUILD_MODE == 'hextra'
+        run: |
+          package="${RUNNER_TEMP}/hugo.deb"
+          curl --fail --location --silent --show-error \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb" \
+            --output "${package}"
+          echo "${HUGO_LINUX_AMD64_SHA256}  ${package}" | sha256sum --check --strict
+          sudo dpkg --install "${package}"
+          hugo version
+
+      - name: Install integrity-pinned Gitleaks
+        run: ./scripts/install-gitleaks.sh
+
+      - name: Install integrity-pinned frontend assets
+        if: env.BUILD_MODE == 'hextra'
+        run: ./scripts/install-frontend-assets.sh
+
+      - name: Run Go tests and static checks
+        env:
+          GOTOOLCHAIN: local
+        run: |
+          go mod verify
+          go test -race -count=1 ./...
+          go vet ./...
+          mkdir -p .local/bin
+          go build -trimpath -o .local/bin/contentctl ./cmd/contentctl
+          go build -trimpath -o .local/bin/linkcheck ./cmd/linkcheck
+
+      - name: Verify controlled content snapshot
+        if: env.BUILD_MODE == 'hextra'
+        run: ./.local/bin/contentctl verify
+
+      - name: Run independent redacted tracked-tree Gitleaks check
+        if: env.BUILD_MODE == 'hextra'
+        run: |
+          tracked_tree="$(mktemp -d "${RUNNER_TEMP}/tracked-tree.XXXXXX")"
+          trap 'rm -rf "${tracked_tree}"' EXIT
+          git checkout-index --all --prefix="${tracked_tree}/"
+          ./.local/bin/gitleaks dir \
+            --config .gitleaks.toml \
+            --no-banner \
+            --no-color \
+            --redact=100 \
+            --exit-code=1 \
+            "${tracked_tree}"
+
+      - name: Prepare pinned legacy recovery artifact
+        if: env.BUILD_MODE == 'legacy'
+        run: ./scripts/prepare-legacy-pages.sh
+
+      - name: Scan legacy recovery artifact
+        if: env.BUILD_MODE == 'legacy'
+        run: |
+          ./.local/bin/gitleaks dir \
+            --config .gitleaks.toml \
+            --no-banner \
+            --no-color \
+            --redact=100 \
+            --exit-code=1 \
+            public
+
+      - name: Build production site
+        if: env.BUILD_MODE == 'hextra'
+        env:
+          HUGO_ENVIRONMENT: production
+          HUGO_ENV: production
+        run: >-
+          hugo --gc --minify
+          --cacheDir "${RUNNER_TEMP}/hugo-cache"
+          --baseURL "https://4everSivan.github.io/"
+
+      - name: Check generated internal links
+        run: ./.local/bin/linkcheck public
+
+      - name: Upload validated Pages artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: public
+
+  deploy:
+    if: ${{ inputs.deploy == true }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
