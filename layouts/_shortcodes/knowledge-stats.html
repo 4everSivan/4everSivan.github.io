@@ -6,13 +6,44 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
-  /* 整体卡片微调 - 收拢间距 */
+
+  /* 按钮与其上方副标题的间距拉伸 */
+  .hextra-home a[href="/docs/"] {
+    margin-top: 2rem !important;
+  }
+
+  /* 首页板块标题 h2 间距舒展 */
+  .hextra-home h2 {
+    margin-top: 4rem !important;
+    margin-bottom: 1.5rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* 整体卡片间距收拢 */
   .hextra-cards {
     gap: 1rem !important;
   }
   .hextra-feature-grid {
     gap: 1rem !important;
+  }
+
+  /* 在桌面端 (width >= 768px) 强制卡片横向平铺，防止退化为竖向 */
+  @media (min-width: 768px) {
+    /* 3列的统计卡片 */
+    .hextra-cards[data-knowledge-stats] {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+    /* 2列的开始浏览卡片 */
+    .hextra-cards:not([data-knowledge-stats]) {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    /* 3列的精选分类卡片网格 */
+    .hextra-feature-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
   }
 
   /* 毛玻璃卡片基本样式 */
@@ -53,6 +84,20 @@
     transform: translateY(-4px) !important;
     border-color: rgba(168, 85, 247, 0.45) !important;
     box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.25) !important;
+  }
+
+  /* 尾部脚注排版美化 (对应被 * 包裹的 em 标签) */
+  .hextra-home em {
+    display: block !important;
+    text-align: center !important;
+    font-size: 0.825rem !important;
+    color: rgba(115, 115, 115, 0.75) !important;
+    margin-top: 3.5rem !important;
+    font-style: normal !important;
+    letter-spacing: 0.04em !important;
+  }
+  .dark .hextra-home em {
+    color: rgba(163, 163, 163, 0.7) !important;
   }
 </style>
 
