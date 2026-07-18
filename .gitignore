@@ -21,4 +21,5 @@
 /.idea/
 /node_modules/
 /assets/vendor/
+/static/fonts/
 **/.DS_Store

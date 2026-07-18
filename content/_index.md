@@ -1,5 +1,5 @@
 ---
-title: "Sivan 学习文档"
+title: "SivanHub"
 layout: hextra-home
 toc: false
 ---
@@ -9,7 +9,7 @@ toc: false
 {{< /hextra/hero-badge >}}
 
 {{< hextra/hero-headline >}}
-Sivan 学习文档
+SivanHub
 {{< /hextra/hero-headline >}}
 
 {{< hextra/hero-subtitle >}}
@@ -17,6 +17,8 @@ Sivan 学习文档
 {{< /hextra/hero-subtitle >}}
 
 {{< hextra/hero-button text="进入文档库" link="/docs/" style="margin-top: 2.2rem; margin-bottom: 2.2rem; display: inline-block;" >}}
+
+{{< terminal-panel >}}
 
 {{< hextra/hero-section heading="h2" >}}
 知识库概览

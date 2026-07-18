@@ -1,6 +1,6 @@
 version: 2
 gitleaks_version: 8.30.1
-ruleset_sha256: e0b81e27ad7ab8771fc119c5d40e16b43b18dab567b901ca3255a12ab6979b14
+ruleset_sha256: dcf1c515d03d58c0ec0b67f062324e356bd9983d953af3d675e4168bd67e74dc
 documents:
     - path: AI/Python-CLAUDE-template.md
       source_sha256: 448ef7da7edb582f29cb7f0779f20cc5f6615ccd6a0977f43528429e1db9baff

@@ -1,5 +1,30 @@
 /* 站点自定义样式, 由 Hextra head.html 自动加载, 生产构建时合并压缩.
-   首页样式统一以 .hextra-home 作用域隔离, 不影响文档页. */
+   首页样式统一以 .hextra-home 作用域隔离, 不影响文档页.
+   站点固定暗色主题 (hugo.yaml theme.default: dark), 亮色规则仅为回退保留. */
+
+/* ===== 像素字体 (Silkscreen, OFL; 由 scripts/install-frontend-assets.sh 按哈希安装) ===== */
+
+@font-face {
+  font-family: "Silkscreen";
+  src: url("/fonts/silkscreen-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Silkscreen";
+  src: url("/fonts/silkscreen-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-hud-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-pixel: "Silkscreen", ui-monospace, monospace;
+  --hud-status-green: #4ade80;
+}
 
 /* ===== 首页布局 ===== */
 
@@ -23,6 +48,14 @@
 .hextra-home h2 {
   margin-top: 4rem;
   letter-spacing: -0.02em;
+}
+
+/* h2 终端提示符前缀 (h2 为渐变裁剪文字, 前缀需显式填充状态绿) */
+.hextra-home h2::before {
+  content: "> ";
+  font-family: var(--font-hud-mono);
+  font-weight: 400;
+  -webkit-text-fill-color: var(--hud-status-green);
 }
 
 /* ===== Hero 区 ===== */
@@ -51,8 +84,24 @@
     radial-gradient(ellipse 45% 60% at 70% 10%, rgba(59, 130, 246, 0.17), transparent 70%);
 }
 
-/* Hero 标题: 通过 Tailwind 渐变变量替换默认的灰阶渐变 */
+/* Hero 顶部 dither 点阵纹理, 向下渐隐 */
+.hextra-home main::after {
+  content: "";
+  position: absolute;
+  inset: -3rem 0 auto;
+  height: 20rem;
+  background-image: repeating-conic-gradient(rgba(255, 255, 255, 0.035) 0% 25%, transparent 0% 50%);
+  background-size: 4px 4px;
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+  mask-image: linear-gradient(to bottom, black, transparent);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Hero 标题: 像素字体 + Tailwind 渐变变量替换默认的灰阶渐变 */
 .hextra-home h1 {
+  font-family: var(--font-pixel);
+  letter-spacing: 0.02em;
   --tw-gradient-from: #a855f7;
   --tw-gradient-to: #3b82f6;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
@@ -71,10 +120,21 @@
   }
 }
 
-/* Hero 徽章 (内容列第一个链接): 品牌色描边与淡色底 */
+/* Hero 徽章 (内容列第一个链接): 品牌色描边与淡色底, 等宽字体 + 状态绿点 */
 .hextra-home main > div > a:first-child {
+  font-family: var(--font-hud-mono);
   border-color: rgba(168, 85, 247, 0.35);
   background-image: linear-gradient(135deg, rgba(168, 85, 247, 0.10), rgba(59, 130, 246, 0.10));
+}
+
+.hextra-home main > div > a:first-child::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background-color: var(--hud-status-green);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
 }
 
 .dark .hextra-home main > div > a:first-child {
@@ -98,6 +158,52 @@
   font-size: 1.25rem;
   line-height: 1.7;
   max-width: 42rem;
+}
+
+/* ===== 终端日志面板 ===== */
+
+.hextra-home .terminal-panel {
+  width: 100%;
+  max-width: 42rem;
+  padding: 1.25rem 1.5rem;
+  text-align: start;
+  font-family: var(--font-hud-mono);
+  font-size: 0.8125rem;
+  line-height: 1.9;
+  color: var(--hx-color-gray-400);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.dark .hextra-home .terminal-panel {
+  border-color: rgba(255, 255, 255, 0.10);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.hextra-home .terminal-line {
+  margin: 0;
+}
+
+.hextra-home .terminal-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--hud-status-green);
+}
+
+.hextra-home .terminal-status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--hud-status-green);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+  animation: terminal-pulse 2s ease-in-out infinite;
+}
+
+@keyframes terminal-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
 /* ===== 卡片 (通用玻璃拟态) ===== */
@@ -166,10 +272,10 @@
 
 .hextra-home .knowledge-stat-number {
   margin-top: 0.5rem;
+  font-family: var(--font-pixel);
   font-size: 2.25rem;
   font-weight: 700;
   line-height: 1.2;
-  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   background-image: linear-gradient(135deg, #a855f7, #3b82f6);
   -webkit-background-clip: text;
@@ -285,6 +391,7 @@
 }
 
 .hextra-home .category-wall-count-num {
+  font-family: var(--font-pixel);
   font-size: 1.25rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -363,6 +470,7 @@
 
 .hextra-home .recent-docs-date {
   flex-shrink: 0;
+  font-family: var(--font-hud-mono);
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
   color: var(--hx-color-gray-400);
@@ -433,7 +541,7 @@
   }
 }
 
-/* 减弱动态偏好: 关闭首页卡片的悬浮位移与过渡 */
+/* 减弱动态偏好: 关闭首页动效与悬浮位移 */
 @media (prefers-reduced-motion: reduce) {
   .hextra-home .hextra-card,
   .hextra-home .hextra-feature-card,
@@ -447,5 +555,9 @@
   .hextra-home .category-wall-item:hover,
   .hextra-home main > div > h1 ~ a:hover {
     transform: none;
+  }
+
+  .hextra-home .terminal-status-dot {
+    animation: none;
   }
 }

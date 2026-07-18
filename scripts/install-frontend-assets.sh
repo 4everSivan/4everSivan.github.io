@@ -72,3 +72,15 @@ install_asset \
   "https://cdn.jsdelivr.net/npm/mermaid@${MERMAID_VERSION}/dist/mermaid.min.js" \
   "${MERMAID_SHA256}" \
   "${OUTPUT_DIR}/mermaid.min.js"
+
+# Silkscreen 像素字体 (OFL), 仅拉丁子集 woff2, 用于首页 HUD 风格标题与数字
+FONTS_DIR="${ROOT_DIR}/static/fonts"
+ensure_real_directory "${FONTS_DIR}"
+install_asset \
+  "https://cdn.jsdelivr.net/npm/@fontsource/silkscreen@${SILKSCREEN_VERSION}/files/silkscreen-latin-400-normal.woff2" \
+  "${SILKSCREEN_LATIN_400_WOFF2_SHA256}" \
+  "${FONTS_DIR}/silkscreen-latin-400-normal.woff2"
+install_asset \
+  "https://cdn.jsdelivr.net/npm/@fontsource/silkscreen@${SILKSCREEN_VERSION}/files/silkscreen-latin-700-normal.woff2" \
+  "${SILKSCREEN_LATIN_700_WOFF2_SHA256}" \
+  "${FONTS_DIR}/silkscreen-latin-700-normal.woff2"

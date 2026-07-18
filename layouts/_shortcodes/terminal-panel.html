@@ -1,0 +1,27 @@
+{{/*
+终端日志面板: Hero 下方的 HUD 元素, 展示流水线状态与真实统计数据.
+
+@example {{< terminal-panel >}}
+*/ -}}
+
+{{- $docs := site.GetPage "/docs" -}}
+{{- if not $docs -}}
+  {{- errorf "terminal-panel: controlled /docs content root is missing" -}}
+{{- end -}}
+
+{{- $documentCount := len $docs.RegularPagesRecursive -}}
+{{- $publishedCategories := 0 -}}
+{{- range $docs.Sections -}}
+  {{- if .RegularPagesRecursive -}}
+    {{- $publishedCategories = add $publishedCategories 1 -}}
+  {{- end -}}
+{{- end -}}
+
+<div class="terminal-panel not-prose" data-published-documents="{{ $documentCount }}">
+  <p class="terminal-line">&gt; init module: sivan-hub</p>
+  <p class="terminal-line">&gt; source: 学习文档 (read-only)</p>
+  <p class="terminal-line">&gt; pipeline: scan → transform → snapshot → verify</p>
+  <p class="terminal-line">&gt; published: {{ $documentCount }} docs / {{ $publishedCategories }} categories</p>
+  <p class="terminal-line">&gt; integrity: sha256 per file</p>
+  <p class="terminal-line terminal-status"><span class="terminal-status-dot"></span>STATUS: VERIFIED</p>
+</div>

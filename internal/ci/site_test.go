@@ -18,10 +18,12 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 	}
 	home := string(homeBytes)
 	for _, required := range []string{
+		`title: "SivanHub"`,
 		"layout: hextra-home",
-		"{{< hextra/hero-headline >}}",
+		"{{< hextra/hero-headline >}}\nSivanHub\n{{< /hextra/hero-headline >}}",
 		"{{< hextra/hero-subtitle >}}",
 		`{{< hextra/hero-button text="进入文档库" link="/docs/"`,
+		"{{< terminal-panel >}}",
 		"{{< knowledge-stats >}}",
 		`{{< category-wall pinned="Postgresql社区版,AI,Patroni,编程语言" >}}`,
 		"{{< recent-docs ",
@@ -97,6 +99,22 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		}
 	}
 
+	terminalBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_shortcodes", "terminal-panel.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	terminal := string(terminalBytes)
+	for _, required := range []string{
+		`site.GetPage "/docs"`,
+		"RegularPagesRecursive",
+		"terminal-status",
+		"STATUS: VERIFIED",
+	} {
+		if !strings.Contains(terminal, required) {
+			t.Fatalf("terminal panel shortcode is missing %q", required)
+		}
+	}
+
 	// 首页样式集中在 assets/css/custom.css 并以 .hextra-home 作用域隔离;
 	// hextra-home 布局覆盖仅负责提供该作用域类.
 	homeLayoutBytes, err := os.ReadFile(filepath.Join(root, "layouts", "hextra-home.html"))
@@ -111,11 +129,34 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		t.Fatal(err)
 	}
 	customCSS := string(customCSSBytes)
-	if !strings.Contains(customCSS, ".hextra-home") {
-		t.Fatal("custom.css must scope home page styles under .hextra-home")
+	for _, required := range []string{".hextra-home", "@font-face", "Silkscreen", ".terminal-panel"} {
+		if !strings.Contains(customCSS, required) {
+			t.Fatalf("custom.css is missing %q", required)
+		}
 	}
 	if strings.Contains(customCSS, "!important") {
 		t.Fatal("custom.css must not use !important overrides")
+	}
+
+	// 站点固定暗色: 通过 Hextra 官方 custom/head-end.html 钩子清除历史亮色偏好.
+	headEndBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_partials", "custom", "head-end.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	headEnd := string(headEndBytes)
+	for _, required := range []string{"color-theme", `"dark"`, "classList"} {
+		if !strings.Contains(headEnd, required) {
+			t.Fatalf("head-end.html is missing %q", required)
+		}
+	}
+
+	// 禁用 JS 时 Hextra 的主题脚本不会执行, 需要 baseof.html 覆盖在服务端输出 class="dark".
+	baseofBytes, err := os.ReadFile(filepath.Join(root, "layouts", "baseof.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(baseofBytes), `class="dark"`) {
+		t.Fatal("baseof.html override must render class=\"dark\" on the html element")
 	}
 
 	wallBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_shortcodes", "category-wall.html"))
@@ -165,6 +206,32 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 			t.Fatalf("reveal.js is missing %q", required)
 		}
 	}
+
+	// 像素字体按项目惯例固定版本并校验哈希安装, 产物目录被 Git 忽略.
+	versionsBytes, err := os.ReadFile(filepath.Join(root, "config", "versions.env"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	versions := string(versionsBytes)
+	for _, required := range []string{"SILKSCREEN_VERSION=", "SILKSCREEN_LATIN_400_WOFF2_SHA256=", "SILKSCREEN_LATIN_700_WOFF2_SHA256="} {
+		if !strings.Contains(versions, required) {
+			t.Fatalf("versions.env is missing %q", required)
+		}
+	}
+	installBytes, err := os.ReadFile(filepath.Join(root, "scripts", "install-frontend-assets.sh"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(installBytes), "@fontsource/silkscreen@${SILKSCREEN_VERSION}") {
+		t.Fatal("install-frontend-assets.sh must install the pinned silkscreen font")
+	}
+	gitignoreBytes, err := os.ReadFile(filepath.Join(root, ".gitignore"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(gitignoreBytes), "/static/fonts/") {
+		t.Fatal(".gitignore must exclude installed font artifacts")
+	}
 }
 
 func TestHugoConfigKeepsNativeArticlePresentation(t *testing.T) {
@@ -174,20 +241,34 @@ func TestHugoConfigKeepsNativeArticlePresentation(t *testing.T) {
 		t.Fatal(err)
 	}
 	var config struct {
+		Title  string `yaml:"title"`
 		Params struct {
 			ExternalLinkDecoration bool `yaml:"externalLinkDecoration"`
 			Page                   struct {
 				Width string `yaml:"width"`
 			} `yaml:"page"`
+			Theme struct {
+				Default       string `yaml:"default"`
+				DisplayToggle bool   `yaml:"displayToggle"`
+			} `yaml:"theme"`
 		} `yaml:"params"`
 	}
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		t.Fatal(err)
+	}
+	if config.Title != "SivanHub" {
+		t.Fatalf("site title = %q, want SivanHub", config.Title)
 	}
 	if !config.Params.ExternalLinkDecoration {
 		t.Fatal("Hextra external link decoration is disabled")
 	}
 	if config.Params.Page.Width != "normal" {
 		t.Fatalf("page width = %q, want normal", config.Params.Page.Width)
+	}
+	if config.Params.Theme.Default != "dark" {
+		t.Fatalf("theme default = %q, want dark", config.Params.Theme.Default)
+	}
+	if config.Params.Theme.DisplayToggle {
+		t.Fatal("theme toggle must be hidden for the fixed dark theme")
 	}
 }

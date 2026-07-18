@@ -1,0 +1,13 @@
+{{/* 项目级覆盖: Hextra 官方 custom/head-end.html 钩子.
+     站点固定暗色主题 (hugo.yaml theme.default: dark + displayToggle: false),
+     此处清除访客历史亮色偏好, 保证主标题脚本之后仍强制 dark. */}}
+<script>
+  try {
+    localStorage.setItem("color-theme", "dark");
+  } catch (error) {
+    // 隐私模式下 localStorage 可能不可用, 直接通过 class 强制暗色
+  }
+  document.documentElement.classList.remove("light");
+  document.documentElement.classList.add("dark");
+  document.documentElement.style.colorScheme = "dark";
+</script>
