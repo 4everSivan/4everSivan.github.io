@@ -1,99 +1,5 @@
-<style>
-  /* 渐变标题 */
-  .hextra-home-headline {
-    background: linear-gradient(135deg, #a855f7 10%, #3b82f6 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* 首页板块标题保持舒展，标题与卡片采用均衡间距 */
-  .hextra-home h2 {
-    margin-top: 4.5rem !important;
-    margin-bottom: 0.5rem !important;
-    font-weight: 700 !important;
-  }
-
-  .hextra-home .hextra-cards,
-  .hextra-home .hextra-feature-grid {
-    margin-top: 0.5rem !important;
-  }
-
-  /* 后续板块标题与上方卡片保持相同的均衡节奏 */
-  .hextra-home .hextra-cards + h2,
-  .hextra-home .hextra-feature-grid + h2 {
-    margin-top: 1rem !important;
-  }
-
-  /* 整体卡片间距收拢 */
-  .hextra-cards {
-    gap: 1rem !important;
-  }
-  .hextra-feature-grid {
-    gap: 1rem !important;
-  }
-
-  /* 在桌面端 (width >= 768px) 强制卡片横向平铺，防止退化为竖向 */
-  @media (min-width: 768px) {
-    /* 3列的统计卡片 */
-    .hextra-cards[data-knowledge-stats] {
-      display: grid !important;
-      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    }
-    /* 2列的开始浏览卡片 */
-    .hextra-cards:not([data-knowledge-stats]) {
-      display: grid !important;
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-    /* 3列的精选分类卡片网格 */
-    .hextra-feature-grid {
-      display: grid !important;
-      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    }
-  }
-
-  /* 毛玻璃卡片基本样式 */
-  .hextra-cards a,
-  [class*="hextra-feature-"][class*="-card"] {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease !important;
-  }
-
-  /* 亮色模式毛玻璃 */
-  .hextra-cards a,
-  [class*="hextra-feature-"][class*="-card"] {
-    background-color: rgba(255, 255, 255, 0.45) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  }
-
-  /* 亮色模式 Hover */
-  .hextra-cards a:hover,
-  [class*="hextra-feature-"][class*="-card"]:hover {
-    transform: translateY(-4px) !important;
-    border-color: rgba(59, 130, 246, 0.45) !important;
-    box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.2) !important;
-  }
-
-  /* 暗色模式毛玻璃 */
-  .dark .hextra-cards a,
-  .dark [class*="hextra-feature-"][class*="-card"] {
-    background-color: rgba(23, 23, 23, 0.45) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  }
-
-  /* 暗色模式 Hover */
-  .dark .hextra-cards a:hover,
-  .dark [class*="hextra-feature-"][class*="-card"]:hover {
-    transform: translateY(-4px) !important;
-    border-color: rgba(168, 85, 247, 0.45) !important;
-    box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.25) !important;
-  }
-
-</style>
-
+{{/* 首页样式集中于 assets/css/custom.css (.hextra-home 作用域), 本短代码只输出结构与数据钩子.
+     数字元素带 data-count-to / data-count-suffix, 供 assets/js/head/reveal.js 滚动计数. */}}
 {{- $docs := site.GetPage "/docs" -}}
 {{- if not $docs -}}
   {{- errorf "knowledge-stats: controlled /docs content root is missing" -}}
@@ -114,25 +20,22 @@
   data-published-documents="{{ $documentCount }}"
   data-published-categories="{{ $categoryCount }}"
 >
-  {{- partial "shortcodes/card" (dict
-    "page" .Page
-    "link" "/docs/"
-    "title" (printf "%d 篇已发布文档" $documentCount)
-    "subtitle" "全部来自受控内容快照"
-    "icon" "document-text"
-  ) -}}
-  {{- partial "shortcodes/card" (dict
-    "page" .Page
-    "link" "/docs/"
-    "title" (printf "%d 个可浏览分类" $categoryCount)
-    "subtitle" "保留源目录的知识分类结构"
-    "icon" "collection"
-  ) -}}
-  {{- partial "shortcodes/card" (dict
-    "page" .Page
-    "link" "/docs/"
-    "title" "逐文件安全筛选"
-    "subtitle" "源内容与发布副本均通过安全扫描"
-    "icon" "shield-check"
-  ) -}}
+  <a href="{{ "/docs/" | relURL }}" class="hextra-card knowledge-stat-card hx:flex hx:flex-col hx:items-center hx:rounded-lg hx:border hx:border-gray-200 hx:p-6 hx:text-center hx:text-current hx:no-underline hx:dark:border-neutral-800">
+    <span class="knowledge-stat-icon">{{ partial "utils/icon.html" (dict "name" "document-text") }}</span>
+    <span class="knowledge-stat-number" data-count-to="{{ $documentCount }}">{{ $documentCount }}</span>
+    <span class="knowledge-stat-label">篇已发布文档</span>
+    <span class="knowledge-stat-desc">全部来自受控内容快照</span>
+  </a>
+  <a href="{{ "/docs/" | relURL }}" class="hextra-card knowledge-stat-card hx:flex hx:flex-col hx:items-center hx:rounded-lg hx:border hx:border-gray-200 hx:p-6 hx:text-center hx:text-current hx:no-underline hx:dark:border-neutral-800">
+    <span class="knowledge-stat-icon">{{ partial "utils/icon.html" (dict "name" "collection") }}</span>
+    <span class="knowledge-stat-number" data-count-to="{{ $categoryCount }}">{{ $categoryCount }}</span>
+    <span class="knowledge-stat-label">个可浏览分类</span>
+    <span class="knowledge-stat-desc">保留源目录的知识分类结构</span>
+  </a>
+  <a href="{{ "/docs/" | relURL }}" class="hextra-card knowledge-stat-card hx:flex hx:flex-col hx:items-center hx:rounded-lg hx:border hx:border-gray-200 hx:p-6 hx:text-center hx:text-current hx:no-underline hx:dark:border-neutral-800">
+    <span class="knowledge-stat-icon">{{ partial "utils/icon.html" (dict "name" "shield-check") }}</span>
+    <span class="knowledge-stat-number" data-count-to="100" data-count-suffix="%">100%</span>
+    <span class="knowledge-stat-label">双重安全扫描通过率</span>
+    <span class="knowledge-stat-desc">源内容与发布副本均通过安全扫描</span>
+  </a>
 </div>

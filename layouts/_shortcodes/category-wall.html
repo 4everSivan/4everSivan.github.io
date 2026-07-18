@@ -1,0 +1,66 @@
+{{/*
+分类导航 Bento 墙: 自动遍历 /docs 全部一级分类, 按文档计数排序展示.
+
+@param {string} pinned 逗号分隔的一级分类名, 置顶为大格 (不足 4 个大格时按文档数自动补齐).
+
+@example {{< category-wall pinned="Postgresql社区版,AI,Patroni,编程语言" >}}
+*/ -}}
+
+{{- $docs := site.GetPage "/docs" -}}
+{{- if not $docs -}}
+  {{- errorf "category-wall: controlled /docs content root is missing" -}}
+{{- end -}}
+
+{{- $pinned := slice -}}
+{{- with .Get "pinned" -}}
+  {{- range split . "," -}}
+    {{- $pinned = $pinned | append (strings.TrimSpace .) -}}
+  {{- end -}}
+{{- end -}}
+{{- $bigCount := math.Max 4 (len $pinned) -}}
+
+{{- /* 收集一级分类: 标题, 链接, 递归文档数与最近一篇更新文档; 无已发布文档的分类不展示 */ -}}
+{{- $items := slice -}}
+{{- range $docs.Sections -}}
+  {{- $pages := .RegularPagesRecursive -}}
+  {{- if $pages -}}
+    {{- $items = $items | append (dict
+      "title" .Title
+      "link" .RelPermalink
+      "count" (len $pages)
+      "latest" (first 1 (sort $pages "Lastmod" "desc"))
+    ) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* 排序: pinned 按参数顺序在前, 其余按文档数降序 */ -}}
+{{- $ordered := slice -}}
+{{- range $name := $pinned -}}
+  {{- range $items -}}
+    {{- if eq .title $name -}}
+      {{- $ordered = $ordered | append . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $item := sort $items "count" "desc" -}}
+  {{- if not (in $pinned $item.title) -}}
+    {{- $ordered = $ordered | append $item -}}
+  {{- end -}}
+{{- end -}}
+
+<div class="category-wall not-prose">
+  {{- range $index, $item := $ordered -}}
+  <a
+    href="{{ $item.link }}"
+    class="category-wall-item{{ if lt $index $bigCount }} category-wall-big{{ end }}"
+  >
+    <span class="category-wall-title">{{ $item.title }}</span>
+    <span class="category-wall-count"><span class="category-wall-count-num">{{ $item.count }}</span> 篇文档</span>
+    {{- if and (lt $index $bigCount) $item.latest -}}
+      {{- with index $item.latest 0 -}}
+    <span class="category-wall-latest">最近更新: {{ .Title }}</span>
+      {{- end -}}
+    {{- end -}}
+  </a>
+  {{- end -}}
+</div>

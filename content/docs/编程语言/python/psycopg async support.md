@@ -1,5 +1,6 @@
 ---
 title: "Psycopg2 Asynchronous support"
+lastmod: "2022-12-06T16:08:38+08:00"
 ---
 
 Psycopg可以向PostgreSQL数据库发出异步查询。通过将参数 `async=1` 传递给connect()函数来建立异步通信样式:返回的连接将在异步模式下工作。

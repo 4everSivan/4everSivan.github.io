@@ -21,8 +21,10 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		"layout: hextra-home",
 		"{{< hextra/hero-headline >}}",
 		"{{< hextra/hero-subtitle >}}",
-		`{{< hextra/hero-button text="进入文档库" link="/docs/" style="margin-top: 2.2rem; margin-bottom: 2.2rem; display: inline-block;" >}}`,
+		`{{< hextra/hero-button text="进入文档库" link="/docs/"`,
 		"{{< knowledge-stats >}}",
+		`{{< category-wall pinned="Postgresql社区版,AI,Patroni,编程语言" >}}`,
+		"{{< recent-docs ",
 		"{{< hextra/feature-grid ",
 		"{{< hextra/feature-card ",
 		`{{< cards cols="2" >}}`,
@@ -35,7 +37,7 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 	}
 	featured := strings.Count(home, "{{< hextra/feature-card ")
 	if featured < 6 || featured > 8 {
-		t.Fatalf("home page has %d featured categories, want 6-8", featured)
+		t.Fatalf("home page has %d featured cards, want 6-8", featured)
 	}
 	if strings.Contains(home, "https://") || strings.Contains(home, "http://") {
 		t.Fatal("home page must not add remote assets or links")
@@ -43,23 +45,9 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 	if strings.Contains(home, "首页统计仅包含已通过安全门禁并进入当前构建的内容") {
 		t.Fatal("home page must not render the obsolete publication footnote")
 	}
-	featuredCategories := []struct {
-		link string
-		dir  string
-	}{
-		{"/docs/postgresql社区版/", filepath.Join("content", "docs", "Postgresql社区版")},
-		{"/docs/编程语言/go/", filepath.Join("content", "docs", "编程语言", "Go")},
-		{"/docs/编程语言/python/", filepath.Join("content", "docs", "编程语言", "python")},
-		{"/docs/patroni/", filepath.Join("content", "docs", "Patroni")},
-		{"/docs/ai/", filepath.Join("content", "docs", "AI")},
-		{"/docs/nosql/", filepath.Join("content", "docs", "NoSQL")},
-		{"/docs/zabbix/", filepath.Join("content", "docs", "Zabbix")},
-	}
-	for _, category := range featuredCategories {
-		if !strings.Contains(home, `link="`+category.link+`"`) {
-			t.Fatalf("home page is missing featured category %s", category.link)
-		}
-		directory := filepath.Join(root, category.dir)
+	pinnedCategories := []string{"Postgresql社区版", "AI", "Patroni", "编程语言"}
+	for _, category := range pinnedCategories {
+		directory := filepath.Join(root, "content", "docs", category)
 		hasDocument := false
 		err := filepath.WalkDir(directory, func(filename string, entry os.DirEntry, walkErr error) error {
 			if walkErr != nil {
@@ -74,7 +62,7 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 			t.Fatal(err)
 		}
 		if !hasDocument {
-			t.Fatalf("featured category has no published documents: %s", category.dir)
+			t.Fatalf("pinned category has no published documents: %s", category)
 		}
 	}
 
@@ -88,39 +76,93 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		"RegularPagesRecursive",
 		`eq .Kind "section"`,
 		"errorf",
-		`partial "shortcodes/card"`,
+		"data-knowledge-stats",
 		"data-published-documents",
 		"data-published-categories",
-		".hextra-home h2 {",
-		"margin-top: 4.5rem !important;",
-		"margin-bottom: 0.5rem !important;",
-		".hextra-home .hextra-cards,",
-		".hextra-home .hextra-feature-grid {",
-		"margin-top: 0.5rem !important;",
-		".hextra-home .hextra-cards + h2,",
-		".hextra-home .hextra-feature-grid + h2 {",
-		"margin-top: 1rem !important;",
+		"data-count-to",
 	} {
 		if !strings.Contains(stats, required) {
 			t.Fatalf("knowledge stats shortcode is missing %q", required)
 		}
 	}
 	for _, forbidden := range []string{
+		"<style",
+		"!important",
 		`a[href*="/docs/"]`,
 		`a[href="/docs/"]`,
 		".hextra-home em",
 	} {
 		if strings.Contains(stats, forbidden) {
-			t.Fatalf("knowledge stats shortcode contains over-broad or obsolete style %q", forbidden)
+			t.Fatalf("knowledge stats shortcode contains inline style or obsolete selector %q", forbidden)
 		}
 	}
 
-	for _, forbidden := range []string{
-		filepath.Join(root, "layouts", "hextra-home.html"),
-		filepath.Join(root, "assets", "css", "custom.css"),
+	// 首页样式集中在 assets/css/custom.css 并以 .hextra-home 作用域隔离;
+	// hextra-home 布局覆盖仅负责提供该作用域类.
+	homeLayoutBytes, err := os.ReadFile(filepath.Join(root, "layouts", "hextra-home.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(homeLayoutBytes), "hextra-home") {
+		t.Fatal("home layout must provide the hextra-home scoping class")
+	}
+	customCSSBytes, err := os.ReadFile(filepath.Join(root, "assets", "css", "custom.css"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	customCSS := string(customCSSBytes)
+	if !strings.Contains(customCSS, ".hextra-home") {
+		t.Fatal("custom.css must scope home page styles under .hextra-home")
+	}
+	if strings.Contains(customCSS, "!important") {
+		t.Fatal("custom.css must not use !important overrides")
+	}
+
+	wallBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_shortcodes", "category-wall.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	wall := string(wallBytes)
+	for _, required := range []string{
+		`site.GetPage "/docs"`,
+		".Sections",
+		"RegularPagesRecursive",
+		`"Lastmod"`,
+		`.Get "pinned"`,
 	} {
-		if _, err := os.Stat(forbidden); !os.IsNotExist(err) {
-			t.Fatalf("forbidden theme override exists: %s", forbidden)
+		if !strings.Contains(wall, required) {
+			t.Fatalf("category wall shortcode is missing %q", required)
+		}
+	}
+
+	recentBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_shortcodes", "recent-docs.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	recent := string(recentBytes)
+	for _, required := range []string{
+		"RegularPagesRecursive",
+		`"Lastmod"`,
+		`.Get "limit"`,
+	} {
+		if !strings.Contains(recent, required) {
+			t.Fatalf("recent docs shortcode is missing %q", required)
+		}
+	}
+
+	revealBytes, err := os.ReadFile(filepath.Join(root, "assets", "js", "head", "reveal.js"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	reveal := string(revealBytes)
+	for _, required := range []string{
+		"classList.add",
+		"IntersectionObserver",
+		"prefers-reduced-motion",
+		"data-count-to",
+	} {
+		if !strings.Contains(reveal, required) {
+			t.Fatalf("reveal.js is missing %q", required)
 		}
 	}
 }

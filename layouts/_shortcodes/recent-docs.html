@@ -1,0 +1,29 @@
+{{/*
+最近更新文档列表: 按 lastmod 降序展示最近更新的文档.
+
+@param {int} limit 展示篇数 (默认 6).
+
+@example {{< recent-docs limit="6" >}}
+*/ -}}
+
+{{- $docs := site.GetPage "/docs" -}}
+{{- if not $docs -}}
+  {{- errorf "recent-docs: controlled /docs content root is missing" -}}
+{{- end -}}
+
+{{- $limit := int (.Get "limit" | default 6) -}}
+{{- $pages := first $limit (sort $docs.RegularPagesRecursive "Lastmod" "desc") -}}
+
+{{- if $pages -}}
+<ul class="recent-docs not-prose">
+  {{- range $pages -}}
+  <li class="recent-docs-item">
+    <a href="{{ .RelPermalink }}" class="recent-docs-link">
+      <time class="recent-docs-date" datetime="{{ .Lastmod.Format "2006-01-02" }}">{{ .Lastmod.Format "2006-01-02" }}</time>
+      <span class="recent-docs-category">{{ with .Parent }}{{ .Title }}{{ end }}</span>
+      <span class="recent-docs-title">{{ .Title }}</span>
+    </a>
+  </li>
+  {{- end -}}
+</ul>
+{{- end -}}

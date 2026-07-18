@@ -1,5 +1,6 @@
 ---
 title: "Patroni 同步复制"
+lastmod: "2024-05-05T22:30:35+08:00"
 ---
 
 ## Patroni 处理同步复制

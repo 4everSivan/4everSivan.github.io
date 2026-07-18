@@ -1,5 +1,6 @@
 ---
 title: "PostgreSQL prepare"
+lastmod: "2024-01-02T14:36:09+08:00"
 ---
 
 prepare的使用：

@@ -197,7 +197,7 @@ func runApprove(ctx context.Context, args []string, stdout io.Writer, runtime ru
 	if err != nil {
 		return err
 	}
-	converted, err := transform.Document(candidate.RelativePath, data)
+	converted, err := transform.Document(candidate.RelativePath, data, time.Unix(0, candidate.State.ModTimeUnixNano))
 	if err != nil {
 		return errors.New("指定文档无法安全转换, 不可批准")
 	}
@@ -488,7 +488,7 @@ func buildSnapshot(ctx context.Context, options commonOptions, scan *scanRun) ([
 		if err != nil {
 			return nil, snapshot.Manifest{}, err
 		}
-		converted, err := transform.Document(candidate.RelativePath, data)
+		converted, err := transform.Document(candidate.RelativePath, data, time.Unix(0, candidate.State.ModTimeUnixNano))
 		if err != nil {
 			scan.results[index] = addTransformFailure(result, "content.transform-error")
 			continue

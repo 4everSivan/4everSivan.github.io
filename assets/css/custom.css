@@ -1,0 +1,451 @@
+/* 站点自定义样式, 由 Hextra head.html 自动加载, 生产构建时合并压缩.
+   首页样式统一以 .hextra-home 作用域隔离, 不影响文档页. */
+
+/* ===== 首页布局 ===== */
+
+/* hextra-home 布局的内容列是 items-start 弹性列, 这里改为居中,
+   让 hero 与板块标题形成居中的落地页视觉 */
+.hextra-home main > div {
+  align-items: center;
+  text-align: center;
+}
+
+/* 修复卡片网格在弹性列中收缩为内容宽度的问题 (feature-grid 原生带 w-full,
+   hextra-cards 没有), 列数由原生 --hextra-cards-grid-cols /
+   --hextra-feature-grid-cols 机制响应式控制, 无需 media query 覆盖 */
+.hextra-home .hextra-cards,
+.hextra-home .hextra-feature-grid {
+  width: 100%;
+  text-align: start;
+}
+
+/* 板块标题节奏: 原主题 h2 无上边距, 导致卡片与下一板块标题拥挤 */
+.hextra-home h2 {
+  margin-top: 4rem;
+  letter-spacing: -0.02em;
+}
+
+/* ===== Hero 区 ===== */
+
+/* 顶部品牌光晕背景, 亮色淡、暗色略强 */
+.hextra-home main {
+  position: relative;
+  isolation: isolate;
+}
+
+.hextra-home main::before {
+  content: "";
+  position: absolute;
+  inset: -3rem 0 auto;
+  height: 26rem;
+  background:
+    radial-gradient(ellipse 40% 55% at 30% 20%, rgba(168, 85, 247, 0.10), transparent 70%),
+    radial-gradient(ellipse 45% 60% at 70% 10%, rgba(59, 130, 246, 0.12), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.dark .hextra-home main::before {
+  background:
+    radial-gradient(ellipse 40% 55% at 30% 20%, rgba(168, 85, 247, 0.15), transparent 70%),
+    radial-gradient(ellipse 45% 60% at 70% 10%, rgba(59, 130, 246, 0.17), transparent 70%);
+}
+
+/* Hero 标题: 通过 Tailwind 渐变变量替换默认的灰阶渐变 */
+.hextra-home h1 {
+  --tw-gradient-from: #a855f7;
+  --tw-gradient-to: #3b82f6;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.dark .hextra-home h1 {
+  --tw-gradient-from: #c084fc;
+  --tw-gradient-to: #60a5fa;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+@media (min-width: 768px) {
+  .hextra-home h1 {
+    font-size: 3.75rem;
+    line-height: 1.1;
+  }
+}
+
+/* Hero 徽章 (内容列第一个链接): 品牌色描边与淡色底 */
+.hextra-home main > div > a:first-child {
+  border-color: rgba(168, 85, 247, 0.35);
+  background-image: linear-gradient(135deg, rgba(168, 85, 247, 0.10), rgba(59, 130, 246, 0.10));
+}
+
+.dark .hextra-home main > div > a:first-child {
+  border-color: rgba(168, 85, 247, 0.45);
+  background-image: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(59, 130, 246, 0.15));
+}
+
+/* Hero 按钮 (h1 之后的兄弟链接): 品牌渐变底色与投影 */
+.hextra-home main > div > h1 ~ a {
+  background-image: linear-gradient(135deg, #a855f7, #3b82f6);
+  box-shadow: 0 10px 25px -8px rgba(99, 102, 241, 0.5);
+}
+
+.hextra-home main > div > h1 ~ a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -8px rgba(99, 102, 241, 0.6);
+}
+
+/* Hero 副标题 (内容列唯一直接段落): 排版强化 */
+.hextra-home main > div > p {
+  font-size: 1.25rem;
+  line-height: 1.7;
+  max-width: 42rem;
+}
+
+/* ===== 卡片 (通用玻璃拟态) ===== */
+
+/* 统计卡片与精选分类卡片: 统一的玻璃拟态与悬浮反馈 */
+.hextra-home .hextra-card,
+.hextra-home .hextra-feature-card {
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.hextra-home .hextra-card:hover,
+.hextra-home .hextra-feature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.25);
+}
+
+.dark .hextra-home .hextra-card,
+.dark .hextra-home .hextra-feature-card {
+  background-color: rgba(23, 23, 23, 0.6);
+}
+
+.dark .hextra-home .hextra-card:hover,
+.dark .hextra-home .hextra-feature-card:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.3);
+}
+
+/* 补上主题引用的 hx:before:bg-glass-gradient 在 v0.12.3 编译产物中
+   缺失的高光渐变 (::before 的定位类由主题自带) */
+.hextra-home .hextra-feature-card::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
+}
+
+.dark .hextra-home .hextra-feature-card::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+}
+
+/* 精选文档卡片副标题三行截断对齐 */
+.hextra-home .hextra-feature-card p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 卡片图标品牌色点缀 */
+.hextra-home .hextra-feature-card h3 svg {
+  color: #3b82f6;
+}
+
+.dark .hextra-home .hextra-feature-card h3 svg {
+  color: #a78bfa;
+}
+
+/* ===== 知识库概览统计卡 ===== */
+
+.hextra-home .knowledge-stat-icon svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: #3b82f6;
+}
+
+.hextra-home .knowledge-stat-number {
+  margin-top: 0.5rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  background-image: linear-gradient(135deg, #a855f7, #3b82f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hextra-home .knowledge-stat-label {
+  font-weight: 600;
+}
+
+.hextra-home .knowledge-stat-desc {
+  font-size: 0.8125rem;
+  color: var(--hx-color-gray-500);
+}
+
+.dark .hextra-home .knowledge-stat-icon svg {
+  color: #a78bfa;
+}
+
+.dark .hextra-home .knowledge-stat-number {
+  background-image: linear-gradient(135deg, #c084fc, #60a5fa);
+}
+
+.dark .hextra-home .knowledge-stat-desc {
+  color: var(--hx-color-gray-400);
+}
+
+/* ===== 分类导航 Bento 墙 ===== */
+
+.hextra-home .category-wall {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+  text-align: start;
+}
+
+.hextra-home .category-wall-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.hextra-home .category-wall-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.25);
+}
+
+.dark .hextra-home .category-wall-item {
+  border-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(23, 23, 23, 0.6);
+}
+
+.dark .hextra-home .category-wall-item:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.3);
+}
+
+/* 大格: 跨 2 列, 品牌渐变描边 (padding-box 玻璃底 + border-box 渐变边) */
+.hextra-home .category-wall-big {
+  grid-column: span 2;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)) padding-box,
+    linear-gradient(135deg, rgba(168, 85, 247, 0.45), rgba(59, 130, 246, 0.45)) border-box;
+}
+
+.hextra-home .category-wall-big:hover {
+  border-color: transparent;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)) padding-box,
+    linear-gradient(135deg, rgba(168, 85, 247, 0.75), rgba(59, 130, 246, 0.75)) border-box;
+}
+
+.dark .hextra-home .category-wall-big {
+  background:
+    linear-gradient(rgba(23, 23, 23, 0.6), rgba(23, 23, 23, 0.6)) padding-box,
+    linear-gradient(135deg, rgba(168, 85, 247, 0.5), rgba(59, 130, 246, 0.5)) border-box;
+}
+
+.dark .hextra-home .category-wall-big:hover {
+  border-color: transparent;
+  background:
+    linear-gradient(rgba(23, 23, 23, 0.75), rgba(23, 23, 23, 0.75)) padding-box,
+    linear-gradient(135deg, rgba(168, 85, 247, 0.8), rgba(59, 130, 246, 0.8)) border-box;
+}
+
+.hextra-home .category-wall-title {
+  font-weight: 600;
+}
+
+.hextra-home .category-wall-big .category-wall-title {
+  font-size: 1.25rem;
+}
+
+.hextra-home .category-wall-count {
+  font-size: 0.8125rem;
+  color: var(--hx-color-gray-500);
+}
+
+.hextra-home .category-wall-count-num {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background-image: linear-gradient(135deg, #a855f7, #3b82f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hextra-home .category-wall-big .category-wall-count-num {
+  font-size: 2rem;
+}
+
+.hextra-home .category-wall-latest {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--hx-color-gray-400);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dark .hextra-home .category-wall-count {
+  color: var(--hx-color-gray-400);
+}
+
+.dark .hextra-home .category-wall-count-num {
+  background-image: linear-gradient(135deg, #c084fc, #60a5fa);
+}
+
+@media (max-width: 1023px) {
+  .hextra-home .category-wall {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .hextra-home .category-wall {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hextra-home .category-wall-big {
+    grid-column: auto;
+  }
+}
+
+/* ===== 最近更新列表 ===== */
+
+.hextra-home .recent-docs {
+  width: 100%;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: start;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.hextra-home .recent-docs-item + .recent-docs-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.hextra-home .recent-docs-link {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.hextra-home .recent-docs-link:hover {
+  background-color: rgba(59, 130, 246, 0.06);
+}
+
+.hextra-home .recent-docs-date {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--hx-color-gray-400);
+}
+
+.hextra-home .recent-docs-category {
+  flex-shrink: 0;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.hextra-home .recent-docs-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dark .hextra-home .recent-docs {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .hextra-home .recent-docs-item + .recent-docs-item {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .hextra-home .recent-docs-link:hover {
+  background-color: rgba(168, 85, 247, 0.08);
+}
+
+.dark .hextra-home .recent-docs-category {
+  color: #a78bfa;
+  background-color: rgba(168, 85, 247, 0.12);
+}
+
+@media (max-width: 639px) {
+  .hextra-home .recent-docs-link {
+    flex-wrap: wrap;
+  }
+}
+
+/* ===== 滚动入场动效 (仅启用 JS 且用户未减弱动态时生效, 无 JS 内容直接可见) ===== */
+
+@media (prefers-reduced-motion: no-preference) {
+  html.js .hextra-home h2[data-reveal] {
+    opacity: 0;
+    translate: 0 16px;
+    transition: opacity 0.5s ease, translate 0.5s ease;
+  }
+
+  html.js .hextra-home h2[data-reveal].revealed {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  html.js .hextra-home [data-reveal] > .reveal-item {
+    opacity: 0;
+    translate: 0 12px;
+    transition: opacity 0.45s ease, translate 0.45s ease;
+    transition-delay: calc(var(--i, 0) * 60ms);
+  }
+
+  html.js .hextra-home [data-reveal].revealed > .reveal-item {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* 减弱动态偏好: 关闭首页卡片的悬浮位移与过渡 */
+@media (prefers-reduced-motion: reduce) {
+  .hextra-home .hextra-card,
+  .hextra-home .hextra-feature-card,
+  .hextra-home .category-wall-item,
+  .hextra-home main > div > h1 ~ a {
+    transition: none;
+  }
+
+  .hextra-home .hextra-card:hover,
+  .hextra-home .hextra-feature-card:hover,
+  .hextra-home .category-wall-item:hover,
+  .hextra-home main > div > h1 ~ a:hover {
+    transform: none;
+  }
+}

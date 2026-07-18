@@ -25,17 +25,36 @@ Sivan 学习文档
 {{< knowledge-stats >}}
 
 {{< hextra/hero-section heading="h2" >}}
-精选分类
+分类导航
+{{< /hextra/hero-section >}}
+
+{{< category-wall pinned="Postgresql社区版,AI,Patroni,编程语言" >}}
+
+{{< hextra/hero-section heading="h2" >}}
+精选文档
 {{< /hextra/hero-section >}}
 
 {{< hextra/feature-grid cols="3" >}}
-  {{< hextra/feature-card title="PostgreSQL" subtitle="多维查询、深度索引、主备复制、高可用配置与性能调优." icon="database" link="/docs/postgresql社区版/" >}}
-  {{< hextra/feature-card title="Go" subtitle="并发模型、底线规范、调度机制与标准库工程实践." icon="code" link="/docs/编程语言/go/" >}}
-  {{< hextra/feature-card title="Python" subtitle="工程架构规范、异步协程数据库驱动与线上部署安全." icon="terminal" link="/docs/编程语言/python/" >}}
-  {{< hextra/feature-card title="Patroni" subtitle="高可用哨兵集群、同步复制状态机与故障自愈机制." icon="server" link="/docs/patroni/" >}}
-  {{< hextra/feature-card title="AI" subtitle="大语言模型 Agent 协同网络与生产级工程化应用指南." icon="sparkles" link="/docs/ai/" >}}
-  {{< hextra/feature-card title="NoSQL" subtitle="Redis 内存数据结构、持久化机制与缓存高并发架构." icon="cube" link="/docs/nosql/" >}}
-  {{< hextra/feature-card title="Zabbix" subtitle="企业级监控系统指标采量、触发器阈值与预警治理." icon="collection" link="/docs/zabbix/" >}}
+  {{< hextra/feature-card title="Patroni failsafe 模式流程分析" subtitle="高可用集群故障自愈的状态机流程深度拆解." icon="server" link="/docs/patroni/patroni-failsafe-模式流程分析/" >}}
+  {{< hextra/feature-card title="Redis 与数据库" subtitle="内存数据结构与关系型数据库的协同架构对比." icon="cube" link="/docs/nosql/redis与数据库/" >}}
+  {{< hextra/feature-card title="Python AI Agent 协作模板" subtitle="大语言模型 Agent 协同开发的工程化提示词模板." icon="sparkles" link="/docs/ai/python-claude-template/" >}}
+{{< /hextra/feature-grid >}}
+
+{{< hextra/hero-section heading="h2" >}}
+最近更新
+{{< /hextra/hero-section >}}
+
+{{< recent-docs limit="6" >}}
+
+{{< hextra/hero-section heading="h2" >}}
+站点能力
+{{< /hextra/hero-section >}}
+
+{{< hextra/feature-grid cols="4" >}}
+  {{< hextra/feature-card title="全文搜索" subtitle="FlexSearch 本地索引, 标题与正文毫秒级定位." icon="search" link="/" >}}
+  {{< hextra/feature-card title="暗色模式" subtitle="跟随系统主题自动切换, 全站组件双套适配." icon="moon" link="/" >}}
+  {{< hextra/feature-card title="Mermaid 图表" subtitle="原生渲染流程图, 时序图与架构图." icon="chart-bar" link="/" >}}
+  {{< hextra/feature-card title="逐文件安全同步" subtitle="源内容与发布副本双重扫描, 受控快照逐文件哈希校验." icon="shield-check" link="/docs/" >}}
 {{< /hextra/feature-grid >}}
 
 {{< hextra/hero-section heading="h2" >}}

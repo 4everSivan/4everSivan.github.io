@@ -1,5 +1,6 @@
 ---
 title: "Goroutine"
+lastmod: "2024-08-16T09:58:22+08:00"
 ---
 
 [TOC]

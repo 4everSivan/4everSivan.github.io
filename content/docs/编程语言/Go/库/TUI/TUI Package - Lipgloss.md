@@ -1,5 +1,6 @@
 ---
 title: "TUI Package - Lipgloss"
+lastmod: "2024-01-03T15:39:01+08:00"
 ---
 
 <img src="https://stuff.charm.sh/lipgloss/lipgloss-header-github.png" alt="Lip Gloss Title Treatment" style="zoom:50%;" />

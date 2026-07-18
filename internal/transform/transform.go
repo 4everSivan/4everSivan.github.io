@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -13,7 +14,9 @@ var errInvalidPath = errors.New("invalid relative markdown path")
 
 // Document converts a scanned Markdown document into deterministic Hugo content.
 // It only operates on an in-memory copy and never writes to the source tree.
-func Document(relativePath string, source []byte) ([]byte, error) {
+// modTime is the source file modification time recorded at discovery; it is
+// emitted as front matter lastmod. A zero modTime omits the lastmod line.
+func Document(relativePath string, source []byte, modTime time.Time) ([]byte, error) {
 	if err := validateMarkdownPath(relativePath); err != nil {
 		return nil, err
 	}
@@ -41,7 +44,12 @@ func Document(relativePath string, source []byte) ([]byte, error) {
 	}
 
 	var out bytes.Buffer
-	fmt.Fprintf(&out, "---\ntitle: %s\n---\n\n", quoteYAML(title))
+	out.WriteString("---\n")
+	fmt.Fprintf(&out, "title: %s\n", quoteYAML(title))
+	if !modTime.IsZero() {
+		fmt.Fprintf(&out, "lastmod: %s\n", quoteYAML(modTime.Format(time.RFC3339)))
+	}
+	out.WriteString("---\n\n")
 	out.Write(body)
 	if len(body) > 0 && body[len(body)-1] != '\n' {
 		out.WriteByte('\n')

@@ -1,5 +1,6 @@
 ---
 title: "PostgreSQL优化：Autovacuum 调优基础知识"
+lastmod: "2024-08-04T22:27:41+08:00"
 ---
 
 *原文链接：https://www.enterprisedb.com/blog/autovacuum-tuning-basics*

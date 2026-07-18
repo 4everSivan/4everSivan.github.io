@@ -1,5 +1,6 @@
 ---
 title: "Patroni failsafe 模式分析"
+lastmod: "2026-05-19T17:17:17+08:00"
 ---
 
 [TOC]

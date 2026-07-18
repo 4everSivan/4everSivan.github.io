@@ -1,5 +1,6 @@
 ---
 title: "Pydantic 学习"
+lastmod: "2025-11-11T08:37:53+08:00"
 ---
 
 [TOC]
