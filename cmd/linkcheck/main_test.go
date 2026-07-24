@@ -134,7 +134,7 @@ func TestCheckRequiresKnowledgeHomeMarkers(t *testing.T) {
 func validHome(inner string) []byte {
 	return []byte(`<h1>Sivan 学习文档</h1>` +
 		`<div data-knowledge-stats data-published-documents=1 data-published-categories=1></div>` +
-		strings.Repeat(`<a class="hextra-feature-card" href="/">分类</a>`, 6) + inner)
+		strings.Repeat(`<a class="hextra-feature-card" href="/">分类</a>`, 3) + inner)
 }
 
 func containsProblem(problems []string, want string) bool {

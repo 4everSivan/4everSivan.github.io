@@ -73,14 +73,19 @@ install_asset \
   "${MERMAID_SHA256}" \
   "${OUTPUT_DIR}/mermaid.min.js"
 
-# Silkscreen 像素字体 (OFL), 仅拉丁子集 woff2, 用于首页 HUD 风格标题与数字
+# Source Serif 4 衬线字体 (OFL), 仅拉丁子集 woff2, 用于首页编辑风标题与数字;
+# 中文回落系统衬线栈 (Songti SC 等), 见 assets/css/custom.css
 FONTS_DIR="${ROOT_DIR}/static/fonts"
 ensure_real_directory "${FONTS_DIR}"
 install_asset \
-  "https://cdn.jsdelivr.net/npm/@fontsource/silkscreen@${SILKSCREEN_VERSION}/files/silkscreen-latin-400-normal.woff2" \
-  "${SILKSCREEN_LATIN_400_WOFF2_SHA256}" \
-  "${FONTS_DIR}/silkscreen-latin-400-normal.woff2"
+  "https://cdn.jsdelivr.net/npm/@fontsource/source-serif-4@${SOURCE_SERIF_4_VERSION}/files/source-serif-4-latin-400-normal.woff2" \
+  "${SOURCE_SERIF_4_LATIN_400_WOFF2_SHA256}" \
+  "${FONTS_DIR}/source-serif-4-latin-400-normal.woff2"
 install_asset \
-  "https://cdn.jsdelivr.net/npm/@fontsource/silkscreen@${SILKSCREEN_VERSION}/files/silkscreen-latin-700-normal.woff2" \
-  "${SILKSCREEN_LATIN_700_WOFF2_SHA256}" \
-  "${FONTS_DIR}/silkscreen-latin-700-normal.woff2"
+  "https://cdn.jsdelivr.net/npm/@fontsource/source-serif-4@${SOURCE_SERIF_4_VERSION}/files/source-serif-4-latin-500-normal.woff2" \
+  "${SOURCE_SERIF_4_LATIN_500_WOFF2_SHA256}" \
+  "${FONTS_DIR}/source-serif-4-latin-500-normal.woff2"
+install_asset \
+  "https://cdn.jsdelivr.net/npm/@fontsource/source-serif-4@${SOURCE_SERIF_4_VERSION}/files/source-serif-4-latin-600-normal.woff2" \
+  "${SOURCE_SERIF_4_LATIN_600_WOFF2_SHA256}" \
+  "${FONTS_DIR}/source-serif-4-latin-600-normal.woff2"

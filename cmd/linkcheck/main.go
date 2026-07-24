@@ -118,7 +118,7 @@ func checkPresentation(relativeFile string, data []byte, problems map[string]str
 		_, documentsOK := positiveAttribute(data, documentCountPattern)
 		_, categoriesOK := positiveAttribute(data, categoryCountPattern)
 		featured := bytes.Count(data, []byte("hextra-feature-card"))
-		if !bytes.Contains(data, []byte("data-knowledge-stats")) || !documentsOK || !categoriesOK || featured < 6 || featured > 8 {
+		if !bytes.Contains(data, []byte("data-knowledge-stats")) || !documentsOK || !categoriesOK || featured != 3 {
 			problems["index.html: 知识导航首页标记不完整"] = struct{}{}
 		}
 	}

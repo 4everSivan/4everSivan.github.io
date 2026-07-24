@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
+func TestHomeEditorialKnowledgeNavigation(t *testing.T) {
 	t.Parallel()
 	root := filepath.Join("..", "..")
 	homeBytes, err := os.ReadFile(filepath.Join(root, "content", "_index.md"))
@@ -20,52 +20,54 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 	for _, required := range []string{
 		`title: "SivanHub"`,
 		"layout: hextra-home",
-		"{{< hextra/hero-headline >}}\nSivanHub\n{{< /hextra/hero-headline >}}",
-		"{{< hextra/hero-subtitle >}}",
-		`{{< hextra/hero-button text="进入文档库" link="/docs/"`,
-		"{{< terminal-panel >}}",
+		"{{< home-hero >}}",
 		"{{< knowledge-stats >}}",
-		`{{< category-wall pinned="Postgresql社区版,AI,Patroni,编程语言" >}}`,
+		"{{< category-wall >}}",
 		"{{< recent-docs ",
 		"{{< hextra/feature-grid ",
 		"{{< hextra/feature-card ",
-		`{{< cards cols="2" >}}`,
-		"查看全部文档",
-		"全文搜索",
 	} {
 		if !strings.Contains(home, required) {
 			t.Fatalf("home page is missing %q", required)
 		}
 	}
+	for _, forbidden := range []string{
+		"terminal-panel",
+		"hero-badge",
+		"hero-headline",
+		"hero-subtitle",
+		"hero-button",
+	} {
+		if strings.Contains(home, forbidden) {
+			t.Fatalf("home page must not use the retired HUD element %q", forbidden)
+		}
+	}
+
+	// Hero 使用独立短代码: Goldmark 默认不渲染 Markdown 内联原始 HTML.
+	heroBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_shortcodes", "home-hero.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	hero := string(heroBytes)
+	for _, required := range []string{
+		`class="home-hero`,
+		`<h1 class="home-title">SivanHub</h1>`,
+		`class="home-cta"`,
+		`"/docs/" | relURL`,
+	} {
+		if !strings.Contains(hero, required) {
+			t.Fatalf("home hero shortcode is missing %q", required)
+		}
+	}
 	featured := strings.Count(home, "{{< hextra/feature-card ")
-	if featured < 6 || featured > 8 {
-		t.Fatalf("home page has %d featured cards, want 6-8", featured)
+	if featured != 3 {
+		t.Fatalf("home page has %d featured cards, want 3", featured)
 	}
 	if strings.Contains(home, "https://") || strings.Contains(home, "http://") {
 		t.Fatal("home page must not add remote assets or links")
 	}
 	if strings.Contains(home, "首页统计仅包含已通过安全门禁并进入当前构建的内容") {
 		t.Fatal("home page must not render the obsolete publication footnote")
-	}
-	pinnedCategories := []string{"Postgresql社区版", "AI", "Patroni", "编程语言"}
-	for _, category := range pinnedCategories {
-		directory := filepath.Join(root, "content", "docs", category)
-		hasDocument := false
-		err := filepath.WalkDir(directory, func(filename string, entry os.DirEntry, walkErr error) error {
-			if walkErr != nil {
-				return walkErr
-			}
-			if !entry.IsDir() && filepath.Ext(filename) == ".md" && entry.Name() != "_index.md" {
-				hasDocument = true
-			}
-			return nil
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !hasDocument {
-			t.Fatalf("pinned category has no published documents: %s", category)
-		}
 	}
 
 	statsBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_shortcodes", "knowledge-stats.html"))
@@ -81,7 +83,6 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		"data-knowledge-stats",
 		"data-published-documents",
 		"data-published-categories",
-		"data-count-to",
 	} {
 		if !strings.Contains(stats, required) {
 			t.Fatalf("knowledge stats shortcode is missing %q", required)
@@ -99,20 +100,9 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		}
 	}
 
-	terminalBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_shortcodes", "terminal-panel.html"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	terminal := string(terminalBytes)
-	for _, required := range []string{
-		`site.GetPage "/docs"`,
-		"RegularPagesRecursive",
-		"terminal-status",
-		"STATUS: VERIFIED",
-	} {
-		if !strings.Contains(terminal, required) {
-			t.Fatalf("terminal panel shortcode is missing %q", required)
-		}
+	// HUD 终端面板已随编辑风改版退役, 短代码文件必须一并移除.
+	if _, err := os.Stat(filepath.Join(root, "layouts", "_shortcodes", "terminal-panel.html")); !os.IsNotExist(err) {
+		t.Fatal("terminal panel shortcode must be removed")
 	}
 
 	// 首页样式集中在 assets/css/custom.css 并以 .hextra-home 作用域隔离;
@@ -129,13 +119,15 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		t.Fatal(err)
 	}
 	customCSS := string(customCSSBytes)
-	for _, required := range []string{".hextra-home", "@font-face", "Silkscreen", ".terminal-panel"} {
+	for _, required := range []string{".hextra-home", "@font-face", "Source Serif 4", ".category-wall"} {
 		if !strings.Contains(customCSS, required) {
 			t.Fatalf("custom.css is missing %q", required)
 		}
 	}
-	if strings.Contains(customCSS, "!important") {
-		t.Fatal("custom.css must not use !important overrides")
+	for _, forbidden := range []string{"!important", "Silkscreen", "terminal-panel"} {
+		if strings.Contains(customCSS, forbidden) {
+			t.Fatalf("custom.css must not contain %q", forbidden)
+		}
 	}
 
 	// 站点固定暗色: 通过 Hextra 官方 custom/head-end.html 钩子清除历史亮色偏好.
@@ -169,7 +161,6 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		".Sections",
 		"RegularPagesRecursive",
 		`"Lastmod"`,
-		`.Get "pinned"`,
 	} {
 		if !strings.Contains(wall, required) {
 			t.Fatalf("category wall shortcode is missing %q", required)
@@ -207,13 +198,18 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 		}
 	}
 
-	// 像素字体按项目惯例固定版本并校验哈希安装, 产物目录被 Git 忽略.
+	// 衬线字体按项目惯例固定版本并校验哈希安装, 产物目录被 Git 忽略.
 	versionsBytes, err := os.ReadFile(filepath.Join(root, "config", "versions.env"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	versions := string(versionsBytes)
-	for _, required := range []string{"SILKSCREEN_VERSION=", "SILKSCREEN_LATIN_400_WOFF2_SHA256=", "SILKSCREEN_LATIN_700_WOFF2_SHA256="} {
+	for _, required := range []string{
+		"SOURCE_SERIF_4_VERSION=",
+		"SOURCE_SERIF_4_LATIN_400_WOFF2_SHA256=",
+		"SOURCE_SERIF_4_LATIN_500_WOFF2_SHA256=",
+		"SOURCE_SERIF_4_LATIN_600_WOFF2_SHA256=",
+	} {
 		if !strings.Contains(versions, required) {
 			t.Fatalf("versions.env is missing %q", required)
 		}
@@ -222,8 +218,8 @@ func TestHomeUsesNativeHextraKnowledgeNavigation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(installBytes), "@fontsource/silkscreen@${SILKSCREEN_VERSION}") {
-		t.Fatal("install-frontend-assets.sh must install the pinned silkscreen font")
+	if !strings.Contains(string(installBytes), "@fontsource/source-serif-4@${SOURCE_SERIF_4_VERSION}") {
+		t.Fatal("install-frontend-assets.sh must install the pinned Source Serif 4 font")
 	}
 	gitignoreBytes, err := os.ReadFile(filepath.Join(root, ".gitignore"))
 	if err != nil {

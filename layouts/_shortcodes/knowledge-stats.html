@@ -1,5 +1,4 @@
-{{/* 首页样式集中于 assets/css/custom.css (.hextra-home 作用域), 本短代码只输出结构与数据钩子.
-     数字元素带 data-count-to / data-count-suffix, 供 assets/js/head/reveal.js 滚动计数. */}}
+{{/* 首页 Hero 单行统计: 样式集中于 assets/css/custom.css (.hextra-home 作用域), 本短代码只输出结构与数据. */}}
 {{- $docs := site.GetPage "/docs" -}}
 {{- if not $docs -}}
   {{- errorf "knowledge-stats: controlled /docs content root is missing" -}}
@@ -13,29 +12,4 @@
   {{- end -}}
 {{- end -}}
 
-<div
-  class="hextra-cards hx:mt-4 hx:gap-4 hx:grid not-prose"
-  style="--hextra-cards-grid-cols: 3;"
-  data-knowledge-stats
-  data-published-documents="{{ $documentCount }}"
-  data-published-categories="{{ $categoryCount }}"
->
-  <a href="{{ "/docs/" | relURL }}" class="hextra-card knowledge-stat-card hx:flex hx:flex-col hx:items-center hx:rounded-lg hx:border hx:border-gray-200 hx:p-6 hx:text-center hx:text-current hx:no-underline hx:dark:border-neutral-800">
-    <span class="knowledge-stat-icon">{{ partial "utils/icon.html" (dict "name" "document-text") }}</span>
-    <span class="knowledge-stat-number" data-count-to="{{ $documentCount }}">{{ $documentCount }}</span>
-    <span class="knowledge-stat-label">篇已发布文档</span>
-    <span class="knowledge-stat-desc">全部来自受控内容快照</span>
-  </a>
-  <a href="{{ "/docs/" | relURL }}" class="hextra-card knowledge-stat-card hx:flex hx:flex-col hx:items-center hx:rounded-lg hx:border hx:border-gray-200 hx:p-6 hx:text-center hx:text-current hx:no-underline hx:dark:border-neutral-800">
-    <span class="knowledge-stat-icon">{{ partial "utils/icon.html" (dict "name" "collection") }}</span>
-    <span class="knowledge-stat-number" data-count-to="{{ $categoryCount }}">{{ $categoryCount }}</span>
-    <span class="knowledge-stat-label">个可浏览分类</span>
-    <span class="knowledge-stat-desc">保留源目录的知识分类结构</span>
-  </a>
-  <a href="{{ "/docs/" | relURL }}" class="hextra-card knowledge-stat-card hx:flex hx:flex-col hx:items-center hx:rounded-lg hx:border hx:border-gray-200 hx:p-6 hx:text-center hx:text-current hx:no-underline hx:dark:border-neutral-800">
-    <span class="knowledge-stat-icon">{{ partial "utils/icon.html" (dict "name" "shield-check") }}</span>
-    <span class="knowledge-stat-number" data-count-to="100" data-count-suffix="%">100%</span>
-    <span class="knowledge-stat-label">双重安全扫描通过率</span>
-    <span class="knowledge-stat-desc">源内容与发布副本均通过安全扫描</span>
-  </a>
-</div>
+<p class="stats-line not-prose" data-knowledge-stats data-published-documents="{{ $documentCount }}" data-published-categories="{{ $categoryCount }}"><span class="stats-line-num">{{ $documentCount }}</span> 篇文档 · <span class="stats-line-num">{{ $categoryCount }}</span> 个分类 · 逐文件哈希校验</p>
