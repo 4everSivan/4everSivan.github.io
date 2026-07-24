@@ -1,7 +1,7 @@
 /* 站点自定义样式, 由 Hextra head.html 自动加载, 生产构建时合并压缩.
    首页样式统一以 .hextra-home 作用域隔离, 不影响文档页.
-   站点固定暗色主题 (hugo.yaml theme.default: dark 且 baseof 服务端直出 class="dark"),
-   首页为暖深色编辑风 (参考 Claude 官网排版), 不再保留亮色回退规则. */
+   站点主题跟随系统 (hugo.yaml theme.default: system), 首页为编辑风 (参考 Claude 官网排版):
+   亮色奶油底 / 暗色暖棕底双套变量, 陶土橙为唯一强调色. */
 
 /* ===== 衬线字体 (Source Serif 4, OFL; 由 scripts/install-frontend-assets.sh 按哈希安装) ===== */
 
@@ -32,19 +32,30 @@
 :root {
   --font-serif: "Source Serif 4", Georgia, "Songti SC", "Noto Serif CJK SC", "SimSun", serif;
   --font-ui-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --home-accent: #c15f3c;
+}
+
+/* ===== 首页主题变量与页面底 (body:has 不支持的旧浏览器回落默认底色, 仅失去定制色调) ===== */
+
+/* 亮色: 奶油底 + 暖墨文字 (Claude 官网主配色) */
+body:has(.hextra-home) {
+  --home-bg: #faf9f7;
+  --home-surface: #ffffff;
+  --home-text: #292524;
+  --home-text-secondary: #78716c;
+  --home-accent-hover: #a14a2f;
+  --home-divider: rgba(41, 37, 36, 0.10);
+  background-color: var(--home-bg);
+}
+
+/* 暗色: 暖棕黑底 + 暖白文字 */
+html.dark body:has(.hextra-home) {
   --home-bg: #1a1815;
   --home-surface: #26221e;
   --home-text: #e8e6e3;
   --home-text-secondary: #a8a29e;
-  --home-accent: #c15f3c;
   --home-accent-hover: #d4764f;
   --home-divider: rgba(231, 229, 228, 0.08);
-}
-
-/* ===== 暖深色页面底 (body:has 不支持的旧浏览器回落默认底色, 仅失去暖色调) ===== */
-
-body:has(.hextra-home) {
-  background-color: var(--home-bg);
 }
 
 body:has(.hextra-home) .hextra-nav-container-blur {

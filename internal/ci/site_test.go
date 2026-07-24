@@ -130,25 +130,26 @@ func TestHomeEditorialKnowledgeNavigation(t *testing.T) {
 		}
 	}
 
-	// 站点固定暗色: 通过 Hextra 官方 custom/head-end.html 钩子清除历史亮色偏好.
+	// 站点主题跟随系统: 通过 Hextra 官方 custom/head-end.html 钩子
+	// 把历史强制 dark 偏好统一迁移为 system.
 	headEndBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_partials", "custom", "head-end.html"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	headEnd := string(headEndBytes)
-	for _, required := range []string{"color-theme", `"dark"`, "classList"} {
+	for _, required := range []string{"color-theme", `"system"`} {
 		if !strings.Contains(headEnd, required) {
 			t.Fatalf("head-end.html is missing %q", required)
 		}
 	}
 
-	// 禁用 JS 时 Hextra 的主题脚本不会执行, 需要 baseof.html 覆盖在服务端输出 class="dark".
+	// 主题由客户端脚本按 localStorage/系统偏好设置, baseof.html 不得在服务端写死主题 class.
 	baseofBytes, err := os.ReadFile(filepath.Join(root, "layouts", "baseof.html"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(baseofBytes), `class="dark"`) {
-		t.Fatal("baseof.html override must render class=\"dark\" on the html element")
+	if strings.Contains(string(baseofBytes), `class="dark"`) {
+		t.Fatal("baseof.html override must not hardcode class=\"dark\" on the html element")
 	}
 
 	wallBytes, err := os.ReadFile(filepath.Join(root, "layouts", "_shortcodes", "category-wall.html"))
@@ -261,10 +262,10 @@ func TestHugoConfigKeepsNativeArticlePresentation(t *testing.T) {
 	if config.Params.Page.Width != "normal" {
 		t.Fatalf("page width = %q, want normal", config.Params.Page.Width)
 	}
-	if config.Params.Theme.Default != "dark" {
-		t.Fatalf("theme default = %q, want dark", config.Params.Theme.Default)
+	if config.Params.Theme.Default != "system" {
+		t.Fatalf("theme default = %q, want system", config.Params.Theme.Default)
 	}
 	if config.Params.Theme.DisplayToggle {
-		t.Fatal("theme toggle must be hidden for the fixed dark theme")
+		t.Fatal("theme toggle must be hidden; theme follows the system preference")
 	}
 }

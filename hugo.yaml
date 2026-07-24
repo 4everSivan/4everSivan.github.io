@@ -59,7 +59,7 @@ params:
   mermaid:
     js: vendor/mermaid.min.js
   theme:
-    default: dark
+    default: system
     displayToggle: false
   page:
     width: normal

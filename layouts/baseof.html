@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-{{/* 覆盖 Hextra v0.12.3 的 baseof.html: 本站固定暗色主题, 服务端直接输出 class="dark",
-     避免禁用 JS 时回退为亮色. 升级 Hextra 时需与该版本主题原文件比对同步. */}}
-<html lang="{{ .Site.Language.Lang }}" dir="{{ partial "utils/hugo-compat/language-direction.html" .Site.Language | default `ltr` }}" class="dark">
+{{/* 覆盖 Hextra v0.12.3 的 baseof.html: 站点主题跟随系统 (hugo.yaml theme.default: system),
+     服务端不输出主题 class, 由主题脚本按 localStorage/系统偏好设置;
+     禁用 JS 时回退为亮色. 升级 Hextra 时需与该版本主题原文件比对同步. */}}
+<html lang="{{ .Site.Language.Lang }}" dir="{{ partial "utils/hugo-compat/language-direction.html" .Site.Language | default `ltr` }}">
   {{- partial "head.html" . -}}
   <body>
     <a href="#content" class="hx:sr-only hx:focus-visible:not-sr-only hx:focus-visible:fixed hx:focus-visible:z-50 hx:focus-visible:top-2 hx:focus-visible:left-2 hx:focus-visible:bg-primary-500 hx:focus-visible:text-white hx:focus-visible:px-4 hx:focus-visible:py-2 hx:focus-visible:rounded-md hx:focus-visible:text-sm hx:focus-visible:font-medium">
