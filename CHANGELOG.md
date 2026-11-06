@@ -6,6 +6,8 @@
 
 ### Added
 
+- [C002](docs/devel/change/C002.json)：首页新增左右两侧各半露的字符画底图（左鸢尾花、右带翼人像），浅色模式棕色、深色模式与字标 S 相同的强调橘色；底图固定在视口内，不拦截交互，打印隐藏。
+
 ### Changed
 
 - [T01](docs/devel/task/T01.json)：仓库改为参考 egoist.dev 的无构建个人主页：宋体与 Times New Roman 混排、杏色/暖黑双主题、36rem 单栏、双列项目卡片与 SKILLS 技能区；新增 GitHub Actions 静态 Pages 部署 workflow。

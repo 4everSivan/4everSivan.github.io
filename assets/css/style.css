@@ -24,6 +24,7 @@
   --selection: #efd0ae;
   --glow: rgba(155, 58, 36, 0.1);
   --shadow: rgba(33, 26, 21, 0.55);
+  --art: rgba(122, 78, 43, 0.3);
 
   --measure: 36rem;
   --skill-card-width: min(263px, calc(100vw - 120px));
@@ -49,6 +50,7 @@ html[data-theme="dark"] {
   --selection: #3a2f26;
   --glow: rgba(217, 133, 95, 0.16);
   --shadow: rgba(0, 0, 0, 0.55);
+  --art: var(--accent);
 }
 
 *,
@@ -87,6 +89,8 @@ body {
 }
 
 .page {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -94,6 +98,38 @@ body {
   max-width: var(--measure);
   margin-inline: auto;
   padding: 0 20px 64px;
+}
+
+/* 字符画底图: 固定在视口居中, 始终位于内容之后. */
+.page-art {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  color: var(--art);
+}
+
+.page-art pre {
+  grid-area: 1 / 1;
+  margin: 0;
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: clamp(2.6px, 1.4vw, 12px);
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: pre;
+}
+
+.page-art-left {
+  transform: translate(calc(-50vw + 1ch), 0);
+}
+
+.page-art-right {
+  transform: translate(50vw, 0);
 }
 
 .skip-link {
@@ -568,6 +604,10 @@ main {
 
   .skip-link,
   .nav {
+    display: none;
+  }
+
+  .page-art {
     display: none;
   }
 

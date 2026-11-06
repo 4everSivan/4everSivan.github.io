@@ -1,0 +1,132 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C002",
+  "title": "首页左右半露字符画背景层",
+  "version": "",
+  "type": "Enhancement",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+
+  "target": {
+    "module": "博客首页",
+    "component": "页面背景层",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+
+  "why": "用户要求把提供的两幅图像转为字符画，作为页面垂直居中、分别贴在视口左右边缘只露出内侧一半的常驻底图：左侧为鸢尾花（再右移一个字符宽），右侧为带翼人像；两幅同字号、同 44 行高。浅色模式用棕色符号、深色模式用与字标 S 相同的强调橘色。底图必须始终位于内容之后，不干扰正文，不拦截点击与选择，也不进入可访问性树。",
+
+  "precheck": {
+    "description": "检查首页是否已存在字符画底图层。",
+    "command": "grep -c \"page-art\" index.html || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 index.html 无 .page-art 层；实现后 grep 返回 1。"
+  },
+
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/page-art.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+
+  "changes": [
+    {
+      "scope": "页面结构",
+      "before": "首页只有顶栏、正文与页脚，没有背景装饰层",
+      "after": "在 body 内新增 .page-art 装饰层，包含左右两幅字符画；垂直居中，分别左移/右移半幅（左侧再右移 1ch，各露出内侧一半），位于 .page 内容之后",
+      "impact": "首页视觉层级与滚动表现"
+    },
+    {
+      "scope": "字符画内容",
+      "before": "无字符画底图",
+      "after": "左侧由用户提供的鸢尾花图标转换为 61×44 字符画，提亮中间调保留描边与纹理，避免整块实心；右侧沿用 78×44 带翼人像字符画；两幅同为 44 行、同字号",
+      "impact": "左右两侧装饰内容"
+    },
+    {
+      "scope": "主题配色",
+      "before": "无字符画底图",
+      "after": "浅色模式 --art 为 rgba(122, 78, 43, 0.3) 棕色；深色模式直接使用 var(--accent)，与字标 S 的橘色一致",
+      "impact": "浅色与深色两套主题"
+    },
+    {
+      "scope": "交互与可访问性",
+      "before": "无字符画底图",
+      "after": "pointer-events: none、user-select: none、aria-hidden=\"true\"；打印时 display: none",
+      "impact": "点击、文本选择、键盘焦点与打印"
+    },
+    {
+      "scope": "响应式",
+      "before": "无字符画底图",
+      "after": "font-size: clamp(2.6px, 1.4vw, 12px) 随视口缩放；390px 下左宽约 200px、右宽约 256px，不产生横向滚动",
+      "impact": "窄屏布局"
+    }
+  ],
+
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "首页信息结构为顶栏、引文、PROJECTS、SKILLS、页脚五个区块，无背景装饰。",
+      "after": "在上述五个区块之外新增居中的字符画底图，固定在视口中心、位于内容之后；浅色棕色、深色橙色，低对比，不拦截交互，打印隐藏。"
+    }
+  },
+
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-01",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "底图位置",
+        "true_if": "底图层 fixed 覆盖视口，左右字符画垂直居中（偏移不超过 2px），水平中心分别位于视口左右边缘（各露出内侧一半，左侧再右移一个字符宽），z-index 低于 .page",
+        "false_if": "垂直未居中、随内容滚动、整幅露出或覆盖正文",
+        "evidence": "node tests/page-art.test.cjs：position=fixed、left offset=(-712.8, 0)、right offset=(720, 0)、art z-index=0 低于 page z-index=1。",
+        "result": true
+      },
+      {
+        "item": "主题配色",
+        "true_if": "浅色模式计算色为棕色（色相 15–45°、亮度低于 50%），深色模式为字标同款橘色（色相 10–45°、亮度高于 50%、不透明）",
+        "false_if": "两模式同色、色相偏离或深色未使用字标强调色",
+        "evidence": "两幅同为浅色 rgba(122, 78, 43, 0.3)、深色 rgb(217, 133, 95)（var(--accent)）；切换主题后位置不变。",
+        "result": true
+      },
+      {
+        "item": "交互隔离",
+        "true_if": "pointer-events:none、aria-hidden=true、中心点未被底图拦截、1440px 与 390px 均无横向滚动",
+        "false_if": "拦截点击或选择、进入可访问性树、撑出横向滚动",
+        "evidence": "pointer-events=none、aria-hidden=true；中心点 elementFromPoint 不落在底图；390px 下左右均无横向滚动。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/page-art.test.cjs 全部通过，scripts/adflow-verify 返回 Exit 0",
+        "false_if": "存在测试失败或门禁非 0",
+        "evidence": "node tests/page-art.test.cjs 16/16 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+
+  "rejections": [],
+
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

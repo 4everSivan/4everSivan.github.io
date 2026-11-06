@@ -6,7 +6,8 @@
     "BlogHome": {
       "design_doc": "docs/devel/design/01-博客首页.md",
       "changes": [
-        "C001"
+        "C001",
+        "C002"
       ]
     }
   },
@@ -16,6 +17,13 @@
       "status": "closed",
       "branch": "fix/C001-skills-carousel",
       "file": "docs/devel/change/C001.json",
+      "version": ""
+    },
+    "C002": {
+      "title": "首页左右半露字符画背景层",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C002.json",
       "version": ""
     }
   }
