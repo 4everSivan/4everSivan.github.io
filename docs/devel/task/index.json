@@ -2,23 +2,24 @@
   "$schema": "https://ad-flow.org/schemas/task-index.v1.json",
   "phase": "Phase 1 - 个人博客首页改版",
   "updated_at": "2026-11-06",
-
   "milestones": {
-    "M1-博客改版": ["T01"]
+    "M1-博客改版": [
+      "T01"
+    ]
   },
-
   "topics": {
     "BlogHome": {
       "design_doc": "docs/devel/design/01-博客首页.md",
-      "tasks": ["T01"]
+      "tasks": [
+        "T01"
+      ]
     }
   },
-
   "tasks": {
     "T01": {
       "title": "个人博客首页高保真改版",
       "milestone": "M1-博客改版",
-      "status": "in_progress",
+      "status": "completed",
       "branch": "feat/T01-blog-home",
       "depends_on": [],
       "file": "docs/devel/task/T01.json"

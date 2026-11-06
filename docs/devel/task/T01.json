@@ -4,7 +4,7 @@
   "title": "个人博客首页高保真改版",
   "version": "",
   "milestone": "M1-博客改版",
-  "status": "in_progress",
+  "status": "completed",
   "branch": "feat/T01-blog-home",
   "depends_on": [],
   "target": {
@@ -90,12 +90,14 @@
     ]
   },
   "sync": {
-    "commit": ""
+    "commit": "37adf93eab52811251a1487d82cb32e9676713be"
   },
   "gate": {
     "tool": "adflow-verify",
     "version": "1.7.0",
-    "ran_at": "",
-    "exit_code": null
+    "ran_at": "2026-11-06",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "completed"
   }
 }
