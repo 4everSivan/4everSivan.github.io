@@ -1,25 +1,22 @@
-# Local AI governance and planning artifacts
-/AGENTS.md
-/CLAUDE.md
-/constitution.md
-/.agent/
-/.agents/
-/.claude/
-/.codex/
-/openspec/
-/docs/superpowers/specs/
+# Operating System Files
+.DS_Store
+Thumbs.db
 
-# Local review and scan reports
-/.local/
+# Editor & IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# Hugo generated output
+# Local runtime, build outputs and ad-flow snapshots
+/local/
+/_adflow_backup/
+
+# Hugo generated output (if the site is rebuilt with Hugo later)
 /public/
 /resources/_gen/
 /.hugo_build.lock
 
-# Local editor and legacy caches
-/.idea/
-/node_modules/
-/assets/vendor/
-/static/fonts/
-**/.DS_Store
+# Python
+__pycache__/
+*.pyc

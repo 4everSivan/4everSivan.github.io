@@ -1,0 +1,19 @@
+{
+  "$schema": "adflow-guide-index-v1",
+  "project": "Sivan",
+  "created": "2026-11-06",
+  "last_change": "2026-11-06",
+  "status": "active",
+  "description": "个人博客的本地预览、静态托管与发布核验指南机器索引",
+  "guides": [
+    {
+      "id": "GUIDE-DEPLOY",
+      "title": "本地预览与发布指南",
+      "file": "01-本地部署指南.md",
+      "category": "deployment",
+      "target_env": "local",
+      "output_artifact": "local/deploy_report.md",
+      "description": "静态站点的本地预览、文件核验与 GitHub Pages 发布步骤"
+    }
+  ]
+}

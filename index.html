@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f7e5d1" id="theme-color">
+  <script>
+    (function () {
+      let stored = null;
+      try {
+        stored = localStorage.getItem('theme');
+      } catch (error) {
+        stored = null;
+      }
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      let theme = prefersDark ? 'dark' : 'light';
+      if (stored === 'light' || stored === 'dark') {
+        theme = stored;
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+      const meta = document.getElementById('theme-color');
+      if (meta) {
+        meta.setAttribute(
+          'content',
+          theme === 'dark' ? '#17130f' : '#f7e5d1'
+        );
+      }
+    })();
+  </script>
+  <title>Sivan</title>
+  <meta name="description" content="Sivan 的个人主页。">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261106b">
+  <script>
+    document.documentElement.classList.add('js');
+    // 若增强脚本未在 2 秒内接管，撤销隐藏态，保证内容始终可见。
+    window.setTimeout(function () {
+      if (!window.sivanRevealReady) {
+        document.documentElement.classList.remove('js');
+      }
+    }, 2000);
+  </script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <h1 class="wordmark"><a href="#top" aria-label="Sivan 首页"><span class="wordmark-initial">S</span>ivan.</a></h1>
+      <nav class="nav" aria-label="主导航">
+        <button class="theme-toggle" type="button" aria-label="切换到深色模式" title="切换到深色模式">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </button>
+        <a class="github-link" href="https://github.com/4everSivan" target="_blank" rel="me noopener" aria-label="GitHub" title="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.18c-3.2.7-3.88-1.36-3.88-1.36-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.68.41.35.78 1.05.78 2.12v3.14c0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+          </svg>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page">
+    <main id="main" class="reveal">
+      <blockquote class="verse" lang="en">
+        <p>The LORD is my shepherd; I shall not want.</p>
+        <p>He maketh me to lie down in green pastures: he leadeth me beside the still waters.</p>
+        <p>He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.</p>
+        <p>Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.</p>
+        <cite>Psalm 23:1–4 · King James Version</cite>
+      </blockquote>
+
+      <section class="projects" id="projects" aria-labelledby="projects-title">
+        <h2 class="section-title" id="projects-title">PROJECTS</h2>
+        <div class="project-grid">
+          <a class="project-card" href="https://4eversivan.github.io/Bruce/" target="_blank" rel="noopener">
+            <img class="project-icon" src="assets/bruce-icon.png" width="32" height="32" alt="">
+            <span class="project-body">
+              <span class="project-name">Bruce</span>
+              <span class="project-desc">macOS 菜单栏应用，记账 AI Agent 的 token 用量与费用。</span>
+            </span>
+          </a>
+
+          <a class="project-card" href="https://github.com/4everSivan/oh-my-tab" target="_blank" rel="noopener">
+            <img class="project-icon" src="assets/oh-my-tab-icon.png" width="32" height="32" alt="">
+            <span class="project-body">
+              <span class="project-name">oh-my-tab</span>
+              <span class="project-desc">轻盈、沉浸的 Chrome 新标签页与浏览器工作台。</span>
+            </span>
+          </a>
+        </div>
+      </section>
+
+      <section class="skills" id="skills" aria-labelledby="skills-title">
+        <h2 class="section-title" id="skills-title">SKILLS</h2>
+        <!-- 技能卡均链接到对应 GitHub 仓库 -->
+        <div class="skill-carousel" data-skill-carousel>
+          <div class="skill-track" data-skill-track>
+            <div class="skill-set" aria-hidden="true">
+                            <a class="project-card skill-card" href="https://github.com/4everSivan/ad-flow" target="_blank" rel="noopener" tabindex="-1">
+                              <span class="project-icon project-icon-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                  <circle cx="6" cy="6" r="2.2"/>
+                                  <circle cx="18" cy="6" r="2.2"/>
+                                  <circle cx="12" cy="18" r="2.2"/>
+                                  <path d="M8.2 6h7.6"/>
+                                  <path d="M7.3 8l3.5 7.7"/>
+                                  <path d="M16.7 8l-3.5 7.7"/>
+                                </svg>
+                              </span>
+                              <span class="project-body">
+                                <span class="project-name">ad-flow</span>
+                                <span class="project-desc">面向 AI Agent 的文档治理流程。</span>
+                              </span>
+                            </a>
+
+                            <a class="project-card skill-card" href="https://github.com/4everSivan/knowledge-map" target="_blank" rel="noopener" tabindex="-1">
+                              <span class="project-icon project-icon-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M9 4l6 2 5-2v14l-5 2-6-2-5 2V6z"/>
+                                  <path d="M9 4v14"/>
+                                  <path d="M15 6v14"/>
+                                </svg>
+                              </span>
+                              <span class="project-body">
+                                <span class="project-name">knowledge-map</span>
+                                <span class="project-desc">从代码与文档生成可追溯的中文知识库与工程图。</span>
+                              </span>
+                            </a>
+
+                            <a class="project-card skill-card" href="https://github.com/4everSivan/test-anything" target="_blank" rel="noopener" tabindex="-1">
+                              <span class="project-icon project-icon-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M9 3h6"/>
+                                  <path d="M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/>
+                                  <path d="M7.5 15h9"/>
+                                </svg>
+                              </span>
+                              <span class="project-body">
+                                <span class="project-name">test-anything</span>
+                                <span class="project-desc">声明式 AI 测试技能：生成单元测试与基准并如实报告。</span>
+                              </span>
+                            </a>
+        
+            </div>
+            <div class="skill-set">
+                            <a class="project-card skill-card" href="https://github.com/4everSivan/ad-flow" target="_blank" rel="noopener">
+                              <span class="project-icon project-icon-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                  <circle cx="6" cy="6" r="2.2"/>
+                                  <circle cx="18" cy="6" r="2.2"/>
+                                  <circle cx="12" cy="18" r="2.2"/>
+                                  <path d="M8.2 6h7.6"/>
+                                  <path d="M7.3 8l3.5 7.7"/>
+                                  <path d="M16.7 8l-3.5 7.7"/>
+                                </svg>
+                              </span>
+                              <span class="project-body">
+                                <span class="project-name">ad-flow</span>
+                                <span class="project-desc">面向 AI Agent 的文档治理流程。</span>
+                              </span>
+                            </a>
+
+                            <a class="project-card skill-card" href="https://github.com/4everSivan/knowledge-map" target="_blank" rel="noopener">
+                              <span class="project-icon project-icon-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M9 4l6 2 5-2v14l-5 2-6-2-5 2V6z"/>
+                                  <path d="M9 4v14"/>
+                                  <path d="M15 6v14"/>
+                                </svg>
+                              </span>
+                              <span class="project-body">
+                                <span class="project-name">knowledge-map</span>
+                                <span class="project-desc">从代码与文档生成可追溯的中文知识库与工程图。</span>
+                              </span>
+                            </a>
+
+                            <a class="project-card skill-card" href="https://github.com/4everSivan/test-anything" target="_blank" rel="noopener">
+                              <span class="project-icon project-icon-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M9 3h6"/>
+                                  <path d="M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/>
+                                  <path d="M7.5 15h9"/>
+                                </svg>
+                              </span>
+                              <span class="project-body">
+                                <span class="project-name">test-anything</span>
+                                <span class="project-desc">声明式 AI 测试技能：生成单元测试与基准并如实报告。</span>
+                              </span>
+                            </a>
+        
+            </div>
+            <div class="skill-set" aria-hidden="true">
+                            <a class="project-card skill-card" href="https://github.com/4everSivan/ad-flow" target="_blank" rel="noopener" tabindex="-1">
+                              <span class="project-icon project-icon-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                  <circle cx="6" cy="6" r="2.2"/>
+                                  <circle cx="18" cy="6" r="2.2"/>
+                                  <circle cx="12" cy="18" r="2.2"/>
+                                  <path d="M8.2 6h7.6"/>
+                                  <path d="M7.3 8l3.5 7.7"/>
+                                  <path d="M16.7 8l-3.5 7.7"/>
+                                </svg>
+                              </span>
+                              <span class="project-body">
+                                <span class="project-name">ad-flow</span>
+                                <span class="project-desc">面向 AI Agent 的文档治理流程。</span>
+                              </span>
+                            </a>
+
+                            <a class="project-card skill-card" href="https://github.com/4everSivan/knowledge-map" target="_blank" rel="noopener" tabindex="-1">
+                              <span class="project-icon project-icon-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M9 4l6 2 5-2v14l-5 2-6-2-5 2V6z"/>
+                                  <path d="M9 4v14"/>
+                                  <path d="M15 6v14"/>
+                                </svg>
+                              </span>
+                              <span class="project-body">
+                                <span class="project-name">knowledge-map</span>
+                                <span class="project-desc">从代码与文档生成可追溯的中文知识库与工程图。</span>
+                              </span>
+                            </a>
+
+                            <a class="project-card skill-card" href="https://github.com/4everSivan/test-anything" target="_blank" rel="noopener" tabindex="-1">
+                              <span class="project-icon project-icon-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M9 3h6"/>
+                                  <path d="M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/>
+                                  <path d="M7.5 15h9"/>
+                                </svg>
+                              </span>
+                              <span class="project-body">
+                                <span class="project-name">test-anything</span>
+                                <span class="project-desc">声明式 AI 测试技能：生成单元测试与基准并如实报告。</span>
+                              </span>
+                            </a>
+        
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p class="foot-copy">© <span data-current-year>2026</span> Sivan</p>
+    </footer>
+  </div>
+
+  <script src="assets/js/main.js?v=20261106b" defer></script>
+</body>
+</html>
