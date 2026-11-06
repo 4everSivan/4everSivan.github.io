@@ -14,7 +14,7 @@
   "cards": {
     "C001": {
       "title": "修复 SKILLS 技能轮播翻页卡顿与连续点击丢失",
-      "status": "in_progress",
+      "status": "verified",
       "branch": "fix/C001-skills-carousel",
       "file": "docs/devel/change/C001.json",
       "version": ""
