@@ -1,0 +1,101 @@
+{
+  "$schema": "https://ad-flow.org/schemas/task-card.v1.json",
+  "id": "T01",
+  "title": "个人博客首页高保真改版",
+  "version": "",
+  "milestone": "M1-博客改版",
+  "status": "in_progress",
+  "branch": "feat/T01-blog-home",
+  "depends_on": [],
+  "target": {
+    "module": "site",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "goal": "把仓库改版为参考 egoist.dev 的无构建个人主页，以宋体与 Times New Roman 混排，并提供双列项目卡片与 SKILLS 分区。",
+  "precheck": {
+    "description": "预检根目录是否已存在可复用的博客首页实现",
+    "command": "test -f index.html",
+    "expected": "退出码 0",
+    "is_completed": false,
+    "evidence": "2026-11-06 改版前仓库为 Hugo + Hextra 文档站，根目录无 index.html；旧实现已按授权清空，无可复用首页"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b feat/T01-blog-home"
+    ],
+    "after": [
+      "scripts/adflow-verify"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "T01-1",
+      "title": "排印令牌与主题",
+      "capability": "在 style.css 中落地宋体/Times 字体栈、字号节奏、间距与浅深两套颜色变量",
+      "done": true
+    },
+    {
+      "id": "T01-2",
+      "title": "首页语义结构",
+      "capability": "用 header/nav/main/section/footer 搭建顶栏、引文、PROJECTS、SKILLS、页脚五个区块，项目区为双列卡片网格，SKILLS 为与项目卡等宽的居中轮播",
+      "done": true
+    },
+    {
+      "id": "T01-3",
+      "title": "渐进增强交互",
+      "capability": "脚本标记 js 可用、更新年份、阻止演示占位链接跳转，并在 reduced-motion 下直接呈现终态",
+      "done": true
+    },
+    {
+      "id": "T01-4",
+      "title": "响应式与可访问性",
+      "capability": "640px 断点、跳转链接、焦点环、装饰符 aria-hidden 与打印样式",
+      "done": true
+    },
+    {
+      "id": "T01-5",
+      "title": "静态 Pages 部署 workflow",
+      "capability": "在 main 推送时运行 adflow-verify，将 index.html 与 assets/ 上传为 Pages artifact 并部署到 GitHub Pages",
+      "done": true
+    }
+  ],
+  "acceptance": {
+    "result": true,
+    "run_id": "local-20261106-01",
+    "user_quote": "确认",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "版式还原",
+        "true_if": "1440px 与 390px 视口下五个区块完整显示，无横向滚动，宋体与 Times New Roman 均生效",
+        "false_if": "出现区块缺失、错位、溢出或字体未按字体栈生效",
+        "evidence": "本地 Chrome 156 全页截图核对：1440px 与 390px 均无横向滚动，五个区块完整，字体栈命中 Times New Roman 与宋体",
+        "result": true
+      },
+      {
+        "item": "主题与动效",
+        "true_if": "浅色与深色主题文字对比度正常；主题按钮可自动检测与记忆切换；技能轮播 600ms 与卡片悬停 480ms 过渡保留，其余动效遵循 reduced-motion",
+        "false_if": "深色主题对比度不足、主题按钮失效，或系统深色偏好下仍强制浅色；轮播/卡片悬停无过渡",
+        "evidence": "浅/深两套主题与主题切换已实测；技能轮播、卡片悬停、吸顶模糊与滚动渐显分界线均已实测",
+        "result": true
+      },
+      {
+        "item": "结构门禁",
+        "true_if": "scripts/adflow-verify --mode init 与 scripts/adflow-verify 均返回 Exit 0",
+        "false_if": "任一检查返回 Exit 4，或存在未处置的硬性违规",
+        "evidence": "scripts/adflow-verify --mode init 与 scripts/adflow-verify 均 Exit 0（errors=0, warnings=0, advisories=0）",
+        "result": true
+      }
+    ]
+  },
+  "sync": {
+    "commit": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "adflow-docs-index-v1",
+  "project": "Sivan",
+  "adflow_version": "1.7.0",
+  "created": "2026-11-06",
+  "last_change": "2026-11-06",
+  "status": "active",
+  "description": "个人博客工程的顶层文档中枢路由表，定义各子系统的边界与机器访问入口",
+  "directories": [
+    {
+      "name": "assets",
+      "path": "docs/assets",
+      "description": "文档与工程静态资源库（版式图、界面截图、视觉稿）",
+      "readme": "docs/assets/README.md",
+      "index": null
+    },
+    {
+      "name": "guide",
+      "path": "docs/guide",
+      "description": "站点本地预览、静态托管与发布核验指引",
+      "readme": "docs/guide/README.md",
+      "index": "docs/guide/index.json"
+    },
+    {
+      "name": "devel",
+      "path": "docs/devel",
+      "description": "研发内场核心工作区（现行设计基线、变更核验、阶段任务、待办缓冲与环境治理）",
+      "readme": "docs/devel/README.md",
+      "index": "docs/devel/index.json"
+    },
+    {
+      "name": "archive",
+      "path": "docs/archive",
+      "description": "历史版本发版封箱归档库（只读冻结）",
+      "readme": "docs/archive/README.md",
+      "index": null
+    }
+  ],
+  "standards": {
+    "coding": "docs/standards/coding.json",
+    "task_template": "docs/standards/task-template.json",
+    "change_template": "docs/standards/change-template.json"
+  }
+}
