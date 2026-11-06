@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- [C001](docs/devel/change/C001.json)：修复 SKILLS 技能轮播翻页卡顿、连续点击丢失与回绕中途吸附；翻页动画改用 Web Animations API 驱动，连续点击合并为一次连续过渡，卡片宽度改取布局宽度以消除 hover 缩放导致的偏移。
+
 <!-- 只添加真实变更并关联真实 C/T 卡，不预登记示例卡或发布版本。
 真实卡片建立后的链接语法示例：
 - [T01](docs/devel/task/T01.json)：交付的能力。

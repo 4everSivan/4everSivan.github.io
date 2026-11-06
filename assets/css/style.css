@@ -336,12 +336,7 @@ main {
   transform: translateX(
     calc(var(--skill-center) - 3 * var(--skill-step))
   );
-  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
-}
-
-.skill-track.is-resetting {
-  transition: none;
 }
 
 .skill-set {

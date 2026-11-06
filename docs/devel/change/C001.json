@@ -1,0 +1,127 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C001",
+  "title": "修复 SKILLS 技能轮播翻页卡顿与连续点击丢失",
+  "version": "",
+  "type": "BugFix",
+  "status": "verified",
+  "branch": "fix/C001-skills-carousel",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "SKILLS 技能轮播",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "技能轮播存在两个独立缺陷。其一，track 把未过滤的 transitionend 当作翻页结束信号；卡片 hover 的 transform、border-color 与 box-shadow 过渡会冒泡到 track，在 600ms 动画进行到约 88ms 时就提前执行 finish()，导致动画期间的点击被丢弃或在中途重定向，越过末张时 normalize() 会在动画中途瞬时吸附，实测单帧跳变 665.5px。其二，metrics() 用 getBoundingClientRect().width 量卡片宽度，卡片 hover 的 scale(1.01) 会放大该值，目标偏移因此偏差数像素，轨道停不到正中心。表现为翻页卡顿、连点少走一格、居中卡片偏移，必须修复。",
+  "precheck": {
+    "description": "用无头 Chrome 加载首页，悬停右侧半卡 200ms 后点击，记录 track 的过渡时序与逐帧位移；修复前应复现提前结束或单帧跳变。",
+    "command": "node tests/carousel.test.cjs",
+    "expected": "修复前测试失败（检测到翻页动画被提前结束、连续点击丢失或回绕中途跳变），修复后通过",
+    "is_completed": false,
+    "evidence": "修复前运行 node tests/carousel.test.cjs：8/11 通过，失败项为「连续点击: 起始位置精确居中」（transform -688.657，期望 -682.5）、「连续两次点击不丢失」（期望 test-anything，实际 knowledge-map）、「回绕无中途吸附」（单帧 688.7px/16ms，速度 43.05px/ms）。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C001-skills-carousel"
+    ],
+    "after": [
+      "node tests/carousel.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "翻页动画驱动",
+      "before": "track 监听未过滤的 transitionend，卡片 hover 过渡冒泡即提前结束动画；每次 go() 另起 900ms 定时器，旧定时器可能结束新动画",
+      "after": "改用 Web Animations API 驱动 transform，以动画自身的 onfinish 提交终值并归一化索引，不再依赖 transitionend 与共享定时器",
+      "impact": "SKILLS 区左右翻页、循环回绕"
+    },
+    {
+      "scope": "连续点击",
+      "before": "animating 为真时直接 return，动画期间的点击被丢弃；提前结束后又可能在中途重定向",
+      "after": "每次点击都计入目标索引，取消当前动画后从当前位置连续过渡到新目标；索引限制在副本安全区间内",
+      "impact": "快速连点与反向点击"
+    },
+    {
+      "scope": "点击判定",
+      "before": "以半个卡宽（约 131px）判断居中，动画中的卡片易被误判为居中并直接打开 GitHub 链接",
+      "after": "居中容差收紧到 3px，且只有中间可交互副本的居中卡片按普通链接打开，其余点击一律翻页",
+      "impact": "技能卡左键点击与键盘焦点行为"
+    },
+    {
+      "scope": "尺寸测量",
+      "before": "metrics() 用 getBoundingClientRect().width 读取卡片宽度，hover 的 scale(1.01) 会放大结果，目标偏移偏差数像素",
+      "after": "改用 getComputedStyle(cards[0]).width 的布局宽度，并用 carousel.clientWidth 读取视口宽度",
+      "impact": "每次翻页的最终停靠位置"
+    },
+    {
+      "scope": "动效曲线",
+      "before": "cubic-bezier(0.22, 1, 0.36, 1)，首帧位移约 33px，起步突兀",
+      "after": "cubic-bezier(0.32, 0.72, 0, 1)，首帧位移约 14px；单步时长仍为 600ms",
+      "impact": "翻页观感"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "技能轮播直接点击左右半卡切换，600ms 缓动；未约定连续点击、回绕时机与居中判定。",
+      "after": "技能轮播单步 600ms；动画期间的点击计入目标索引并合并为一次连续过渡（600–900ms）；回绕仅在动画结束后瞬时完成；只有真正居中的中间副本卡片按链接打开。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261106-02",
+    "user_quote": "先合并到主分支，然后清理掉分支，再继续在主分支上做字符画背景",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "翻页时序",
+        "true_if": "单次点击后 track 在约 600ms 内完成一步位移，hover 过渡不会提前结束动画",
+        "false_if": "动画在 600ms 前被截断，或出现非整组宽度整数倍的单帧跳变",
+        "evidence": "node tests/carousel.test.cjs：悬停稳定与悬停 200ms 两种时序均无异常帧；1440px 与 390px 视口 11/11 通过。",
+        "result": true
+      },
+      {
+        "item": "连续点击",
+        "true_if": "动画进行中再次点击不被丢弃，两次点击后居中卡片前进两格",
+        "false_if": "存在被吞掉的点击，或最终位置少于点击步数",
+        "evidence": "悬停 200ms 后 50ms 内连点两次，最终居中卡片为 test-anything（前进两格）；1440px 与 390px 均通过。",
+        "result": true
+      },
+      {
+        "item": "循环回绕",
+        "true_if": "越过末张后回到首张，回绕瞬时完成且视觉连续，位移跳变恰为整组宽度",
+        "false_if": "回绕过程中出现可见跳变，或居中卡片与预期不符",
+        "evidence": "从末张回绕到首张，回绕位移恰为 819px（整组宽度），无中途吸附；1440px 与 390px 均通过。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "scripts/adflow-verify 返回 Exit 0，无硬性违规",
+        "false_if": "存在任何硬性违规或退出码非 0",
+        "evidence": "scripts/adflow-verify 退出码 0，0 error / 0 warning / 0 advisory。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "2026-11-06",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "verified",
+    "signed_quote": "先合并到主分支，然后清理掉分支，再继续在主分支上做字符画背景",
+    "signed_rejection_count": 0
+  }
+}

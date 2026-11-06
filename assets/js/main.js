@@ -131,6 +131,8 @@
 })();
 
 // 技能轮播: 中间一张完整卡, 两侧露出半张并淡出; 点击左右半卡切换.
+// 动画由 Web Animations API 驱动: 卡片 hover 过渡的 transitionend 会冒泡到
+// track, 若把它当作翻页结束信号, 翻页动画会在中途被提前截断.
 (function () {
   'use strict';
 
@@ -153,30 +155,47 @@
     return;
   }
 
+  const allCards = Array.from(track.querySelectorAll('.skill-card'));
   const count = cards.length;
+  const STEP_MS = 600;
+  const MAX_MS = 900;
+  const EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
+  const CENTER_TOLERANCE = 3;
+  // 轨道只有三份副本; 索引越界会露出空白, 两端各留一张作为缓冲.
+  const MIN_INDEX = 1;
+  const MAX_INDEX = count * 3 - 2;
+
   let index = count;
-  let animating = false;
+  let animation = null;
 
   function metrics() {
     const gap = parseFloat(getComputedStyle(original).columnGap) || 0;
-    const cardWidth = cards[0].getBoundingClientRect().width;
-    const viewWidth = carousel.getBoundingClientRect().width;
+    // 必须取布局宽度: hover 的 scale(1.01) 会放大 getBoundingClientRect,
+    // 用它计算目标偏移会让轨道停不到正中心.
+    const cardWidth = parseFloat(getComputedStyle(cards[0]).width) || 0;
+    const viewWidth = carousel.clientWidth;
     return {
       center: (viewWidth - cardWidth) / 2,
       step: cardWidth + gap,
     };
   }
 
-  function position(animate) {
+  function offsetOf(target) {
     const { center, step } = metrics();
-    if (!animate) {
-      track.classList.add('is-resetting');
+    return center - target * step;
+  }
+
+  function currentOffset() {
+    const matrix = new DOMMatrixReadOnly(getComputedStyle(track).transform);
+    return Number.isFinite(matrix.m41) ? matrix.m41 : 0;
+  }
+
+  function setOffset(offset) {
+    if (animation) {
+      animation.cancel();
+      animation = null;
     }
-    track.style.transform = `translateX(${center - index * step}px)`;
-    if (!animate) {
-      void track.offsetWidth;
-      track.classList.remove('is-resetting');
-    }
+    track.style.transform = `translateX(${offset}px)`;
   }
 
   function normalize() {
@@ -189,68 +208,96 @@
       shifted = true;
     }
     if (shifted) {
-      position(false);
+      // 三份副本内容一致, 瞬时重置在视觉上不可见.
+      setOffset(offsetOf(index));
     }
   }
 
   function go(delta) {
-    if (animating) {
+    const next = index + delta;
+    if (next < MIN_INDEX || next > MAX_INDEX) {
       return;
     }
-    animating = true;
-    index += delta;
-    position(true);
+    index = next;
 
-    function finish() {
-      track.removeEventListener('transitionend', finish);
-      normalize();
-      animating = false;
+    const { center, step } = metrics();
+    const from = currentOffset();
+    const to = center - index * step;
+
+    if (animation) {
+      // 动画进行中再次点击: 从当前视觉位置连续过渡到新目标.
+      animation.cancel();
+      animation = null;
+      track.style.transform = `translateX(${from}px)`;
     }
 
-    track.addEventListener('transitionend', finish);
-    window.setTimeout(() => {
-      if (animating) {
-        finish();
+    if (Math.abs(to - from) < 0.5) {
+      track.style.transform = `translateX(${to}px)`;
+      normalize();
+      return;
+    }
+
+    // 一次跨多格时适度延长时长, 但保持单步 600ms 的基准.
+    const steps = Math.max(1, Math.round(Math.abs(to - from) / step));
+    const duration = Math.min(MAX_MS, STEP_MS + (steps - 1) * 150);
+    if (typeof track.animate !== 'function') {
+      track.style.transform = `translateX(${to}px)`;
+      normalize();
+      return;
+    }
+    const anim = track.animate(
+      [
+        { transform: `translateX(${from}px)` },
+        { transform: `translateX(${to}px)` },
+      ],
+      { duration, easing: EASING, fill: 'forwards' }
+    );
+    animation = anim;
+    anim.onfinish = () => {
+      if (animation !== anim) {
+        return;
       }
-    }, 900);
+      animation = null;
+      // 先写入终值再取消动画, 避免取消时回到起点.
+      track.style.transform = `translateX(${to}px)`;
+      anim.cancel();
+      normalize();
+    };
   }
 
-  // 点击左右半卡切换; 中间的卡片保持为可点击链接.
+  // 只有真正居中的卡片按普通链接打开; 其余点击一律翻页.
   function centered(card) {
     const box = card.getBoundingClientRect();
     const view = carousel.getBoundingClientRect();
-    const cardCenter = box.left + box.width / 2;
-    const viewCenter = view.left + view.width / 2;
-    return Math.abs(cardCenter - viewCenter) < box.width / 2;
+    return (
+      Math.abs(box.left + box.width / 2 - (view.left + view.width / 2)) <=
+      CENTER_TOLERANCE
+    );
   }
 
-  sets.forEach((set) => {
-    set.querySelectorAll('.skill-card').forEach((card) => {
-      card.addEventListener('click', (event) => {
-        if (animating) {
-          event.preventDefault();
-          return;
-        }
-        if (centered(card)) {
-          return;
-        }
-        event.preventDefault();
-        const box = card.getBoundingClientRect();
-        const view = carousel.getBoundingClientRect();
-        const cardCenter = box.left + box.width / 2;
-        const viewCenter = view.left + view.width / 2;
-        go(cardCenter < viewCenter ? -1 : 1);
-      });
+  allCards.forEach((card) => {
+    card.addEventListener('click', (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+      if (card.closest('.skill-set') === original && centered(card)) {
+        return;
+      }
+      event.preventDefault();
+      const box = card.getBoundingClientRect();
+      const view = carousel.getBoundingClientRect();
+      go(box.left + box.width / 2 < view.left + view.width / 2 ? -1 : 1);
     });
   });
 
-  position(false);
+  setOffset(offsetOf(index));
 
   let resizeFrame = 0;
   window.addEventListener('resize', () => {
     window.cancelAnimationFrame(resizeFrame);
     resizeFrame = window.requestAnimationFrame(() => {
-      position(false);
+      setOffset(offsetOf(index));
+      normalize();
     });
   });
 })();
