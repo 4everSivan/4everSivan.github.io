@@ -2,7 +2,6 @@
   "$schema": "https://ad-flow.org/schemas/change-index.v1.json",
   "version": "1.0",
   "updated_at": "2026-11-06",
-
   "topics": {
     "BlogHome": {
       "design_doc": "docs/devel/design/01-博客首页.md",
@@ -14,7 +13,7 @@
   "cards": {
     "C001": {
       "title": "修复 SKILLS 技能轮播翻页卡顿与连续点击丢失",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C001-skills-carousel",
       "file": "docs/devel/change/C001.json",
       "version": ""

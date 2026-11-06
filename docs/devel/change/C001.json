@@ -4,7 +4,7 @@
   "title": "修复 SKILLS 技能轮播翻页卡顿与连续点击丢失",
   "version": "",
   "type": "BugFix",
-  "status": "verified",
+  "status": "closed",
   "branch": "fix/C001-skills-carousel",
   "is_hotfix": false,
   "target": {
@@ -111,7 +111,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "fbc9819d1b01c09bc3c52a74abb3a6c7a90e2839",
     "tag": ""
   },
   "gate": {
@@ -119,8 +119,8 @@
     "version": "1.7.0",
     "ran_at": "2026-11-06",
     "exit_code": 0,
-    "from_status": "in_progress",
-    "target_status": "verified",
+    "from_status": "verified",
+    "target_status": "closed",
     "signed_quote": "先合并到主分支，然后清理掉分支，再继续在主分支上做字符画背景",
     "signed_rejection_count": 0
   }
