@@ -647,38 +647,53 @@ html[data-theme="dark"] .foot {
 }
 
 /* --------------------------------------------------------------------------
-   入场：默认可见，仅在 JS 可用时隐藏后揭示
+   入场：顶栏与各区块从上到下依次淡入
    -------------------------------------------------------------------------- */
 
-.reveal {
-  opacity: 1;
-  transform: none;
+.masthead,
+.projects,
+.skills,
+.blogs,
+.foot {
+  animation: intro 600ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-.js .reveal {
-  opacity: 0;
-  transform: translateY(10px);
+.masthead {
+  animation-delay: 0ms;
 }
 
-.js .reveal.is-visible {
-  opacity: 1;
-  transform: none;
-  transition: opacity 600ms var(--ease), transform 600ms var(--ease);
+.projects {
+  animation-delay: 80ms;
+}
+
+.skills {
+  animation-delay: 160ms;
+}
+
+.blogs {
+  animation-delay: 240ms;
+}
+
+.foot {
+  animation-delay: 320ms;
+}
+
+@keyframes intro {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-
-  .js .reveal,
-  .js .reveal.is-visible {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-
 }
 
 /* --------------------------------------------------------------------------
@@ -745,9 +760,14 @@ html[data-theme="dark"] .foot {
     display: none;
   }
 
-  .js .reveal {
-    opacity: 1 !important;
-    transform: none !important;
+  .masthead,
+  .projects,
+  .skills,
+  .blogs,
+  .foot {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 
   .project-card {

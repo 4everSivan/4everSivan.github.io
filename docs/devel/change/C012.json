@@ -1,0 +1,98 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C012",
+  "title": "页面打开入场动画",
+  "version": "",
+  "type": "Enhancement",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "页面入场",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "用户要求打开网站时所有内容从上到下依次淡入；原实现只有 main 整体 reveal，没有分段节奏。",
+  "precheck": {
+    "description": "检查是否已有分段入场动画。",
+    "command": "grep -c \"animation: intro\" assets/css/style.css || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 CSS 无 intro 动画；实现后 grep 返回 1。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/intro.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "入场节奏",
+      "before": "main 使用 IntersectionObserver 整体 reveal，所有区块同时淡入",
+      "after": "顶栏、PROJECTS、SKILLS、BLOGS、页脚分别使用 intro 动画，延迟 0/80/160/240/320ms，单段 600ms，从上到下依次淡入并上移 12px",
+      "impact": "页面首次加载"
+    },
+    {
+      "scope": "降级与偏好",
+      "before": "reduced-motion 下 reveal 被禁用",
+      "after": "入场动画在 reduced-motion 下仍保留；打印时关闭动画并强制不透明",
+      "impact": "reduced-motion 与打印"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "入场为主体整体上移 10px + 淡入，时长 600ms，reduced-motion 下禁用。",
+      "after": "入场为顶栏与各区块从上到下依次淡入并上移 12px，间隔 80ms，单段 600ms；不随 reduced-motion 关闭。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-14",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "入场节奏",
+        "true_if": "页面加载后存在 5 段 intro 动画，延迟依次为 0/80/160/240/320ms，目标为顶栏与四个区块/页脚",
+        "false_if": "动画缺失、延迟不递增或区块未覆盖",
+        "evidence": "node tests/intro.test.cjs：5 段 intro 动画，延迟 [0,80,160,240,320]，目标 masthead/projects/skills/blogs/foot。",
+        "result": true
+      },
+      {
+        "item": "结束状态",
+        "true_if": "入场结束后顶栏、PROJECTS、SKILLS、BLOGS、页脚计算 opacity 均为 1；reduced-motion 下动画仍存在",
+        "false_if": "有元素保持透明、动画被 reduced-motion 关闭",
+        "evidence": "1100ms 后五者 opacity 均为 1；reduced-motion=true 时动画仍存在。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/intro.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "node tests/intro.test.cjs 5/5 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

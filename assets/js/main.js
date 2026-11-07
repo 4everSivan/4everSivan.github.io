@@ -130,36 +130,6 @@
     });
   }
 
-  const revealElements = Array.from(document.querySelectorAll('.reveal'));
-  const prefersReducedMotion = window.matchMedia(
-    '(prefers-reduced-motion: reduce)'
-  );
-
-  function showAll() {
-    revealElements.forEach((element) => {
-      element.classList.add('is-visible');
-    });
-  }
-
-  if (prefersReducedMotion.matches || !('IntersectionObserver' in window)) {
-    showAll();
-  } else {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) {
-            return;
-          }
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        });
-      },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.05 }
-    );
-
-    revealElements.forEach((element) => observer.observe(element));
-  }
-
   // 项目卡片: 指针位置驱动柔光, 离开后回到默认位置.
   document.querySelectorAll('.project-card').forEach((card) => {
     card.addEventListener(
