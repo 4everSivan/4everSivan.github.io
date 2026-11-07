@@ -393,24 +393,19 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 10px 0 6px;
+  padding: 24px 0 6px;
   text-align: center;
 }
 
 .blog-placeholder-icon {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--rule);
-  border-radius: 9px;
-  background-color: var(--paper-raise);
   color: var(--ink-soft);
 }
 
 .blog-placeholder-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
 }
 
 .blog-placeholder-text {

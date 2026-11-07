@@ -100,9 +100,11 @@ const READ = `
     return { exists: false };
   }
   const title = blogs.querySelector('.section-title');
+  const placeholder = blogs.querySelector('.blog-placeholder');
   const icon = blogs.querySelector('.blog-placeholder-icon');
   const svg = icon && icon.querySelector('svg');
   const text = blogs.querySelector('.blog-placeholder-text');
+  const placeholderStyle = placeholder ? getComputedStyle(placeholder) : null;
   const iconStyle = icon ? getComputedStyle(icon) : null;
   const textStyle = text ? getComputedStyle(text) : null;
   const blogsStyle = getComputedStyle(blogs);
@@ -113,11 +115,13 @@ const READ = `
     titleTag: title ? title.tagName : null,
     text: text ? text.textContent : null,
     textColor: textStyle ? textStyle.color : null,
+    placeholderPaddingTop: placeholderStyle ? placeholderStyle.paddingTop : null,
     iconWidth: iconStyle ? iconStyle.width : null,
     iconHeight: iconStyle ? iconStyle.height : null,
     iconBorderStyle: iconStyle ? iconStyle.borderStyle : null,
     iconBorderWidth: iconStyle ? iconStyle.borderWidth : null,
     iconBackground: iconStyle ? iconStyle.backgroundColor : null,
+    iconColor: iconStyle ? iconStyle.color : null,
     iconPaths: svg ? svg.querySelectorAll('path').length : 0,
     links: blogs.querySelectorAll('a').length,
     marginTop: blogsStyle.marginTop,
@@ -185,13 +189,14 @@ const READ = `
       light.text
     );
     check(
-      '图标为 40px 实线小方块',
-      light.iconWidth === '40px' &&
-        light.iconHeight === '40px' &&
-        light.iconBorderStyle === 'solid' &&
-        light.iconBorderWidth === '1px',
-      `${light.iconWidth} / ${light.iconBorderStyle} ${light.iconBorderWidth}`
+      '羽毛笔无边框 22px',
+      light.iconWidth === '22px' &&
+        light.iconHeight === '22px' &&
+        light.iconBorderStyle === 'none' &&
+        light.iconBackground === 'rgba(0, 0, 0, 0)',
+      `${light.iconWidth} / ${light.iconBorderStyle} / ${light.iconBackground}`
     );
+    check('占位整体下移', light.placeholderPaddingTop === '24px', light.placeholderPaddingTop);
     check('图标为羽毛笔线稿', light.iconPaths === 3, `${light.iconPaths} 条路径`);
     check('区块内无链接', light.links === 0, `${light.links} 个链接`);
     check('区块上间距 64px', light.marginTop === '64px', light.marginTop);
@@ -200,6 +205,11 @@ const READ = `
       '浅色文案为次级灰',
       light.textColor === 'rgb(111, 96, 84)',
       light.textColor
+    );
+    check(
+      '浅色图标为次级墨',
+      light.iconColor === 'rgb(93, 80, 69)',
+      light.iconColor
     );
 
     await evaluate(client, "document.querySelector('.theme-toggle').click()");
@@ -211,9 +221,9 @@ const READ = `
       dark.textColor
     );
     check(
-      '深色图标底色为暖黑',
-      dark.iconBackground === 'rgb(33, 27, 22)',
-      dark.iconBackground
+      '深色图标为次级墨',
+      dark.iconColor === 'rgb(181, 168, 152)',
+      dark.iconColor
     );
 
     client.close();
