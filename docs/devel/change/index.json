@@ -101,7 +101,7 @@
     },
     "C012": {
       "title": "页面打开入场动画",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C012.json",
       "version": ""
