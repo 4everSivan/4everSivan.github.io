@@ -1,0 +1,98 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C005",
+  "title": "首页新增 BLOGS 空状态占位",
+  "version": "",
+  "type": "Feature",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "BLOGS 区块",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "用户确认在 SKILLS 下新增 BLOGS 区块；当前没有文章，用羽毛笔图标 + COMING SOON 作为空状态占位，不设链接、不使用虚线卡片框。",
+  "precheck": {
+    "description": "检查首页是否已存在 BLOGS 区块。",
+    "command": "grep -c \"blog-placeholder\" index.html || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 index.html 无 blog-placeholder；实现后 grep 返回 3（容器、图标、文案三处）。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/blogs.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "页面结构",
+      "before": "SKILLS 之后直接进入页脚，没有 BLOGS 区块",
+      "after": "在 SKILLS 与页脚之间新增 BLOGS 区块：区块标题 + 居中羽毛笔图标 + COMING SOON",
+      "impact": "首页信息结构与区块顺序"
+    },
+    {
+      "scope": "空状态样式",
+      "before": "无 BLOGS 空状态",
+      "after": "40px 实线小方块承载 18px 羽毛笔线稿，下方 11px / 0.2em 字距的 COMING SOON；无虚线卡片框、无链接",
+      "impact": "BLOGS 区块视觉"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "首页自上而下为顶栏、引文、PROJECTS、SKILLS、页脚五个区块。",
+      "after": "在 SKILLS 与页脚之间新增 BLOGS 区块；没有文章时显示羽毛笔图标 + COMING SOON 的空状态，不使用卡片框或链接。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-04",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "区块结构",
+        "true_if": "BLOGS 区块位于 SKILLS 之后、页脚之前，含 h2 BLOGS 与羽毛笔图标 + COMING SOON",
+        "false_if": "区块缺失、顺序错误或标题不符",
+        "evidence": "node tests/blogs.test.cjs：BLOGS 区块位于 SKILLS 与页脚之间，h2 标题为 BLOGS。",
+        "result": true
+      },
+      {
+        "item": "空状态样式",
+        "true_if": "图标容器 40px、1px 实线边框、无虚线框；文字 COMING SOON 使用 ink-faint；区块内无链接",
+        "false_if": "仍有虚线框、中文文案、链接或颜色不符合主题",
+        "evidence": "图标容器 40px / 1px solid；羽毛笔 3 条路径；文案 COMING SOON；区块内 0 个链接；浅色文案 rgb(111, 96, 84)、深色 rgb(140, 127, 112)。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/blogs.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "node tests/blogs.test.cjs 12/12 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

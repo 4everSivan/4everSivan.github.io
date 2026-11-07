@@ -380,6 +380,46 @@ main {
   margin-bottom: 18px;
 }
 
+.blogs {
+  margin-top: 64px;
+}
+
+.blogs .section-title {
+  margin-bottom: 18px;
+}
+
+.blog-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 6px;
+  text-align: center;
+}
+
+.blog-placeholder-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--rule);
+  border-radius: 9px;
+  background-color: var(--paper-raise);
+  color: var(--ink-soft);
+}
+
+.blog-placeholder-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.blog-placeholder-text {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
 .skill-carousel {
   position: relative;
   width: 100%;
