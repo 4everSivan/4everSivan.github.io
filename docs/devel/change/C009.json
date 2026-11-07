@@ -4,7 +4,7 @@
   "title": "卡片图标标题同行布局",
   "version": "",
   "type": "Enhancement",
-  "status": "in_progress",
+  "status": "closed",
   "branch": "main",
   "is_hotfix": false,
   "target": {
@@ -56,8 +56,8 @@
   "verification": {
     "result": true,
     "run_id": "local-20261107-10",
-    "user_quote": "",
-    "signoff": "",
+    "user_quote": "用“确认”签收所有卡片",
+    "signoff": "sivan (AI代签)",
     "checks": [
       {
         "item": "卡片布局",
@@ -92,7 +92,11 @@
   "gate": {
     "tool": "adflow-verify",
     "version": "1.7.0",
-    "ran_at": "",
-    "exit_code": null
+    "ran_at": "2026-11-07",
+    "exit_code": 0,
+    "from_status": "verified",
+    "target_status": "closed",
+    "signed_quote": "用“确认”签收所有卡片",
+    "signed_rejection_count": 0
   }
 }

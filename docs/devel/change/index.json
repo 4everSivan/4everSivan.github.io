@@ -51,49 +51,49 @@
     },
     "C005": {
       "title": "首页新增 BLOGS 空状态占位",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C005.json",
       "version": ""
     },
     "C006": {
       "title": "页脚贴底与顶栏渐变遮罩",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C006.json",
       "version": ""
     },
     "C007": {
       "title": "主题切换图标动画",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C007.json",
       "version": ""
     },
     "C008": {
       "title": "页脚主题配色",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C008.json",
       "version": ""
     },
     "C009": {
       "title": "卡片图标标题同行布局",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C009.json",
       "version": ""
     },
     "C010": {
       "title": "字标点击平滑回顶",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C010.json",
       "version": ""
     },
     "C011": {
       "title": "引文默认折叠与字标切换",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C011.json",
       "version": ""

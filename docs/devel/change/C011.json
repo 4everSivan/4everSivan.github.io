@@ -4,7 +4,7 @@
   "title": "引文默认折叠与字标切换",
   "version": "",
   "type": "Feature",
-  "status": "in_progress",
+  "status": "closed",
   "branch": "main",
   "is_hotfix": false,
   "target": {
@@ -62,8 +62,8 @@
   "verification": {
     "result": true,
     "run_id": "local-20261107-13",
-    "user_quote": "",
-    "signoff": "",
+    "user_quote": "用“确认”签收所有卡片",
+    "signoff": "sivan (AI代签)",
     "checks": [
       {
         "item": "默认折叠",
@@ -83,7 +83,7 @@
         "item": "结构与门禁",
         "true_if": "node tests/verse-panel.test.cjs 全部通过，scripts/adflow-verify Exit 0",
         "false_if": "测试失败或门禁非 0",
-        "evidence": "node tests/verse-panel.test.cjs 7/7 通过；scripts/adflow-verify Exit 0。",
+        "evidence": "node tests/verse-panel.test.cjs 9/9 通过；scripts/adflow-verify Exit 0。",
         "result": true
       }
     ]
@@ -92,13 +92,17 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "45ff1fada889a95e8f64b4abbd5075c51605e883",
+    "commit": "c8a9315fdf7036a47d019aa86fd3fed9af81a0b3",
     "tag": ""
   },
   "gate": {
     "tool": "adflow-verify",
     "version": "1.7.0",
-    "ran_at": "",
-    "exit_code": null
+    "ran_at": "2026-11-07",
+    "exit_code": 0,
+    "from_status": "verified",
+    "target_status": "closed",
+    "signed_quote": "用“确认”签收所有卡片",
+    "signed_rejection_count": 0
   }
 }
