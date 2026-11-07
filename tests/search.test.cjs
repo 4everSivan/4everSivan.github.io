@@ -97,11 +97,14 @@ const READ = `
   const toggle = search.querySelector('.search-toggle');
   const content = search.querySelector('.search-content');
   const input = search.querySelector('.search-input');
-  const key = search.querySelector('[data-search-key]');
+  const inputStyle = getComputedStyle(input);
   const theme = document.querySelector('.theme-toggle');
+  const github = document.querySelector('.github-link');
   const style = getComputedStyle(search);
   const rect = search.getBoundingClientRect();
+  const toggleRect = toggle.getBoundingClientRect();
   const themeRect = theme.getBoundingClientRect();
+  const githubRect = github.getBoundingClientRect();
   return {
     isOpen: search.classList.contains('is-open'),
     width: Math.round(rect.width * 10) / 10,
@@ -113,9 +116,12 @@ const READ = `
     tabIndex: input.tabIndex,
     focused: document.activeElement === input,
     toggleFocused: document.activeElement === toggle,
-    key: key.textContent.trim(),
-    platform: navigator.platform,
+    inputFont: inputStyle.fontFamily,
+    inputColor: inputStyle.color,
     searchBeforeTheme: rect.right <= themeRect.left,
+    searchGap: Math.round((themeRect.left - toggleRect.right) * 10) / 10,
+    barGap: Math.round((themeRect.left - rect.right) * 10) / 10,
+    themeGap: Math.round((githubRect.left - themeRect.right) * 10) / 10,
     placeholder: input.getAttribute('placeholder'),
     noHorizontalScroll:
       document.documentElement.scrollWidth <= window.innerWidth + 1,
@@ -179,10 +185,15 @@ const READ = `
       ''
     );
     check(
-      '快捷键按平台显示',
-      collapsed.key ===
-        (collapsed.platform.includes('Mac') ? '⌘ F' : 'Ctrl F'),
-      `${collapsed.platform} -> ${collapsed.key}`
+      '放大镜与主题按钮间距一致',
+      Math.abs(collapsed.searchGap - collapsed.themeGap) <= 1,
+      `searchGap=${collapsed.searchGap}, themeGap=${collapsed.themeGap}`
+    );
+    check(
+      '输入文字使用主题字体与墨色',
+      collapsed.inputFont.includes('Times New Roman') &&
+        collapsed.inputColor === 'rgb(33, 26, 21)',
+      `font=${collapsed.inputFont.slice(0, 36)}, color=${collapsed.inputColor}`
     );
     check(
       '占位文字为 Search…',
@@ -212,6 +223,11 @@ const READ = `
         opened.borderColor === 'rgb(155, 58, 36)',
       `bg=${opened.background}, border=${opened.borderColor}`
     );
+    check(
+      '展开栏与主题按钮间距一致',
+      Math.abs(opened.barGap - opened.themeGap) <= 1,
+      `barGap=${opened.barGap}, themeGap=${opened.themeGap}`
+    );
 
     await evaluate(
       client,
@@ -237,13 +253,31 @@ const READ = `
       `width=${shortcut.width}, focused=${shortcut.focused}`
     );
 
+    await evaluate(
+      client,
+      "document.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', metaKey: true, bubbles: true, cancelable: true }))"
+    );
+    await sleep(350);
+    const shortcutClosed = await evaluate(client, READ);
+    check(
+      '⌘F 再次按下收起',
+      !shortcutClosed.isOpen &&
+        shortcutClosed.width === 28 &&
+        shortcutClosed.toggleFocused,
+      `width=${shortcutClosed.width}, toggleFocused=${shortcutClosed.toggleFocused}`
+    );
+
+    await evaluate(client, "document.querySelector('.search-toggle').click()");
+    await sleep(350);
+
     await evaluate(client, "document.querySelector('.theme-toggle').click()");
     await sleep(300);
     const dark = await evaluate(client, READ);
     check(
-      '深色下纸面填充为暖黑',
-      dark.background === 'rgb(33, 27, 22)',
-      dark.background
+      '深色下纸面填充与文字颜色匹配主题',
+      dark.background === 'rgb(33, 27, 22)' &&
+        dark.inputColor === 'rgb(236, 228, 216)',
+      `bg=${dark.background}, color=${dark.inputColor}`
     );
 
     await client.send('Emulation.setDeviceMetricsOverride', {

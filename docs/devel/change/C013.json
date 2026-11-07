@@ -13,7 +13,7 @@
     "design_doc": "docs/devel/design/01-博客首页.md",
     "design_topic": "BlogHome"
   },
-  "why": "用户确认在主题切换按钮左侧增加搜索栏：默认收缩为放大镜图标，点击展开为纸面填充搜索栏，内置 Mac/Windows 自适应快捷键提示（⌘F / Ctrl F）。",
+  "why": "用户确认在主题切换按钮左侧增加搜索栏：默认收缩为放大镜图标，点击展开为纸面填充搜索栏，输入文字使用主题衬线字体与墨色。",
   "precheck": {
     "description": "检查顶栏是否已存在搜索栏。",
     "command": "grep -c \"search-toggle\" index.html || true",
@@ -34,13 +34,13 @@
     {
       "scope": "顶栏结构",
       "before": "顶栏导航只有主题切换按钮与 GitHub 图标",
-      "after": "主题切换按钮左侧新增搜索控件：默认 28px 放大镜图标，点击展开 180×28 纸面填充搜索栏（8px 圆角）",
+      "after": "主题切换按钮左侧新增搜索控件：默认 28px 放大镜图标（与主题按钮的视觉间距等于主题/GitHub 间距），点击展开 180×28 纸面填充搜索栏（8px 圆角），输入文字使用主题衬线字体与墨色",
       "impact": "顶栏导航布局"
     },
     {
       "scope": "快捷键",
       "before": "无搜索快捷键",
-      "after": "按平台显示 ⌘F / Ctrl F；⌘F / Ctrl+F 展开并聚焦输入框，Esc 收起，点击外部收起",
+      "after": "⌘F / Ctrl+F 切换展开/收起，展开时聚焦输入框，收起时回到放大镜；Esc/点击外部收起",
       "impact": "搜索栏交互"
     },
     {
@@ -61,29 +61,29 @@
   },
   "verification": {
     "result": true,
-    "run_id": "local-20261107-16",
+    "run_id": "local-20261107-18",
     "user_quote": "",
     "signoff": "",
     "checks": [
       {
         "item": "展开与收起",
-        "true_if": "默认 28px 放大镜、输入框 tabindex=-1；点击后展开 180×28、输入框聚焦；Esc 收起",
+        "true_if": "默认 28px 放大镜且与主题按钮的视觉间距等于主题/GitHub 间距；输入框 tabindex=-1；点击展开 180×28、输入框聚焦；Esc 与 ⌘F 再次按下均可收起",
         "false_if": "默认展开、点击不展开、焦点未进入输入框或 Esc 无效",
-        "evidence": "node tests/search.test.cjs：默认 28×28、输入 tabindex=-1；点击展开 180×28、输入聚焦；Esc 收起并聚焦放大镜。",
+        "evidence": "searchGap=18=themeGap；点击展开 180×28、聚焦；Esc/⌘F 收起并聚焦放大镜。",
         "result": true
       },
       {
         "item": "快捷键与响应式",
-        "true_if": "快捷键按平台显示 ⌘F / Ctrl F；⌘F/Ctrl+F 展开并聚焦；390px 与 320px 展开后无横向滚动",
+        "true_if": "⌘F/Ctrl+F 切换展开/收起；输入文字使用主题衬线字体与墨色；390px 与 320px 展开后无横向滚动",
         "false_if": "快捷键文案错误、快捷键无效或窄屏溢出",
-        "evidence": "MacIntel -> ⌘ F；⌘F 展开并聚焦；390px 宽 150、320px 宽 144，均无横向滚动。",
+        "evidence": "⌘F 展开/收起；输入字体含 Times New Roman、浅色墨色 rgb(33, 26, 21)、深色 rgb(236, 228, 216)；390px 宽 150、320px 宽 144，均无横向滚动。",
         "result": true
       },
       {
         "item": "结构与门禁",
         "true_if": "node tests/search.test.cjs 全部通过，scripts/adflow-verify Exit 0",
         "false_if": "测试失败或门禁非 0",
-        "evidence": "node tests/search.test.cjs 13/13 通过；scripts/adflow-verify Exit 0。",
+        "evidence": "node tests/search.test.cjs 16/16 通过；scripts/adflow-verify Exit 0。",
         "result": true
       }
     ]
@@ -92,7 +92,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "a276e4119b2c55da836cda9cca58037322ec67e3",
     "tag": ""
   },
   "gate": {

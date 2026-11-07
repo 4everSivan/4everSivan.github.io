@@ -260,7 +260,13 @@ html[data-theme="dark"] .wordmark-initial {
   background-color: transparent;
   color: var(--ink-faint);
   transition: width 280ms var(--ease), padding 280ms var(--ease),
+    gap 280ms var(--ease), margin-right 280ms var(--ease),
     background-color 180ms var(--ease), border-color 180ms var(--ease);
+}
+
+.nav .search:not(.is-open) {
+  gap: 0;
+  margin-right: -5px;
 }
 
 .nav .search.is-open {
@@ -307,30 +313,6 @@ html[data-theme="dark"] .wordmark-initial {
   opacity: 0;
 }
 
-.nav .search-key {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  height: 18px;
-  padding: 0 5px;
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  color: var(--ink-faint);
-  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
-  font-size: 10px;
-  line-height: 1;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-.nav .search-divider {
-  flex: none;
-  width: 1px;
-  height: 14px;
-  background-color: var(--rule);
-}
-
 .nav .search-input {
   flex: 1;
   min-width: 0;
@@ -338,9 +320,15 @@ html[data-theme="dark"] .wordmark-initial {
   background: transparent;
   color: var(--ink);
   font-family: var(--font-serif);
-  font-size: 12px;
+  font-size: 0.8125rem;
   line-height: 1;
   outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.nav .search-input::-webkit-search-cancel-button {
+  display: none;
 }
 
 .nav .search-input::placeholder {

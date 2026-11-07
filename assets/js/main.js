@@ -88,14 +88,6 @@
     const searchToggle = search.querySelector('.search-toggle');
     const searchContent = search.querySelector('.search-content');
     const searchInput = search.querySelector('.search-input');
-    const searchKey = search.querySelector('[data-search-key]');
-    const isMac =
-      /Mac|iPhone|iPad|iPod/i.test(navigator.platform || '') ||
-      (navigator.userAgentData &&
-        navigator.userAgentData.platform === 'macOS');
-    if (searchKey) {
-      searchKey.textContent = isMac ? '⌘ F' : 'Ctrl F';
-    }
 
     function setSearch(open, focus) {
       search.classList.toggle('is-open', open);
@@ -124,7 +116,11 @@
         event.key.toLowerCase() === 'f'
       ) {
         event.preventDefault();
-        setSearch(true, true);
+        const open = search.classList.contains('is-open');
+        setSearch(!open, !open);
+        if (open) {
+          searchToggle.focus();
+        }
       }
     });
 
