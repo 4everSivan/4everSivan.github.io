@@ -497,9 +497,13 @@ main {
   overflow: hidden;
   --x: 50%;
   --y: 35%;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "icon name"
+    "desc desc";
+  align-items: center;
+  gap: 10px 12px;
   padding: 14px;
   border: 1px solid var(--rule);
   border-radius: 12px;
@@ -548,6 +552,7 @@ main {
 .project-icon {
   display: block;
   flex: none;
+  grid-area: icon;
   width: 32px;
   height: 32px;
   border-radius: 7px;
@@ -573,13 +578,12 @@ main {
 }
 
 .project-body {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
+  display: contents;
 }
 
 .project-name {
+  grid-area: name;
+  min-width: 0;
   font-size: 0.9375rem;
   font-weight: 500;
   line-height: 1.4;
@@ -587,6 +591,8 @@ main {
 }
 
 .project-desc {
+  grid-area: desc;
+  min-width: 0;
   color: var(--ink-soft);
   font-size: 0.875rem;
   line-height: 1.65;
@@ -668,9 +674,6 @@ html[data-theme="dark"] .foot {
   }
 
   .project-card {
-    flex-direction: column;
-    gap: 14px;
-    min-height: 152px;
     padding: 16px;
   }
 }

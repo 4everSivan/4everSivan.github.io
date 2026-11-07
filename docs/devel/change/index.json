@@ -13,7 +13,8 @@
         "C005",
         "C006",
         "C007",
-        "C008"
+        "C008",
+        "C009"
       ]
     }
   },
@@ -72,6 +73,13 @@
       "status": "in_progress",
       "branch": "main",
       "file": "docs/devel/change/C008.json",
+      "version": ""
+    },
+    "C009": {
+      "title": "卡片图标标题同行布局",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C009.json",
       "version": ""
     }
   }

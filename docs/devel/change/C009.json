@@ -1,0 +1,98 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C009",
+  "title": "卡片图标标题同行布局",
+  "version": "",
+  "type": "Enhancement",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "项目与技能卡片",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "卡片宽屏为图标在上、标题与描述在下，图标与标题之间空白较大；用户要求图标与标题同一行、描述横跨下方，项目卡与技能卡统一。",
+  "precheck": {
+    "description": "检查卡片是否已采用图标标题同行布局。",
+    "command": "grep -c \"grid-template-areas\" assets/css/style.css || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 CSS 无 grid-template-areas；实现后 grep 返回 1。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/card-layout.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "卡片布局",
+      "before": "卡片为纵向排列：图标在上，标题与描述在下；宽屏最小高度 152px",
+      "after": "卡片改为两行网格：第一行图标 + 标题，第二行描述横跨整张卡片；移除宽屏最小高度",
+      "impact": "PROJECTS 与 SKILLS 卡片"
+    },
+    {
+      "scope": "结构",
+      "before": ".project-body 为纵向 flex 容器",
+      "after": ".project-body 使用 display: contents，标题与描述直接参与卡片网格布局",
+      "impact": "卡片内部结构与文本换行"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "项目卡宽屏为图标在上、标题与描述在下；窄屏为图标在左、文字在右。",
+      "after": "项目卡与技能卡统一为图标与标题同一行、描述横跨下方；窄屏单列、宽屏双列。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-10",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "卡片布局",
+        "true_if": "卡片 display 为 grid，grid-template-areas 含 icon name 与 desc desc；图标与标题垂直中心对齐，描述在图标下方并横跨卡片",
+        "false_if": "图标仍独占一行、标题不在图标右侧或描述未横跨卡片",
+        "evidence": "node tests/card-layout.test.cjs：display=grid，areas=\"icon name\" \"desc desc\"；icon/name 中心对齐，desc 宽 229/229。",
+        "result": true
+      },
+      {
+        "item": "响应式",
+        "true_if": "1440px 与 390px 下均为图标标题同行、描述在下，且无横向滚动",
+        "false_if": "窄屏退回旧布局或出现横向滚动",
+        "evidence": "1440 与 390 下项目卡、技能卡均为同行布局，desc 宽度等于内容宽度，无横向滚动。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/card-layout.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "node tests/card-layout.test.cjs 17/17 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}
