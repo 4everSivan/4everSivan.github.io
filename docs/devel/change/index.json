@@ -15,7 +15,8 @@
         "C007",
         "C008",
         "C009",
-        "C010"
+        "C010",
+        "C011"
       ]
     }
   },
@@ -88,6 +89,13 @@
       "status": "in_progress",
       "branch": "main",
       "file": "docs/devel/change/C010.json",
+      "version": ""
+    },
+    "C011": {
+      "title": "引文默认折叠与字标展开",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C011.json",
       "version": ""
     }
   }

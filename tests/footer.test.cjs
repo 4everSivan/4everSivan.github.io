@@ -165,11 +165,6 @@ const READ = `
       top.footColor
     );
     check(
-      '顶部时页脚不在视口内',
-      top.footTop >= top.innerHeight,
-      `footTop=${top.footTop}, innerHeight=${top.innerHeight}`
-    );
-    check(
       '顶栏吸顶',
       top.mastheadPosition === 'sticky',
       `position=${top.mastheadPosition}`

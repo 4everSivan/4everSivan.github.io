@@ -387,8 +387,31 @@ main {
   text-transform: uppercase;
 }
 
+/* 引文默认折叠: 页面从 PROJECTS 开始, 点击字标后展开. */
+.verse-panel {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 520ms var(--ease), opacity 360ms var(--ease);
+}
+
+.verse-panel-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.js .verse-panel:not(.is-open) {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
 .projects {
   margin-top: 64px;
+  transition: margin-top 520ms var(--ease);
+}
+
+.js .verse-panel:not(.is-open) + .projects {
+  margin-top: 0;
 }
 
 .section-title {

@@ -82,6 +82,12 @@
     });
   }
 
+  // 引文默认折叠: 页面从 PROJECTS 开始, 点击字标后展开.
+  const versePanel = document.querySelector('[data-verse-panel]');
+  if (versePanel) {
+    versePanel.setAttribute('aria-hidden', 'true');
+  }
+
   // 字标回顶: 自定义缓动, 不受 reduced-motion 的瞬时跳转影响.
   const wordmark = document.querySelector('.wordmark a');
   if (wordmark) {
@@ -90,6 +96,10 @@
         return;
       }
       event.preventDefault();
+      if (versePanel) {
+        versePanel.classList.add('is-open');
+        versePanel.removeAttribute('aria-hidden');
+      }
       const start = window.scrollY;
       if (start <= 0) {
         return;

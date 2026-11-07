@@ -153,6 +153,9 @@ const READ = `
     await client.send('Emulation.setScrollbarsHidden', { hidden: false });
     await client.send('Page.navigate', { url: PAGE_URL });
     await sleep(1000);
+    // 展开引文, 让页面恢复可滚动高度.
+    await evaluate(client, "document.querySelector('.wordmark a').click()");
+    await sleep(700);
 
     const before = await evaluate(client, READ);
     check(

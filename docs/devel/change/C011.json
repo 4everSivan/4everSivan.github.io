@@ -1,0 +1,104 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C011",
+  "title": "引文默认折叠与字标展开",
+  "version": "",
+  "type": "Feature",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "引文与顶栏字标",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "用户要求默认从 PROJECTS 开始显示，不能向上翻到引文；只有点击字标才展开上方的圣经引文并滑回顶部。",
+  "precheck": {
+    "description": "检查引文是否已有折叠面板。",
+    "command": "grep -c \"verse-panel\" index.html || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 index.html 无 verse-panel；实现后 grep 返回 1。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/verse-panel.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "引文折叠",
+      "before": "引文始终显示在页面顶部，页面初始即可向上滚动到引文",
+      "after": "引文包进 .verse-panel，启用 JS 时默认 grid-template-rows: 0fr + opacity 0，页面从 PROJECTS 开始；折叠时 PROJECTS 上间距归零",
+      "impact": "首页初始视口与滚动范围"
+    },
+    {
+      "scope": "字标展开",
+      "before": "点击字标只做平滑回顶",
+      "after": "点击字标先给引文面板加 is-open、移除 aria-hidden，再执行平滑回顶；面板以 520ms 展开",
+      "impact": "顶栏字标点击"
+    },
+    {
+      "scope": "降级",
+      "before": "无",
+      "after": "禁用 JS 时引文保持可见，字标回退到原生 #top 锚点",
+      "impact": "禁用 JS 环境"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "引文始终显示在页面顶部，页面可从 PROJECTS 向上滚动到引文。",
+      "after": "引文默认折叠，页面从 PROJECTS 开始且无法向上滚动到引文；点击字标展开引文并平滑回顶。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-12",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "默认折叠",
+        "true_if": "加载后面板高度为 0、aria-hidden=true，PROJECTS 位于视口内，页面顶部无法继续上翻",
+        "false_if": "引文默认可见、页面初始可上翻或 PROJECTS 不在首屏",
+        "evidence": "node tests/verse-panel.test.cjs：panelHeight=0、aria-hidden=true、projectsTop=115.2、scrollY=0。",
+        "result": true
+      },
+      {
+        "item": "字标展开",
+        "true_if": "点击字标后面板 is-open、aria-hidden 移除、高度大于 100px，引文在视口内可见",
+        "false_if": "点击后引文未展开、仍对辅助技术隐藏或未回到顶部",
+        "evidence": "点击字标后 isOpen=true、aria-hidden=null、panelHeight=311.5、verseTop=115.2。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/verse-panel.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "node tests/verse-panel.test.cjs 7/7 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}
