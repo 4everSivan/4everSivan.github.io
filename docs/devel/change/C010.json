@@ -1,0 +1,98 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C010",
+  "title": "字标点击平滑回顶",
+  "version": "",
+  "type": "Enhancement",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "顶栏字标",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "字标 href=#top 在 reduced-motion 下被 CSS 的 scroll-behavior: auto 变成瞬时跳转；用户要求点击后滑动回顶，而不是瞬间刷新上去。",
+  "precheck": {
+    "description": "检查字标是否已有自定义回顶逻辑。",
+    "command": "grep -c \"wordmark\" assets/js/main.js || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 main.js 无 wordmark 处理；实现后 grep 返回 1。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/wordmark-scroll.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "字标回顶",
+      "before": "点击字标依赖浏览器锚点跳转；reduced-motion 下 scroll-behavior: auto，瞬间跳到顶部",
+      "after": "点击字标用 requestAnimationFrame 执行 460ms ease-out 缓动，逐帧 scrollTo({ behavior: 'instant' })，并 replaceState 更新 #top 哈希",
+      "impact": "顶栏字标点击"
+    },
+    {
+      "scope": "降级",
+      "before": "无 JavaScript 时依赖原生锚点跳转",
+      "after": "无 JavaScript 时仍按 href=#top 跳转；带修饰键的点击仍按普通链接处理",
+      "impact": "禁用 JS 与修饰键点击"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "字标使用原生 #top 锚点跳转，reduced-motion 下为瞬时跳转。",
+      "after": "字标点击以 460ms 缓动滚回顶部并更新 #top 哈希；不随 reduced-motion 变为瞬时跳转。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-11",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "平滑回顶",
+        "true_if": "reduced-motion 下点击字标，80ms 时 scrollY 位于 0 与起始值之间，420ms 内回到 0",
+        "false_if": "点击后立即跳到 0，或滚动过程出现反向/停滞",
+        "evidence": "node tests/wordmark-scroll.test.cjs：reduced-motion 下 80ms scrollY=171（起始 320），160ms:80，260ms:23，420ms:0。",
+        "result": true
+      },
+      {
+        "item": "无重载与哈希",
+        "true_if": "页面未重载，location.hash 为 #top；修饰键点击仍按链接行为",
+        "false_if": "点击触发页面重载、哈希未更新或修饰键点击被拦截",
+        "evidence": "location.hash=#top；window.__marker=1，页面未重载。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/wordmark-scroll.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "node tests/wordmark-scroll.test.cjs 6/6 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

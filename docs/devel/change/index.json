@@ -14,7 +14,8 @@
         "C006",
         "C007",
         "C008",
-        "C009"
+        "C009",
+        "C010"
       ]
     }
   },
@@ -80,6 +81,13 @@
       "status": "in_progress",
       "branch": "main",
       "file": "docs/devel/change/C009.json",
+      "version": ""
+    },
+    "C010": {
+      "title": "字标点击平滑回顶",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C010.json",
       "version": ""
     }
   }

@@ -18,6 +18,7 @@
 - [C007](docs/devel/change/C007.json)：主题切换时太阳/月亮图标改为 420ms 旋转 + 淡入淡出，独立于整页颜色扩散。
 - [C008](docs/devel/change/C008.json)：页脚 © 2026 Sivan 浅色为次级灰、深色为强调橘色。
 - [C009](docs/devel/change/C009.json)：项目卡与技能卡改为图标与标题同行、描述横跨下方；窄屏单列、宽屏双列。
+- [C010](docs/devel/change/C010.json)：点击顶栏字标改为 460ms 缓动滚回顶部，reduced-motion 下也不再瞬时跳转。
 
 ### Fixed
 

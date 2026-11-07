@@ -82,6 +82,40 @@
     });
   }
 
+  // 字标回顶: 自定义缓动, 不受 reduced-motion 的瞬时跳转影响.
+  const wordmark = document.querySelector('.wordmark a');
+  if (wordmark) {
+    wordmark.addEventListener('click', (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+      event.preventDefault();
+      const start = window.scrollY;
+      if (start <= 0) {
+        return;
+      }
+      const duration = 460;
+      const startTime = performance.now();
+      function step(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const top = Math.round(start * (1 - eased));
+        try {
+          window.scrollTo({ top, behavior: 'instant' });
+        } catch (error) {
+          window.scrollTo(0, top);
+        }
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      }
+      window.requestAnimationFrame(step);
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '#top');
+      }
+    });
+  }
+
   const revealElements = Array.from(document.querySelectorAll('.reveal'));
   const prefersReducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
