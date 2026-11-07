@@ -11,7 +11,8 @@
         "C003",
         "C004",
         "C005",
-        "C006"
+        "C006",
+        "C007"
       ]
     }
   },
@@ -56,6 +57,13 @@
       "status": "in_progress",
       "branch": "main",
       "file": "docs/devel/change/C006.json",
+      "version": ""
+    },
+    "C007": {
+      "title": "主题切换图标动画",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C007.json",
       "version": ""
     }
   }

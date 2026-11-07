@@ -95,6 +95,10 @@ const READ_COLORS = `
 (() => {
   const root = document.documentElement;
   const style = (selector) => getComputedStyle(document.querySelector(selector)).color;
+  const sun = document.querySelector('.theme-toggle .icon-sun');
+  const moon = document.querySelector('.theme-toggle .icon-moon');
+  const sunStyle = getComputedStyle(sun);
+  const moonStyle = getComputedStyle(moon);
   const sheetRules = [];
   for (const sheet of Array.from(document.styleSheets)) {
     try {
@@ -110,13 +114,26 @@ const READ_COLORS = `
     initial: style('.wordmark-initial'),
     rest: style('.wordmark a'),
     toggle: style('.theme-toggle'),
+    sunOpacity: sunStyle.opacity,
+    moonOpacity: moonStyle.opacity,
     hasRevealKeyframes: sheetRules.some(
       (rule) => rule.type === CSSRule.KEYFRAMES_RULE && rule.name === 'theme-reveal'
+    ),
+    hasIconInKeyframes: sheetRules.some(
+      (rule) => rule.type === CSSRule.KEYFRAMES_RULE && rule.name === 'icon-in'
+    ),
+    hasIconOutKeyframes: sheetRules.some(
+      (rule) => rule.type === CSSRule.KEYFRAMES_RULE && rule.name === 'icon-out'
     ),
     hasViewTransitionRule: sheetRules.some(
       (rule) =>
         rule.selectorText &&
         rule.selectorText.includes('::view-transition-new(root)')
+    ),
+    hasIconViewTransitionRule: sheetRules.some(
+      (rule) =>
+        rule.selectorText &&
+        rule.selectorText.includes('::view-transition-new(theme-toggle)')
     ),
   };
 })()
@@ -203,6 +220,17 @@ const PROBE_TRANSITION = `
     );
     check('存在扩散关键帧', light.hasRevealKeyframes, '');
     check('存在 view-transition 规则', light.hasViewTransitionRule, '');
+    check(
+      '浅色显示月亮图标',
+      light.sunOpacity === '0' && light.moonOpacity === '1',
+      `sun=${light.sunOpacity}, moon=${light.moonOpacity}`
+    );
+    check(
+      '存在图标切换关键帧',
+      light.hasIconInKeyframes && light.hasIconOutKeyframes,
+      ''
+    );
+    check('存在图标 view-transition 规则', light.hasIconViewTransitionRule, '');
 
     const vt = await evaluate(client, PROBE_TRANSITION);
     check(
@@ -229,6 +257,8 @@ const PROBE_TRANSITION = `
       vt ? `r=${vt.radius}, 需要=${Math.round(needed)}` : ''
     );
 
+    // 等图标 420ms 过渡结束再读取最终状态.
+    await sleep(500);
     const dark = await evaluate(client, READ_COLORS);
     check('深色主题已生效', dark.theme === 'dark', `data-theme=${dark.theme}`);
     check(
@@ -240,6 +270,11 @@ const PROBE_TRANSITION = `
       '深色 ivan. 为墨色',
       dark.rest === 'rgb(236, 228, 216)',
       dark.rest
+    );
+    check(
+      '深色显示太阳图标',
+      dark.sunOpacity === '1' && dark.moonOpacity === '0',
+      `sun=${dark.sunOpacity}, moon=${dark.moonOpacity}`
     );
 
     // 不支持 View Transitions 时必须仍能切换.

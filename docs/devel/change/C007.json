@@ -1,0 +1,98 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C007",
+  "title": "主题切换图标动画",
+  "version": "",
+  "type": "Enhancement",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "顶栏主题按钮",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "主题切换时太阳/月亮图标用 display 直接切换，没有过渡；用户要求图标本身有切换动画，区别于整页颜色扩散。",
+  "precheck": {
+    "description": "检查主题按钮图标是否已有切换动画。",
+    "command": "grep -c \"icon-in\" assets/css/style.css || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 CSS 无 icon-in 关键帧；实现后 grep 返回 1。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/theme.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "图标渲染",
+      "before": "太阳/月亮用 display: none/block 直接切换，无过渡",
+      "after": "两个图标始终渲染在同一网格单元，用 opacity 与 transform 420ms 过渡切换（旋转 ±120°、缩放 0.5→1）",
+      "impact": "顶栏主题按钮"
+    },
+    {
+      "scope": "扩散兼容",
+      "before": "整页 View Transition 快照会冻结图标状态，图标动画不可见",
+      "after": "主题按钮设置 view-transition-name: theme-toggle，用 icon-in/icon-out 关键帧独立旋转淡入淡出，与整页扩散同时进行",
+      "impact": "主题切换动画"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "主题按钮在太阳/月亮之间直接切换，无图标过渡。",
+      "after": "主题按钮的两个图标始终渲染，以 420ms 旋转 + 淡入淡出切换；整页颜色扩散同时进行。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-08",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "图标状态",
+        "true_if": "浅色 sun opacity 0 / moon 1，深色 sun 1 / moon 0；两个图标始终渲染",
+        "false_if": "图标仍用 display 切换、透明度状态错误或其中一个未渲染",
+        "evidence": "node tests/theme.test.cjs：浅色 sun=0/moon=1，深色 sun=1/moon=0；两个图标均渲染。",
+        "result": true
+      },
+      {
+        "item": "动画规则",
+        "true_if": "CSS 含 icon-in / icon-out 关键帧与 ::view-transition-new(theme-toggle) 规则；无 View Transitions 时 CSS 过渡仍生效",
+        "false_if": "缺少关键帧、缺少独立 view-transition 规则或降级时无过渡",
+        "evidence": "CSS 含 icon-in/icon-out 关键帧与 ::view-transition-new(theme-toggle) 规则；无 startViewTransition 时 CSS 过渡仍生效（降级测试通过）。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/theme.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "node tests/theme.test.cjs 16/16 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}
