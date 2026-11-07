@@ -185,15 +185,35 @@ const READ = `
       `verseTop=${opened.verseTop}, innerHeight=${opened.innerHeight}`
     );
 
+    await evaluate(client, "document.querySelector('.wordmark a').click()");
+    await sleep(750);
+    const closedAgain = await evaluate(client, READ);
+    check(
+      '再次点击字标收起引文',
+      !closedAgain.isOpen &&
+        closedAgain.ariaHidden === 'true' &&
+        closedAgain.panelHeight <= 1,
+      `isOpen=${closedAgain.isOpen}, aria-hidden=${closedAgain.ariaHidden}, panelHeight=${closedAgain.panelHeight}`
+    );
+    check(
+      '收起后回到 PROJECTS',
+      closedAgain.projectsTop >= 0 &&
+        closedAgain.projectsTop < closedAgain.innerHeight &&
+        closedAgain.scrollY === 0,
+      `projectsTop=${closedAgain.projectsTop}, scrollY=${closedAgain.scrollY}`
+    );
+
+    await evaluate(client, "document.querySelector('.wordmark a').click()");
+    await sleep(750);
     await evaluate(client, 'window.scrollTo(0, 600)');
     await sleep(200);
     await evaluate(client, "document.querySelector('.wordmark a').click()");
     await sleep(750);
     const afterScroll = await evaluate(client, READ);
     check(
-      '滚动后点击字标回到顶部',
-      afterScroll.scrollY === 0,
-      `scrollY=${afterScroll.scrollY}`
+      '滚动后点击字标收起并回到顶部',
+      afterScroll.scrollY === 0 && !afterScroll.isOpen,
+      `scrollY=${afterScroll.scrollY}, isOpen=${afterScroll.isOpen}`
     );
 
     client.close();

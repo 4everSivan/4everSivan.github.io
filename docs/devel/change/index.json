@@ -92,7 +92,7 @@
       "version": ""
     },
     "C011": {
-      "title": "引文默认折叠与字标展开",
+      "title": "引文默认折叠与字标切换",
       "status": "in_progress",
       "branch": "main",
       "file": "docs/devel/change/C011.json",

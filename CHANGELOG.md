@@ -19,7 +19,7 @@
 - [C008](docs/devel/change/C008.json)：页脚 © 2026 Sivan 浅色为次级灰、深色为强调橘色。
 - [C009](docs/devel/change/C009.json)：项目卡与技能卡改为图标与标题同行、描述横跨下方；窄屏单列、宽屏双列。
 - [C010](docs/devel/change/C010.json)：点击顶栏字标改为 460ms 缓动滚回顶部，reduced-motion 下也不再瞬时跳转。
-- [C011](docs/devel/change/C011.json)：引文默认折叠，页面从 PROJECTS 开始；点击字标展开引文并滑回顶部。
+- [C011](docs/devel/change/C011.json)：引文默认折叠，页面从 PROJECTS 开始；点击字标切换展开/收起，展开时滑回顶部，收起时回到 PROJECTS。
 
 ### Fixed
 

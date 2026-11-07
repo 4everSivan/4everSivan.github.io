@@ -97,8 +97,12 @@
       }
       event.preventDefault();
       if (versePanel) {
-        versePanel.classList.add('is-open');
-        versePanel.removeAttribute('aria-hidden');
+        const isOpen = versePanel.classList.toggle('is-open');
+        if (isOpen) {
+          versePanel.removeAttribute('aria-hidden');
+        } else {
+          versePanel.setAttribute('aria-hidden', 'true');
+        }
       }
       const start = window.scrollY;
       if (start <= 0) {

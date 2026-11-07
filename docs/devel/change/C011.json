@@ -1,7 +1,7 @@
 {
   "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
   "id": "C011",
-  "title": "引文默认折叠与字标展开",
+  "title": "引文默认折叠与字标切换",
   "version": "",
   "type": "Feature",
   "status": "in_progress",
@@ -13,7 +13,7 @@
     "design_doc": "docs/devel/design/01-博客首页.md",
     "design_topic": "BlogHome"
   },
-  "why": "用户要求默认从 PROJECTS 开始显示，不能向上翻到引文；只有点击字标才展开上方的圣经引文并滑回顶部。",
+  "why": "用户要求默认从 PROJECTS 开始显示，不能向上翻到引文；点击字标展开引文并滑回顶部，再次点击收起并回到 PROJECTS。",
   "precheck": {
     "description": "检查引文是否已有折叠面板。",
     "command": "grep -c \"verse-panel\" index.html || true",
@@ -38,9 +38,9 @@
       "impact": "首页初始视口与滚动范围"
     },
     {
-      "scope": "字标展开",
+      "scope": "字标切换",
       "before": "点击字标只做平滑回顶",
-      "after": "点击字标先给引文面板加 is-open、移除 aria-hidden，再执行平滑回顶；面板以 520ms 展开",
+      "after": "点击字标切换引文：折叠时展开并回顶，展开时收起并回到 PROJECTS；面板以 520ms 过渡",
       "impact": "顶栏字标点击"
     },
     {
@@ -61,7 +61,7 @@
   },
   "verification": {
     "result": true,
-    "run_id": "local-20261107-12",
+    "run_id": "local-20261107-13",
     "user_quote": "",
     "signoff": "",
     "checks": [
@@ -73,10 +73,10 @@
         "result": true
       },
       {
-        "item": "字标展开",
-        "true_if": "点击字标后面板 is-open、aria-hidden 移除、高度大于 100px，引文在视口内可见",
-        "false_if": "点击后引文未展开、仍对辅助技术隐藏或未回到顶部",
-        "evidence": "点击字标后 isOpen=true、aria-hidden=null、panelHeight=311.5、verseTop=115.2。",
+        "item": "字标切换",
+        "true_if": "首次点击展开且引文可见；再次点击收起、aria-hidden 恢复、回到 PROJECTS；滚动后点击收起并回顶",
+        "false_if": "点击后引文不切换、仍对辅助技术隐藏或未回到顶部/PROJECTS",
+        "evidence": "点击字标后 isOpen=true、panelHeight=311.5；再次点击 isOpen=false、aria-hidden=true、panelHeight=0、projectsTop=115.2；滚动 600 后点击 scrollY=0。",
         "result": true
       },
       {
@@ -92,7 +92,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "45ff1fada889a95e8f64b4abbd5075c51605e883",
     "tag": ""
   },
   "gate": {
