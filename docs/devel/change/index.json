@@ -37,7 +37,7 @@
     },
     "C004": {
       "title": "隐藏页面滚动栏",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C004.json",
       "version": ""
