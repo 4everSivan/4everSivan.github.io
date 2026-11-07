@@ -4,7 +4,7 @@
   "title": "顶栏搜索栏",
   "version": "",
   "type": "Feature",
-  "status": "in_progress",
+  "status": "closed",
   "branch": "main",
   "is_hotfix": false,
   "target": {
@@ -62,8 +62,8 @@
   "verification": {
     "result": true,
     "run_id": "local-20261107-19",
-    "user_quote": "",
-    "signoff": "",
+    "user_quote": "用“确认”签收所有卡片",
+    "signoff": "sivan (AI代签)",
     "checks": [
       {
         "item": "展开与收起",
@@ -92,13 +92,17 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "78576657d0567decfb054bb5798ccbe81f607eac",
+    "commit": "d360d4fd9d10f485571559aff1d3b367f1a930c3",
     "tag": ""
   },
   "gate": {
     "tool": "adflow-verify",
     "version": "1.7.0",
-    "ran_at": "",
-    "exit_code": null
+    "ran_at": "2026-11-07",
+    "exit_code": 0,
+    "from_status": "verified",
+    "target_status": "closed",
+    "signed_quote": "用“确认”签收所有卡片",
+    "signed_rejection_count": 0
   }
 }

@@ -109,7 +109,7 @@
     },
     "C013": {
       "title": "顶栏搜索栏",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C013.json",
       "version": ""
