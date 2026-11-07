@@ -1,4 +1,4 @@
-// 回归测试: 页脚固定在视口底部与底部留白.
+// 回归测试: 页脚流式贴底、底部留白与顶栏渐变遮罩.
 // 运行: node tests/footer.test.cjs
 // 依赖本机 Chrome, 可用 CHROME_PATH 覆盖; 找不到 Chrome 时跳过并以 0 退出.
 
@@ -94,22 +94,22 @@ function check(name, passed, detail) {
 const READ = `
 (() => {
   const foot = document.querySelector('.foot');
-  const blogs = document.querySelector('.blogs');
-  const style = getComputedStyle(foot);
-  const rect = foot.getBoundingClientRect();
-  const blogsRect = blogs.getBoundingClientRect();
+  const masthead = document.querySelector('.masthead');
+  const footStyle = getComputedStyle(foot);
+  const mastheadStyle = getComputedStyle(masthead);
+  const footRect = foot.getBoundingClientRect();
   return {
-    position: style.position,
-    bottom: style.bottom,
-    paddingBottom: style.paddingBottom,
-    footTop: Math.round(rect.top * 10) / 10,
-    footBottom: Math.round(rect.bottom * 10) / 10,
-    footCenterX: Math.round((rect.left + rect.width / 2) * 10) / 10,
-    blogsBottom: Math.round(blogsRect.bottom * 10) / 10,
+    footPosition: footStyle.position,
+    footTop: Math.round(footRect.top * 10) / 10,
+    footBottom: Math.round(footRect.bottom * 10) / 10,
+    footCenterX: Math.round((footRect.left + footRect.width / 2) * 10) / 10,
+    mastheadPosition: mastheadStyle.position,
+    mastheadBorderBottom: mastheadStyle.borderBottomWidth,
+    mastheadBackground: mastheadStyle.backgroundImage,
+    mastheadScrolledClass: masthead.classList.contains('is-scrolled'),
     innerWidth: window.innerWidth,
     innerHeight: window.innerHeight,
     scrollY: Math.round(window.scrollY),
-    scrollHeight: document.documentElement.scrollHeight,
     noHorizontalScroll:
       document.documentElement.scrollWidth <= window.innerWidth + 1,
   };
@@ -150,20 +150,30 @@ const READ = `
 
     const top = await evaluate(client, READ);
     check(
-      '页脚固定在视口底部',
-      top.position === 'fixed' && top.bottom === '0px',
-      `position=${top.position}, bottom=${top.bottom}`
+      '页脚保持在文档流',
+      top.footPosition === 'static',
+      `position=${top.footPosition}`
     );
     check(
-      '顶部时页脚贴视口底边',
-      Math.abs(top.footBottom - top.innerHeight) <= 1,
-      `footBottom=${top.footBottom}, innerHeight=${top.innerHeight}`
+      '顶部时页脚不在视口内',
+      top.footTop >= top.innerHeight,
+      `footTop=${top.footTop}, innerHeight=${top.innerHeight}`
     );
-    check('页脚底部留白 24px', top.paddingBottom === '24px', top.paddingBottom);
     check(
-      '页脚水平居中',
-      Math.abs(top.footCenterX - top.innerWidth / 2) <= 1,
-      `center=${top.footCenterX}, viewport=${top.innerWidth / 2}`
+      '顶栏吸顶',
+      top.mastheadPosition === 'sticky',
+      `position=${top.mastheadPosition}`
+    );
+    check(
+      '顶栏无分隔线',
+      top.mastheadBorderBottom === '0px',
+      `border-bottom=${top.mastheadBorderBottom}`
+    );
+    check(
+      '顶栏为纸面色渐变遮罩',
+      top.mastheadBackground.includes('linear-gradient') &&
+        top.mastheadBackground.includes('rgba'),
+      top.mastheadBackground.slice(0, 90)
     );
     check('无横向滚动', top.noHorizontalScroll, `width=${top.innerWidth}`);
 
@@ -182,23 +192,33 @@ const READ = `
 
     const after = await evaluate(client, READ);
     check(
-      '滚动后页脚仍贴视口底边',
-      Math.abs(after.footBottom - after.innerHeight) <= 1,
-      `footBottom=${after.footBottom}, innerHeight=${after.innerHeight}`
+      '底部时页脚贴底留白 24px',
+      Math.abs(after.footBottom - (after.innerHeight - 24)) <= 1,
+      `footBottom=${after.footBottom}, expected=${after.innerHeight - 24}`
     );
     check(
-      'BLOGS 内容不被页脚遮挡',
-      after.blogsBottom <= after.footTop,
-      `blogsBottom=${after.blogsBottom}, footTop=${after.footTop}`
+      '底部时页脚可见',
+      after.footTop < after.innerHeight,
+      `footTop=${after.footTop}`
+    );
+    check(
+      '页脚水平居中',
+      Math.abs(after.footCenterX - after.innerWidth / 2) <= 1,
+      `center=${after.footCenterX}, viewport=${after.innerWidth / 2}`
+    );
+    check(
+      '滚动后顶栏仍无分隔线',
+      after.mastheadBorderBottom === '0px' && !after.mastheadScrolledClass,
+      `border=${after.mastheadBorderBottom}, is-scrolled=${after.mastheadScrolledClass}`
     );
 
     await client.send('Emulation.setEmulatedMedia', { media: 'print' });
     await sleep(100);
-    const printPosition = await evaluate(
+    const printBackground = await evaluate(
       client,
-      "getComputedStyle(document.querySelector('.foot')).position"
+      "getComputedStyle(document.querySelector('.masthead')).backgroundImage"
     );
-    check('打印时页脚回到文档流', printPosition === 'static', printPosition);
+    check('打印时顶栏无背景', printBackground === 'none', printBackground);
     await client.send('Emulation.setEmulatedMedia', { media: '' });
 
     client.close();

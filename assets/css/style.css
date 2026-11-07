@@ -102,7 +102,7 @@ body {
   width: 100%;
   max-width: var(--measure);
   margin-inline: auto;
-  padding: 0 20px 96px;
+  padding: 0 20px 24px;
 }
 
 /* 字符画底图: 固定在视口居中, 始终位于内容之后. */
@@ -167,22 +167,12 @@ body {
   top: 0;
   z-index: 20;
   flex: none;
-  background-color: rgba(var(--paper-rgb), 0.92);
-  border-bottom: 1px solid transparent;
-  transition: border-color 320ms var(--ease);
-}
-
-.masthead.is-scrolled {
-  border-bottom-color: var(--rule);
-}
-
-@supports ((backdrop-filter: blur(1px)) or
-  (-webkit-backdrop-filter: blur(1px))) {
-  .masthead {
-    background-color: rgba(var(--paper-rgb), 0.64);
-    -webkit-backdrop-filter: blur(18px) saturate(1.15);
-    backdrop-filter: blur(18px) saturate(1.15);
-  }
+  background: linear-gradient(
+    to bottom,
+    var(--paper) 0,
+    var(--paper) 65%,
+    rgba(var(--paper-rgb), 0) 100%
+  );
 }
 
 .masthead-inner {
@@ -565,27 +555,15 @@ main {
    -------------------------------------------------------------------------- */
 
 .foot {
-  position: fixed;
-  inset-inline: 0;
-  bottom: 0;
-  z-index: 10;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: center;
   gap: 10px 20px;
-  margin: 0;
-  padding: 18px 20px calc(24px + env(safe-area-inset-bottom));
-  background: linear-gradient(
-    to top,
-    var(--paper) 0,
-    var(--paper) 72%,
-    rgba(var(--paper-rgb), 0) 100%
-  );
+  margin-top: 112px;
   color: var(--ink-faint);
   font-size: 0.8125rem;
   text-align: center;
-  pointer-events: none;
 }
 
 .foot p {
@@ -675,13 +653,6 @@ main {
   .page {
     display: block;
     min-height: 0;
-  }
-
-  .foot {
-    position: static;
-    margin: 0;
-    padding: 12px 0 0;
-    background: none;
   }
 
   .masthead {

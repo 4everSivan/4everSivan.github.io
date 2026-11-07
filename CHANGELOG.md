@@ -14,7 +14,7 @@
 - [C003](docs/devel/change/C003.json)：浅色模式字标 S 改为墨色、`ivan.` 改为次级灰；主题切换新增以按钮为圆心的 600ms 圆形扩散，不支持 View Transitions 时瞬时切换。
 - [C004](docs/devel/change/C004.json)：隐藏浏览器右侧滚动栏，保留滚轮、触控板与键盘滚动。
 - [C005](docs/devel/change/C005.json)：首页 SKILLS 下新增 BLOGS 区块；暂无文章时显示 22px 羽毛笔线稿 + `COMING SOON`，无边框、无链接。
-- [C006](docs/devel/change/C006.json)：页脚固定在视口底部，底部留白 24px；页面底部预留 96px，打印时恢复文档流。
+- [C006](docs/devel/change/C006.json)：页脚回到文档流，滚动到底部时贴底，页面底部留白 24px；顶栏改用纸面色到透明的渐变遮罩并移除分隔线。
 
 ### Fixed
 

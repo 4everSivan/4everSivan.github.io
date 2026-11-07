@@ -52,7 +52,7 @@
       "version": ""
     },
     "C006": {
-      "title": "页脚固定到底部并控制底部间距",
+      "title": "页脚贴底与顶栏渐变遮罩",
       "status": "in_progress",
       "branch": "main",
       "file": "docs/devel/change/C006.json",

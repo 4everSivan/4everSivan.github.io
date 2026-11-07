@@ -112,26 +112,6 @@
     revealElements.forEach((element) => observer.observe(element));
   }
 
-  // 顶栏: 滚动超过阈值后渐显底部分界线.
-  const masthead = document.querySelector('.masthead');
-  if (masthead) {
-    let frame = 0;
-    function syncMasthead() {
-      masthead.classList.toggle('is-scrolled', window.scrollY > 24);
-      frame = 0;
-    }
-    window.addEventListener(
-      'scroll',
-      () => {
-        if (frame === 0) {
-          frame = window.requestAnimationFrame(syncMasthead);
-        }
-      },
-      { passive: true }
-    );
-    syncMasthead();
-  }
-
   // 项目卡片: 指针位置驱动柔光, 离开后回到默认位置.
   document.querySelectorAll('.project-card').forEach((card) => {
     card.addEventListener(

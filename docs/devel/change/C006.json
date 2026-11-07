@@ -1,7 +1,7 @@
 {
   "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
   "id": "C006",
-  "title": "页脚固定到底部并控制底部间距",
+  "title": "页脚贴底与顶栏渐变遮罩",
   "version": "",
   "type": "Enhancement",
   "status": "in_progress",
@@ -13,13 +13,13 @@
     "design_doc": "docs/devel/design/01-博客首页.md",
     "design_topic": "BlogHome"
   },
-  "why": "用户要求把 © 2026 Sivan 页脚固定到视口底部，并控制底部留白，避免页脚随内容滚走或底部空白过大。",
+  "why": "用户要求页脚只在滚动到底部时贴底，不要一直固定；并把底栏的纸面色渐变遮罩应用到顶栏，移除顶栏分隔线；同时缩短页脚与页面底部的距离到 24px。",
   "precheck": {
-    "description": "检查页脚是否已固定在视口底部。",
-    "command": "grep -c \"inset-inline\" assets/css/style.css || true",
-    "expected": "开工前为 0（尚未实现）",
+    "description": "检查顶栏是否仍使用滚动分界线。",
+    "command": "grep -c \"is-scrolled\" assets/css/style.css || true",
+    "expected": "修改前为 1（仍有滚动分界线）",
     "is_completed": false,
-    "evidence": "开工前 CSS 无 inset-inline；实现后 grep 返回 1。"
+    "evidence": "修改前 CSS 含 .masthead.is-scrolled 分界线；修改后返回 0。"
   },
   "callback": {
     "before": [
@@ -34,20 +34,20 @@
     {
       "scope": "页脚定位",
       "before": "页脚在文档流末尾，margin-top 112px，随内容滚动",
-      "after": "页脚 position: fixed、bottom: 0、inset-inline: 0、z-index: 10，始终贴在视口底部",
+      "after": "页脚保持在文档流末尾，不固定到视口；滚动到底部时自然贴底，页面底部留白 24px",
       "impact": "全站页脚与滚动表现"
     },
     {
-      "scope": "底部留白",
-      "before": "页面 padding-bottom 64px，页脚底部无固定留白",
-      "after": "页脚 padding-bottom 24px（含 safe-area），页面 padding-bottom 96px 为固定页脚预留遮挡空间",
-      "impact": "页面底部间距与内容可读性"
+      "scope": "顶栏遮罩",
+      "before": "顶栏使用半透明纸面色 + 18px 背景模糊，滚动后渐显底部发丝线",
+      "after": "顶栏改用纸面色到透明的渐变遮罩，移除 border-bottom 与 is-scrolled 发丝线",
+      "impact": "全站顶栏"
     },
     {
-      "scope": "遮罩与打印",
-      "before": "页脚无背景遮罩；打印时随文档流输出",
-      "after": "页脚底部使用纸面色到透明的渐变遮罩；打印时恢复 static，避免每页重复固定",
-      "impact": "滚动可读性与打印"
+      "scope": "打印",
+      "before": "页脚固定，打印时需恢复 static",
+      "after": "页脚不再固定；顶栏打印隐藏渐变背景",
+      "impact": "打印样式"
     }
   ],
   "design": {
@@ -55,35 +55,35 @@
     "topic": "BlogHome",
     "modified": true,
     "rule_diff": {
-      "before": "页脚在文档流末尾，顶部间距 112px，随内容滚动。",
-      "after": "页脚固定在视口底部，水平居中，底部留白 24px；页面底部预留 96px，页脚使用纸面色渐变遮罩；打印时恢复文档流。"
+      "before": "页脚固定在视口底部，底部留白 24px；顶栏使用半透明纸面色与背景模糊，滚动后渐显发丝线。",
+      "after": "页脚在文档流末尾，滚动到底部时贴底，页面底部留白 24px；顶栏使用纸面色到透明的渐变遮罩，不显示分隔线。"
     }
   },
   "verification": {
     "result": true,
-    "run_id": "local-20261107-06",
+    "run_id": "local-20261107-07",
     "user_quote": "",
     "signoff": "",
     "checks": [
       {
-        "item": "固定位置",
-        "true_if": "页脚计算 position 为 fixed、bottom 为 0px；滚动到顶部与底部时页脚底边都等于视口底边",
-        "false_if": "页脚随内容滚动、未贴底或位置偏移",
-        "evidence": "node tests/footer.test.cjs：position=fixed、bottom=0px；滚动到顶部与底部时 footBottom=900=innerHeight。",
+        "item": "页脚位置",
+        "true_if": "页脚 position 为 static；顶部滚动时不在视口内；滚动到底部时页脚底边距视口底边约 24px",
+        "false_if": "页脚常驻视口、顶部时可见或底部留白不符",
+        "evidence": "node tests/footer.test.cjs：position=static；顶部 footTop=1233.7 > 900；底部 footBottom=875.8 = 900 - 24。",
         "result": true
       },
       {
-        "item": "底部间距",
-        "true_if": "页脚 padding-bottom 24px；滚动到底部时 BLOGS 区块底边不高于页脚顶边；无横向滚动",
-        "false_if": "底部留白不符、内容被页脚遮挡或出现横向滚动",
-        "evidence": "padding-bottom=24px；滚动到底部 blogsBottom=803.7 ≤ footTop=835.9；无横向滚动。",
+        "item": "顶栏渐变",
+        "true_if": "masthead position sticky、border-bottom 0、背景为纸面色到透明的 linear-gradient；滚动后不出现 is-scrolled",
+        "false_if": "仍有分隔线、背景不是渐变或滚动后出现分界线",
+        "evidence": "masthead position=sticky、border-bottom=0px、background-image 为 linear-gradient；滚动后 is-scrolled=false。",
         "result": true
       },
       {
         "item": "结构与门禁",
         "true_if": "node tests/footer.test.cjs 全部通过，scripts/adflow-verify Exit 0",
         "false_if": "测试失败或门禁非 0",
-        "evidence": "node tests/footer.test.cjs 9/9 通过；scripts/adflow-verify Exit 0。",
+        "evidence": "node tests/footer.test.cjs 12/12 通过；scripts/adflow-verify Exit 0。",
         "result": true
       }
     ]
@@ -92,7 +92,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "a749b5088f06a366f8966f1544c4a046af7fdd8d",
     "tag": ""
   },
   "gate": {
