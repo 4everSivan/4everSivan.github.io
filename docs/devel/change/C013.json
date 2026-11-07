@@ -40,7 +40,7 @@
     {
       "scope": "快捷键",
       "before": "无搜索快捷键",
-      "after": "⌘F / Ctrl+F 切换展开/收起，展开时聚焦输入框，收起时回到放大镜；Esc/点击外部收起",
+      "after": "⌘F / Ctrl+F 切换展开/收起，展开时聚焦输入框，收起时释放焦点（不残留焦点环）；Esc/点击外部收起",
       "impact": "搜索栏交互"
     },
     {
@@ -61,15 +61,15 @@
   },
   "verification": {
     "result": true,
-    "run_id": "local-20261107-18",
+    "run_id": "local-20261107-19",
     "user_quote": "",
     "signoff": "",
     "checks": [
       {
         "item": "展开与收起",
-        "true_if": "默认 28px 放大镜且与主题按钮的视觉间距等于主题/GitHub 间距；输入框 tabindex=-1；点击展开 180×28、输入框聚焦；Esc 与 ⌘F 再次按下均可收起",
+        "true_if": "默认 28px 放大镜且与主题按钮的视觉间距等于主题/GitHub 间距；输入框 tabindex=-1；点击展开 180×28、输入框聚焦；Esc 与 ⌘F 再次按下均可收起且不残留焦点环",
         "false_if": "默认展开、点击不展开、焦点未进入输入框或 Esc 无效",
-        "evidence": "searchGap=18=themeGap；点击展开 180×28、聚焦；Esc/⌘F 收起并聚焦放大镜。",
+        "evidence": "searchGap=18=themeGap；点击展开 180×28、聚焦；Esc/⌘F 收起并释放焦点（toggleFocused=false）。",
         "result": true
       },
       {
@@ -92,7 +92,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "a276e4119b2c55da836cda9cca58037322ec67e3",
+    "commit": "78576657d0567decfb054bb5798ccbe81f607eac",
     "tag": ""
   },
   "gate": {

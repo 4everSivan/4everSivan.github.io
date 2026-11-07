@@ -97,6 +97,9 @@
       if (open && focus) {
         searchInput.focus();
       }
+      if (!open && document.activeElement === searchInput) {
+        searchInput.blur();
+      }
     }
 
     searchToggle.addEventListener('click', () => {
@@ -106,7 +109,6 @@
     search.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         setSearch(false, false);
-        searchToggle.focus();
       }
     });
 
@@ -118,9 +120,6 @@
         event.preventDefault();
         const open = search.classList.contains('is-open');
         setSearch(!open, !open);
-        if (open) {
-          searchToggle.focus();
-        }
       }
     });
 

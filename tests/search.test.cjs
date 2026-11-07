@@ -236,8 +236,11 @@ const READ = `
     await sleep(350);
     const closed = await evaluate(client, READ);
     check(
-      'Esc 收起并回到放大镜',
-      !closed.isOpen && closed.width === 28 && closed.toggleFocused,
+      'Esc 收起且不残留焦点环',
+      !closed.isOpen &&
+        closed.width === 28 &&
+        !closed.toggleFocused &&
+        !closed.focused,
       `width=${closed.width}, toggleFocused=${closed.toggleFocused}`
     );
 
@@ -260,10 +263,11 @@ const READ = `
     await sleep(350);
     const shortcutClosed = await evaluate(client, READ);
     check(
-      '⌘F 再次按下收起',
+      '⌘F 再次按下收起且不残留焦点环',
       !shortcutClosed.isOpen &&
         shortcutClosed.width === 28 &&
-        shortcutClosed.toggleFocused,
+        !shortcutClosed.toggleFocused &&
+        !shortcutClosed.focused,
       `width=${shortcutClosed.width}, toggleFocused=${shortcutClosed.toggleFocused}`
     );
 
