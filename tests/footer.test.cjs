@@ -99,7 +99,9 @@ const READ = `
   const mastheadStyle = getComputedStyle(masthead);
   const footRect = foot.getBoundingClientRect();
   return {
+    theme: document.documentElement.getAttribute('data-theme'),
     footPosition: footStyle.position,
+    footColor: footStyle.color,
     footTop: Math.round(footRect.top * 10) / 10,
     footBottom: Math.round(footRect.bottom * 10) / 10,
     footCenterX: Math.round((footRect.left + footRect.width / 2) * 10) / 10,
@@ -145,6 +147,9 @@ const READ = `
       deviceScaleFactor: 1,
       mobile: false,
     });
+    await client.send('Emulation.setEmulatedMedia', {
+      features: [{ name: 'prefers-color-scheme', value: 'light' }],
+    });
     await client.send('Page.navigate', { url: PAGE_URL });
     await sleep(1000);
 
@@ -153,6 +158,11 @@ const READ = `
       '页脚保持在文档流',
       top.footPosition === 'static',
       `position=${top.footPosition}`
+    );
+    check(
+      '浅色页脚为灰色',
+      top.footColor === 'rgb(111, 96, 84)',
+      top.footColor
     );
     check(
       '顶部时页脚不在视口内',
@@ -212,14 +222,29 @@ const READ = `
       `border=${after.mastheadBorderBottom}, is-scrolled=${after.mastheadScrolledClass}`
     );
 
-    await client.send('Emulation.setEmulatedMedia', { media: 'print' });
+    await client.send('Emulation.setEmulatedMedia', {
+      media: 'print',
+      features: [{ name: 'prefers-color-scheme', value: 'light' }],
+    });
     await sleep(100);
     const printBackground = await evaluate(
       client,
       "getComputedStyle(document.querySelector('.masthead')).backgroundImage"
     );
     check('打印时顶栏无背景', printBackground === 'none', printBackground);
-    await client.send('Emulation.setEmulatedMedia', { media: '' });
+    await client.send('Emulation.setEmulatedMedia', {
+      media: '',
+      features: [{ name: 'prefers-color-scheme', value: 'light' }],
+    });
+
+    await evaluate(client, "document.querySelector('.theme-toggle').click()");
+    await sleep(300);
+    const dark = await evaluate(client, READ);
+    check(
+      '深色页脚为强调橘色',
+      dark.footColor === 'rgb(217, 133, 95)',
+      `${dark.footColor} (theme=${dark.theme})`
+    );
 
     client.close();
   } finally {

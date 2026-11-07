@@ -1,0 +1,85 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C008",
+  "title": "页脚主题配色",
+  "version": "",
+  "type": "Enhancement",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "页脚",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "页脚 © 2026 Sivan 目前始终使用次级灰；用户要求深色模式改为强调橘色，浅色保持灰色。",
+  "precheck": {
+    "description": "检查页脚是否已有深色强调色规则。",
+    "command": "grep -c \"html\\[data-theme=\\\"dark\\\"\\] .foot\" assets/css/style.css || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 CSS 无深色页脚规则；实现后 grep 返回 1。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/footer.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "页脚配色",
+      "before": "页脚始终使用 var(--ink-faint) 次级灰",
+      "after": "浅色模式保持 var(--ink-faint) 灰色；深色模式使用 var(--accent) 强调橘色",
+      "impact": "页脚在浅色/深色主题下的观感"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "页脚版权行使用统一的次级灰。",
+      "after": "页脚版权行浅色模式为次级灰、深色模式为强调橘色。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-09",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "页脚配色",
+        "true_if": "浅色模式页脚计算色为 rgb(111, 96, 84)，深色模式为 rgb(217, 133, 95)",
+        "false_if": "浅色不是灰色、深色不是强调橘色或切换后颜色未更新",
+        "evidence": "node tests/footer.test.cjs：浅色页脚 rgb(111, 96, 84)，深色 rgb(217, 133, 95)。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/footer.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "node tests/footer.test.cjs 14/14 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

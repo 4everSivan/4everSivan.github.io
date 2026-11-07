@@ -16,6 +16,7 @@
 - [C005](docs/devel/change/C005.json)：首页 SKILLS 下新增 BLOGS 区块；暂无文章时显示 22px 羽毛笔线稿 + `COMING SOON`，无边框、无链接。
 - [C006](docs/devel/change/C006.json)：页脚回到文档流，滚动到底部时贴底，页面底部留白 24px；顶栏改用纸面色到透明的渐变遮罩并移除分隔线。
 - [C007](docs/devel/change/C007.json)：主题切换时太阳/月亮图标改为 420ms 旋转 + 淡入淡出，独立于整页颜色扩散。
+- [C008](docs/devel/change/C008.json)：页脚 © 2026 Sivan 浅色为次级灰、深色为强调橘色。
 
 ### Fixed
 

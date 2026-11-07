@@ -12,7 +12,8 @@
         "C004",
         "C005",
         "C006",
-        "C007"
+        "C007",
+        "C008"
       ]
     }
   },
@@ -64,6 +65,13 @@
       "status": "in_progress",
       "branch": "main",
       "file": "docs/devel/change/C007.json",
+      "version": ""
+    },
+    "C008": {
+      "title": "页脚主题配色",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C008.json",
       "version": ""
     }
   }

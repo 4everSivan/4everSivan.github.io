@@ -609,6 +609,10 @@ main {
   text-align: center;
 }
 
+html[data-theme="dark"] .foot {
+  color: var(--accent);
+}
+
 .foot p {
   margin: 0;
 }
