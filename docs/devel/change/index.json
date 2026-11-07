@@ -10,7 +10,8 @@
         "C002",
         "C003",
         "C004",
-        "C005"
+        "C005",
+        "C006"
       ]
     }
   },
@@ -48,6 +49,13 @@
       "status": "in_progress",
       "branch": "main",
       "file": "docs/devel/change/C005.json",
+      "version": ""
+    },
+    "C006": {
+      "title": "页脚固定到底部并控制底部间距",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C006.json",
       "version": ""
     }
   }

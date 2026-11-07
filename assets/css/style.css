@@ -102,7 +102,7 @@ body {
   width: 100%;
   max-width: var(--measure);
   margin-inline: auto;
-  padding: 0 20px 64px;
+  padding: 0 20px 96px;
 }
 
 /* 字符画底图: 固定在视口居中, 始终位于内容之后. */
@@ -565,15 +565,27 @@ main {
    -------------------------------------------------------------------------- */
 
 .foot {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 10;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: center;
   gap: 10px 20px;
-  margin-top: 112px;
+  margin: 0;
+  padding: 18px 20px calc(24px + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to top,
+    var(--paper) 0,
+    var(--paper) 72%,
+    rgba(var(--paper-rgb), 0) 100%
+  );
   color: var(--ink-faint);
   font-size: 0.8125rem;
   text-align: center;
+  pointer-events: none;
 }
 
 .foot p {
@@ -663,6 +675,13 @@ main {
   .page {
     display: block;
     min-height: 0;
+  }
+
+  .foot {
+    position: static;
+    margin: 0;
+    padding: 12px 0 0;
+    background: none;
   }
 
   .masthead {
