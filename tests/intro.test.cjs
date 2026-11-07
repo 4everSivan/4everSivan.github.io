@@ -160,26 +160,24 @@ const READ = `
 
     const early = await evaluate(client, READ);
     check(
-      '存在 5 段入场动画',
-      early.animations.length === 5,
+      '存在 4 段入场动画',
+      early.animations.length === 4,
       early.animations.map((item) => `${item.target}:${item.delay}`).join(', ')
     );
     const delays = early.animations.map((item) => item.delay);
     check(
       '延迟从上到下递增',
-      JSON.stringify(delays) === JSON.stringify([0, 80, 160, 240, 320]),
+      JSON.stringify(delays) === JSON.stringify([80, 160, 240, 320]),
       JSON.stringify(delays)
     );
     check(
       'reduced-motion 下仍保留入场',
-      early.reduced === true && early.animations.length === 5,
+      early.reduced === true && early.animations.length === 4,
       `reduced=${early.reduced}`
     );
     check(
-      '早期帧仍在淡入',
-      early.opacities.foot === '0' &&
-        Number(early.opacities.masthead) >= 0 &&
-        Number(early.opacities.masthead) <= 1,
+      '顶栏不参与动画',
+      early.opacities.masthead === '1' && early.opacities.foot === '0',
       JSON.stringify(early.opacities)
     );
 

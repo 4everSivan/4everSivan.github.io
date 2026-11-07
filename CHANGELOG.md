@@ -20,7 +20,7 @@
 - [C009](docs/devel/change/C009.json)：项目卡与技能卡改为图标与标题同行、描述横跨下方；窄屏单列、宽屏双列。
 - [C010](docs/devel/change/C010.json)：点击顶栏字标改为 460ms 缓动滚回顶部，reduced-motion 下也不再瞬时跳转。
 - [C011](docs/devel/change/C011.json)：引文默认折叠，页面从 PROJECTS 开始；点击字标切换展开/收起，展开时滑回顶部，收起时回到 PROJECTS。
-- [C012](docs/devel/change/C012.json)：页面打开时顶栏、PROJECTS、SKILLS、BLOGS、页脚从上到下依次淡入上移，间隔 80ms；不随 reduced-motion 关闭。
+- [C012](docs/devel/change/C012.json)：页面打开时 PROJECTS、SKILLS、BLOGS、页脚从上到下依次淡入上移，间隔 80ms；顶栏不参与；不随 reduced-motion 关闭。
 
 ### Fixed
 

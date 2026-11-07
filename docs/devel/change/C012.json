@@ -34,7 +34,7 @@
     {
       "scope": "入场节奏",
       "before": "main 使用 IntersectionObserver 整体 reveal，所有区块同时淡入",
-      "after": "顶栏、PROJECTS、SKILLS、BLOGS、页脚分别使用 intro 动画，延迟 0/80/160/240/320ms，单段 600ms，从上到下依次淡入并上移 12px",
+      "after": "PROJECTS、SKILLS、BLOGS、页脚分别使用 intro 动画，延迟 80/160/240/320ms，单段 600ms，从上到下依次淡入并上移 12px；顶栏不参与动画",
       "impact": "页面首次加载"
     },
     {
@@ -55,22 +55,22 @@
   },
   "verification": {
     "result": true,
-    "run_id": "local-20261107-14",
+    "run_id": "local-20261107-15",
     "user_quote": "",
     "signoff": "",
     "checks": [
       {
         "item": "入场节奏",
-        "true_if": "页面加载后存在 5 段 intro 动画，延迟依次为 0/80/160/240/320ms，目标为顶栏与四个区块/页脚",
+        "true_if": "页面加载后存在 4 段 intro 动画，延迟依次为 80/160/240/320ms，目标为 PROJECTS、SKILLS、BLOGS、页脚；顶栏无动画",
         "false_if": "动画缺失、延迟不递增或区块未覆盖",
-        "evidence": "node tests/intro.test.cjs：5 段 intro 动画，延迟 [0,80,160,240,320]，目标 masthead/projects/skills/blogs/foot。",
+        "evidence": "node tests/intro.test.cjs：4 段 intro 动画，延迟 [80,160,240,320]，目标 projects/skills/blogs/foot；顶栏 opacity=1 且无 intro 动画。",
         "result": true
       },
       {
         "item": "结束状态",
-        "true_if": "入场结束后顶栏、PROJECTS、SKILLS、BLOGS、页脚计算 opacity 均为 1；reduced-motion 下动画仍存在",
+        "true_if": "入场结束后四个区块与顶栏计算 opacity 均为 1；reduced-motion 下动画仍存在",
         "false_if": "有元素保持透明、动画被 reduced-motion 关闭",
-        "evidence": "1100ms 后五者 opacity 均为 1；reduced-motion=true 时动画仍存在。",
+        "evidence": "1100ms 后五者 opacity 均为 1；reduced-motion=true 时 4 段动画仍存在。",
         "result": true
       },
       {
@@ -86,7 +86,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "0163bba0c4b1e8e31a7923ac67fc7614ba132432",
     "tag": ""
   },
   "gate": {

@@ -650,16 +650,11 @@ html[data-theme="dark"] .foot {
    入场：顶栏与各区块从上到下依次淡入
    -------------------------------------------------------------------------- */
 
-.masthead,
 .projects,
 .skills,
 .blogs,
 .foot {
   animation: intro 600ms cubic-bezier(0.32, 0.72, 0, 1) both;
-}
-
-.masthead {
-  animation-delay: 0ms;
 }
 
 .projects {
@@ -760,7 +755,6 @@ html[data-theme="dark"] .foot {
     display: none;
   }
 
-  .masthead,
   .projects,
   .skills,
   .blogs,
