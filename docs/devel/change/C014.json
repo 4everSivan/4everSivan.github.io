@@ -4,7 +4,7 @@
   "title": "主题切换改为自上而下渐变揭示",
   "version": "",
   "type": "Enhancement",
-  "status": "verified",
+  "status": "closed",
   "branch": "fix/C014-theme-reveal-up",
   "is_hotfix": false,
   "target": {
@@ -90,9 +90,9 @@
   },
   "rejections": [],
   "sync": {
-    "design_pinned": false,
-    "changelog": false,
-    "commit": "",
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "cdb9ab7cfa5351f58cece6b0dd03e5e929b27c1b",
     "tag": ""
   },
   "gate": {
@@ -100,8 +100,8 @@
     "version": "1.7.0",
     "ran_at": "2026-11-07",
     "exit_code": 0,
-    "from_status": "in_progress",
-    "target_status": "verified",
+    "from_status": "verified",
+    "target_status": "closed",
     "signed_quote": "确认，然后合并到主分支，并清理掉所有分支包括之前的归档分支",
     "signed_rejection_count": 0
   }

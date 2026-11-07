@@ -117,7 +117,7 @@
     },
     "C014": {
       "title": "主题切换改为自上而下渐变揭示",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C014-theme-reveal-up",
       "file": "docs/devel/change/C014.json",
       "version": ""
