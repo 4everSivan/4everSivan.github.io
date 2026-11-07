@@ -1,7 +1,7 @@
 {
   "$schema": "https://ad-flow.org/schemas/change-index.v1.json",
   "version": "1.0",
-  "updated_at": "2026-11-06",
+  "updated_at": "2026-11-07",
   "topics": {
     "BlogHome": {
       "design_doc": "docs/devel/design/01-博客首页.md",
@@ -18,7 +18,8 @@
         "C010",
         "C011",
         "C012",
-        "C013"
+        "C013",
+        "C014"
       ]
     }
   },
@@ -112,6 +113,13 @@
       "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C013.json",
+      "version": ""
+    },
+    "C014": {
+      "title": "主题切换改为自上而下渐变揭示",
+      "status": "verified",
+      "branch": "fix/C014-theme-reveal-up",
+      "file": "docs/devel/change/C014.json",
       "version": ""
     }
   }

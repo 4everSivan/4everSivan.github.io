@@ -1,0 +1,108 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C014",
+  "title": "主题切换改为自上而下渐变揭示",
+  "version": "",
+  "type": "Enhancement",
+  "status": "verified",
+  "branch": "fix/C014-theme-reveal-up",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "主题切换",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "用户要求主题切换动画不再以顶栏按钮为圆心向外扩散，改为从视口顶部向下以渐变羽化边界揭起新配色：圆形扩散把视觉焦点拉到顶栏，与页面自上而下的阅读顺序相反；纵向揭示顺着版面方向落下来，边界是渐变而非硬边。",
+  "precheck": {
+    "description": "确认主题切换仍为圆形 clip-path 扩散，纵向渐变揭示尚未实现。",
+    "command": "grep -c 'circle(' assets/css/style.css || true",
+    "expected": "开工前为 2（theme-reveal 关键帧起止各一处圆形 clip-path）",
+    "is_completed": false,
+    "evidence": "开工前 grep 返回 2：assets/css/style.css:416 与 :420 的 theme-reveal 关键帧使用 clip-path: circle(...)，圆心取自 --theme-x/--theme-y。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C014-theme-reveal-up"
+    ],
+    "after": [
+      "node tests/theme.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "主题切换动画",
+      "before": "点击后以主题按钮中心为圆心，用 clip-path: circle() 从半径 0 扩散到覆盖视口最远角，600ms 揭示新主题",
+      "after": "点击后新主题从视口顶部整幅向下揭起：用纵向渐变蒙版（linear-gradient，不透明侧在上）让羽化边界向下推进，600ms 覆盖整页配色；缓动由前重的 cubic-bezier(0.32, 0.72, 0, 1) 改为 ease-in-out 的 cubic-bezier(0.4, 0, 0.2, 1)",
+      "impact": "主题切换观感；View Transitions 中间帧结构"
+    },
+    {
+      "scope": "切换参数注入",
+      "before": "点击时计算按钮中心坐标与覆盖视口最远角的半径，写入 --theme-x / --theme-y / --theme-r 供关键帧使用",
+      "after": "删除坐标与半径计算，关键帧只推进蒙版位置，不再依赖按钮几何",
+      "impact": "assets/js/main.js 主题切换分支"
+    },
+    {
+      "scope": "降级与图标",
+      "before": "不支持 View Transitions 时瞬时切换；太阳/月亮图标 420ms 旋转淡入淡出",
+      "after": "降级路径与图标动画保持不变；蒙版不生效的旧浏览器等同瞬时切换，不出现半页残影",
+      "impact": "旧浏览器与主题按钮图标"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "点击后以按钮中心为圆心，用 View Transitions API 的圆形 clip-path 扩散 600ms 揭示新主题。",
+      "after": "点击后从视口顶部整幅向下揭起新主题，边界为纵向渐变羽化带（约 14vh），600ms ease-in-out 完成；不再以按钮为圆心扩散。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-20",
+    "user_quote": "确认，然后合并到主分支，并清理掉所有分支包括之前的归档分支",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "揭示方向与羽化",
+        "true_if": "新主题由视口顶部向下推进，边界为纵向渐变；关键帧中不再出现 circle()，且蒙版位置在 600ms 内由上推至下",
+        "false_if": "仍为圆形扩散、边界为硬边或方向为自下而上",
+        "evidence": "tests/theme.test.cjs 断言 ::view-transition-new(root) 的蒙版为纵向 linear-gradient（不透明色标在前）、mask-size 100% 240%、theme-reveal 关键帧只推进 mask-position 96% → 14.3% 且无 circle()；冻结帧实拍 t=0 全浅色、t=240 深色已压过约 6 成且边界为暖色渐变带、t=480 全深色无浅色残留。",
+        "result": true
+      },
+      {
+        "item": "降级与图标",
+        "true_if": "不支持 View Transitions 时仍瞬时切换主题；太阳/月亮图标 420ms 旋转淡入淡出不受影响",
+        "false_if": "无 API 时点击无反应，或图标错位/不切换",
+        "evidence": "置 document.startViewTransition = undefined 后点击仍切到浅色（PASS）；太阳/月亮 icon-in、icon-out 420ms 用例 PASS，深浅色图标透明度正确。",
+        "result": true
+      },
+      {
+        "item": "回归与门禁",
+        "true_if": "node tests/theme.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "tests/ 下 11 个测试文件全部 EXIT=0（theme 19/19，其余 4–17 项）；scripts/adflow-verify Exit 0，0 error / 0 warning / 0 advisory。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": false,
+    "changelog": false,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "2026-11-07",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "verified",
+    "signed_quote": "确认，然后合并到主分支，并清理掉所有分支包括之前的归档分支",
+    "signed_rejection_count": 0
+  }
+}

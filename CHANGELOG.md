@@ -22,6 +22,7 @@
 - [C011](docs/devel/change/C011.json)：引文默认折叠，页面从 PROJECTS 开始；点击字标切换展开/收起，展开时滑回顶部，收起时回到 PROJECTS。
 - [C012](docs/devel/change/C012.json)：页面打开时 PROJECTS、SKILLS、BLOGS、页脚从上到下依次淡入上移，间隔 80ms；顶栏不参与；不随 reduced-motion 关闭。
 - [C013](docs/devel/change/C013.json)：顶栏主题按钮左侧新增搜索：默认 28px 放大镜，点击展开 180×28 纸面填充搜索栏，输入文字使用主题衬线字体与墨色；快捷键可切换展开/收起，收起后释放焦点；收起态图标与主题按钮间距与主题/GitHub 一致；窄屏收窄不溢出。
+- [C014](docs/devel/change/C014.json)：主题切换改为自上而下渐变揭示：新主题以纵向渐变蒙版从视口顶部向下覆盖整页，羽化带约 14vh、600ms ease-in-out；不再以主题按钮为圆心圆形扩散，也不再向页面注入圆心与半径变量。
 
 ### Fixed
 
