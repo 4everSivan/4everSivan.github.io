@@ -8,7 +8,8 @@
       "changes": [
         "C001",
         "C002",
-        "C003"
+        "C003",
+        "C004"
       ]
     }
   },
@@ -32,6 +33,13 @@
       "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C003.json",
+      "version": ""
+    },
+    "C004": {
+      "title": "隐藏页面滚动栏",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C004.json",
       "version": ""
     }
   }

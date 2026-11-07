@@ -1,0 +1,92 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C004",
+  "title": "隐藏页面滚动栏",
+  "version": "",
+  "type": "Enhancement",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "全局滚动样式",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "页面内容高度约 1134px，超过常见视口高度，浏览器右侧会常驻滚动栏；用户要求隐藏滚动栏以保持版面完整，同时必须保留滚轮、触控板与键盘滚动能力。",
+  "precheck": {
+    "description": "检查是否已隐藏滚动栏。",
+    "command": "grep -c \"scrollbar-width\" assets/css/style.css || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 CSS 无 scrollbar-width；实现后 grep 返回 1。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/scroll.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "滚动样式",
+      "before": "html 使用浏览器默认滚动栏，页面高度超过视口时右侧常驻",
+      "after": "html 设置 scrollbar-width: none，并用 ::-webkit-scrollbar 隐藏滚动栏；页面仍可滚动",
+      "impact": "全站滚动栏与版面宽度"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "页面使用浏览器原生滚动栏。",
+      "after": "隐藏滚动栏的视觉呈现，但保留滚轮、触控板与键盘滚动。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-03",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "滚动栏隐藏",
+        "true_if": "html 计算 scrollbar-width 为 none，且样式表含 html::-webkit-scrollbar { display: none }",
+        "false_if": "仍显示滚动栏或规则缺失",
+        "evidence": "node tests/scroll.test.cjs：scrollbar-width=none，html::-webkit-scrollbar { display: none } 规则存在。",
+        "result": true
+      },
+      {
+        "item": "滚动能力保留",
+        "true_if": "scrollHeight 大于 clientHeight，scrollTo 后 scrollY 变化，无横向滚动",
+        "false_if": "页面无法滚动或出现横向滚动",
+        "evidence": "scrollHeight=1134 > clientHeight=900；scrollTo(0, 200) 后 scrollY=200；scrollWidth=1440 = clientWidth。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/scroll.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "node tests/scroll.test.cjs 4/4 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}
