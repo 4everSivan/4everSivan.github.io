@@ -7,7 +7,8 @@
       "design_doc": "docs/devel/design/01-博客首页.md",
       "changes": [
         "C001",
-        "C002"
+        "C002",
+        "C003"
       ]
     }
   },
@@ -24,6 +25,13 @@
       "status": "in_progress",
       "branch": "main",
       "file": "docs/devel/change/C002.json",
+      "version": ""
+    },
+    "C003": {
+      "title": "浅色字标配色与主题扩散切换动画",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C003.json",
       "version": ""
     }
   }

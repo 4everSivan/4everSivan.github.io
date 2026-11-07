@@ -1,0 +1,104 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C003",
+  "title": "浅色字标配色与主题扩散切换动画",
+  "version": "",
+  "type": "Enhancement",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "顶栏字标与主题切换",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "浅色主题下字标 S 目前使用强调橘红、其余字符为墨色；用户要求 S 改为黑色、ivan. 改为主题按钮未选中时的灰色。主题切换目前瞬时完成，用户要求点击按钮后以按钮为圆心扩散更新整个主题颜色。",
+  "precheck": {
+    "description": "检查主题切换是否已实现扩散动画。",
+    "command": "grep -c \"startViewTransition\" assets/js/main.js || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 main.js 无 startViewTransition；实现后 grep 返回 2（typeof 检查与调用）。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/theme.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "字标配色",
+      "before": "浅色模式 S 为 var(--accent) 橘红、其余为 var(--ink) 墨色",
+      "after": "浅色模式 S 为 var(--ink) 墨黑、ivan. 为 var(--ink-faint) 灰色（与主题按钮未选中色一致）；深色模式保持 S 为 var(--accent)、其余为 var(--ink)",
+      "impact": "顶栏字标在浅色与深色主题下的观感"
+    },
+    {
+      "scope": "主题切换动画",
+      "before": "点击按钮立即切换 data-theme，无过渡",
+      "after": "点击后以按钮中心为圆心，用 View Transitions API 的 clip-path 圆形扩散 600ms 揭示新主题",
+      "impact": "浅色/深色主题切换"
+    },
+    {
+      "scope": "降级",
+      "before": "无",
+      "after": "不支持 View Transitions 的浏览器直接切换主题，不依赖外部库",
+      "impact": "旧浏览器与不支持该 API 的环境"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "字标仅首字母 S 使用站点橘色，其余字符为墨色；主题切换瞬时完成，无过渡。",
+      "after": "浅色模式 S 为墨色、其余为次级灰；深色模式 S 为强调橘色、其余为墨色。主题切换以按钮中心为圆心，用 600ms 圆形扩散揭示新主题；不支持 View Transitions 时瞬时切换。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-02",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "字标配色",
+        "true_if": "浅色模式 S 计算色等于 var(--ink)、ivan. 等于主题按钮未选中色；深色模式 S 等于 var(--accent)、其余等于 var(--ink)",
+        "false_if": "浅色模式 S 仍为橘色、ivan. 与主题按钮颜色不一致，或深色模式被误改",
+        "evidence": "node tests/theme.test.cjs：浅色 S=rgb(33, 26, 21)、ivan.=rgb(111, 96, 84)（与主题按钮一致）；深色 S=rgb(217, 133, 95)、ivan.=rgb(236, 228, 216)。",
+        "result": true
+      },
+      {
+        "item": "扩散动画",
+        "true_if": "点击主题按钮会调用 startViewTransition，--theme-x/y/r 以按钮中心计算，CSS 含 theme-reveal 圆形 clip-path 关键帧",
+        "false_if": "仍为瞬时切换、扩散圆心不在按钮上，或缺少 clip-path 关键帧",
+        "evidence": "点击时调用 startViewTransition，--theme-x/y=(943, 25.59) 等于按钮中心，--theme-r=1286 覆盖视口最远角；CSS 含 theme-reveal 关键帧与 ::view-transition-new(root) 规则。",
+        "result": true
+      },
+      {
+        "item": "降级与门禁",
+        "true_if": "无 startViewTransition 时仍能切换主题；node tests/theme.test.cjs 全部通过；scripts/adflow-verify 返回 Exit 0",
+        "false_if": "不支持时主题无法切换，或存在测试失败/门禁非 0",
+        "evidence": "无 startViewTransition 时仍能切换主题；node tests/theme.test.cjs 12/12 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

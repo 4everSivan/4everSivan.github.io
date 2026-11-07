@@ -44,7 +44,27 @@
     }
 
     themeToggle.addEventListener('click', () => {
-      applyTheme(currentTheme() === 'dark' ? 'light' : 'dark', true);
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      if (typeof document.startViewTransition !== 'function') {
+        applyTheme(next, true);
+        return;
+      }
+      // 以按钮中心为圆心, 半径覆盖到视口最远角.
+      const rect = themeToggle.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const radius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+      root.style.setProperty('--theme-x', `${x}px`);
+      root.style.setProperty('--theme-y', `${y}px`);
+      root.style.setProperty('--theme-r', `${radius}px`);
+      try {
+        document.startViewTransition(() => applyTheme(next, true));
+      } catch (error) {
+        applyTheme(next, true);
+      }
     });
 
     applyTheme(currentTheme(), false);

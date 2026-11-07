@@ -11,6 +11,7 @@
 ### Changed
 
 - [T01](docs/devel/task/T01.json)：仓库改为参考 egoist.dev 的无构建个人主页：宋体与 Times New Roman 混排、杏色/暖黑双主题、36rem 单栏、双列项目卡片与 SKILLS 技能区；新增 GitHub Actions 静态 Pages 部署 workflow。
+- [C003](docs/devel/change/C003.json)：浅色模式字标 S 改为墨色、`ivan.` 改为次级灰；主题切换新增以按钮为圆心的 600ms 圆形扩散，不支持 View Transitions 时瞬时切换。
 
 ### Fixed
 
