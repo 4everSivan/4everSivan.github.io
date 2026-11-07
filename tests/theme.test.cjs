@@ -130,6 +130,37 @@ const READ_COLORS = `
         rule.selectorText &&
         rule.selectorText.includes('::view-transition-new(root)')
     ),
+    revealRule: (() => {
+      // 同一条选择器在样式表里出现两次, 带蒙版的才是揭示规则.
+      const rule = sheetRules
+        .filter(
+          (item) =>
+            item.selectorText &&
+            item.selectorText.includes('::view-transition-new(root)')
+        )
+        .find(
+          (item) =>
+            item.style.getPropertyValue('mask-image') ||
+            item.style.getPropertyValue('-webkit-mask-image')
+        );
+      if (!rule) {
+        return null;
+      }
+      const read = (name) => rule.style.getPropertyValue(name);
+      return {
+        maskImage: read('mask-image') || read('-webkit-mask-image'),
+        maskSize: read('mask-size') || read('-webkit-mask-size'),
+        maskPosition: read('mask-position') || read('-webkit-mask-position'),
+        clipPath: read('clip-path'),
+      };
+    })(),
+    revealKeyframeText: (() => {
+      const rule = sheetRules.find(
+        (item) =>
+          item.type === CSSRule.KEYFRAMES_RULE && item.name === 'theme-reveal'
+      );
+      return rule ? rule.cssText : '';
+    })(),
     hasIconViewTransitionRule: sheetRules.some(
       (rule) =>
         rule.selectorText &&
@@ -140,34 +171,48 @@ const READ_COLORS = `
 `;
 
 const PROBE_TRANSITION = `
-(() => {
+(async () => {
+  const root = document.documentElement;
   const button = document.querySelector('.theme-toggle');
-  const rect = button.getBoundingClientRect();
-  window.__vt = null;
-  document.startViewTransition = (callback) => {
-    const root = document.documentElement;
-    const style = getComputedStyle(root);
-    const record = {
-      before: root.getAttribute('data-theme'),
-      x: parseFloat(style.getPropertyValue('--theme-x')),
-      y: parseFloat(style.getPropertyValue('--theme-y')),
-      radius: parseFloat(style.getPropertyValue('--theme-r')),
-      buttonX: rect.left + rect.width / 2,
-      buttonY: rect.top + rect.height / 2,
-      innerWidth: window.innerWidth,
-      innerHeight: window.innerHeight,
-    };
-    callback();
-    record.after = root.getAttribute('data-theme');
-    window.__vt = record;
-    return {
-      finished: Promise.resolve(),
-      ready: Promise.resolve(),
-      updateCallbackDone: Promise.resolve(),
-    };
-  };
+  const before = root.getAttribute('data-theme');
   button.click();
-  return window.__vt;
+  // View Transition 的伪元素在下一帧才建好, 等一拍再取动画.
+  await new Promise((resolve) => setTimeout(resolve, 120));
+  const animations = document
+    .getAnimations()
+    .filter((animation) => animation.effect && animation.effect.pseudoElement);
+  const record = {
+    before,
+    after: root.getAttribute('data-theme'),
+    pseudoAnimations: animations.map(
+      (animation) =>
+        animation.animationName + '@' + animation.effect.pseudoElement
+    ),
+    reveal: null,
+  };
+  const reveal = animations.find(
+    (animation) =>
+      animation.animationName === 'theme-reveal' &&
+      animation.effect.pseudoElement === '::view-transition-new(root)'
+  );
+  if (reveal) {
+    record.reveal = {
+      duration: reveal.effect.getTiming().duration,
+      positions: reveal.effect.getKeyframes().map((frame) => {
+        if (frame.maskPosition) {
+          return String(frame.maskPosition);
+        }
+        if (frame.webkitMaskPosition) {
+          return String(frame.webkitMaskPosition);
+        }
+        if (frame.webkitMaskPositionY !== undefined) {
+          return String(frame.webkitMaskPositionY);
+        }
+        return '';
+      }),
+    };
+  }
+  return record;
 })()
 `;
 
@@ -232,6 +277,32 @@ const PROBE_TRANSITION = `
     );
     check('存在图标 view-transition 规则', light.hasIconViewTransitionRule, '');
 
+    const reveal = light.revealRule;
+    const maskImage = reveal ? reveal.maskImage : '';
+    // 浏览器会把默认的 to bottom 归一化掉, 因此用色标顺序判断方向:
+    // 不透明色标在前(顶部) = 新主题从上往下覆盖.
+    const opaqueAt = maskImage.indexOf('rgb(0, 0, 0)');
+    const clearAt = maskImage.indexOf('rgba(0, 0, 0, 0)');
+    const verticalOnly =
+      maskImage.startsWith('linear-gradient(') &&
+      !/(?:to top|to left|to right|\d+deg)/.test(maskImage);
+    check(
+      '揭示蒙版为纵向渐变, 不透明侧在上',
+      Boolean(reveal && verticalOnly && opaqueAt >= 0 && clearAt > opaqueAt),
+      reveal ? maskImage : '缺少 ::view-transition-new(root) 规则'
+    );
+    check(
+      '揭示蒙版高度留出整屏余量',
+      Boolean(reveal && reveal.maskSize.includes('240%')),
+      reveal ? reveal.maskSize : ''
+    );
+    check(
+      '关键帧推进蒙版位置且无圆形扩散',
+      light.revealKeyframeText.includes('mask-position') &&
+        !light.revealKeyframeText.includes('circle('),
+      ''
+    );
+
     const vt = await evaluate(client, PROBE_TRANSITION);
     check(
       '点击调用 View Transition',
@@ -239,26 +310,26 @@ const PROBE_TRANSITION = `
       vt ? `${vt.before} -> ${vt.after}` : '未调用'
     );
     check(
-      '扩散圆心在按钮中心',
-      vt &&
-        Math.abs(vt.x - vt.buttonX) <= 0.5 &&
-        Math.abs(vt.y - vt.buttonY) <= 0.5,
-      vt ? `圆心=(${vt.x}, ${vt.y}), 按钮=(${vt.buttonX}, ${vt.buttonY})` : ''
+      '揭示动画挂在 root 新快照上且为 600ms',
+      Boolean(vt && vt.reveal && vt.reveal.duration === 600),
+      vt && vt.reveal
+        ? `duration=${vt.reveal.duration}`
+        : vt
+          ? `伪元素动画=${(vt.pseudoAnimations || []).join(', ') || '无'}`
+          : ''
     );
-    const needed = vt
-      ? Math.hypot(
-          Math.max(vt.x, vt.innerWidth - vt.x),
-          Math.max(vt.y, vt.innerHeight - vt.y)
-        )
-      : 0;
+    const positions = (vt && vt.reveal && vt.reveal.positions) || [];
+    const offsetY = (value) => parseFloat(String(value).trim().split(/\s+/).pop());
+    const yFrom = positions.length > 0 ? offsetY(positions[0]) : NaN;
+    const yTo = positions.length > 1 ? offsetY(positions[1]) : NaN;
     check(
-      '扩散半径覆盖视口最远角',
-      vt && vt.radius >= needed - 1,
-      vt ? `r=${vt.radius}, 需要=${Math.round(needed)}` : ''
+      '蒙版由上向下推进',
+      Number.isFinite(yFrom) && Number.isFinite(yTo) && yTo < yFrom,
+      positions.length ? positions.join(' -> ') : '未取到关键帧'
     );
 
-    // 等图标 420ms 过渡结束再读取最终状态.
-    await sleep(500);
+    // 等揭示 600ms 与图标 420ms 过渡结束再读取最终状态.
+    await sleep(800);
     const dark = await evaluate(client, READ_COLORS);
     check('深色主题已生效', dark.theme === 'dark', `data-theme=${dark.theme}`);
     check(

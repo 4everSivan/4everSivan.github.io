@@ -49,17 +49,7 @@
         applyTheme(next, true);
         return;
       }
-      // 以按钮中心为圆心, 半径覆盖到视口最远角.
-      const rect = themeToggle.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      const radius = Math.hypot(
-        Math.max(x, window.innerWidth - x),
-        Math.max(y, window.innerHeight - y)
-      );
-      root.style.setProperty('--theme-x', `${x}px`);
-      root.style.setProperty('--theme-y', `${y}px`);
-      root.style.setProperty('--theme-r', `${radius}px`);
+      // 揭示方向与速度由样式表里的纵向渐变蒙版决定, 这里只负责换主题.
       try {
         document.startViewTransition(() => applyTheme(next, true));
       } catch (error) {

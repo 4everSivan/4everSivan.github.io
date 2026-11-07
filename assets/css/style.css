@@ -400,7 +400,7 @@ html[data-theme="dark"] .nav .theme-toggle .icon-moon {
   transform: rotate(120deg) scale(0.5);
 }
 
-/* 主题切换: 新主题从按钮位置圆形扩散, 覆盖整页配色. */
+/* 主题切换: 新主题自视口顶部整幅向下揭起, 边界为纵向渐变羽化带. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
@@ -408,22 +408,42 @@ html[data-theme="dark"] .nav .theme-toggle .icon-moon {
 }
 
 ::view-transition-new(root) {
-  animation: theme-reveal 600ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 50%,
+    rgba(0, 0, 0, 0) 56%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 50%,
+    rgba(0, 0, 0, 0) 56%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-size: 100% 240%;
+  mask-size: 100% 240%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: theme-reveal 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* 蒙版高度为视口的 2.4 倍: 上下各留出整屏余量, 起止帧不带半屏残影.
+   96% 时羽化带整条在视口上方(起始不可见), 14.3% 时前沿正好推过视口底边. */
 @keyframes theme-reveal {
   from {
-    clip-path: circle(0 at var(--theme-x, 50%) var(--theme-y, 50%));
+    -webkit-mask-position: 0 96%;
+    mask-position: 0 96%;
   }
 
   to {
-    clip-path: circle(
-      var(--theme-r, 150vmax) at var(--theme-x, 50%) var(--theme-y, 50%)
-    );
+    -webkit-mask-position: 0 14.3%;
+    mask-position: 0 14.3%;
   }
 }
 
-/* 主题按钮图标: 太阳/月亮旋转 + 淡入淡出, 独立于整页扩散. */
+/* 主题按钮图标: 太阳/月亮旋转 + 淡入淡出, 独立于整页揭示. */
 ::view-transition-old(theme-toggle),
 ::view-transition-new(theme-toggle) {
   animation-duration: 420ms;
