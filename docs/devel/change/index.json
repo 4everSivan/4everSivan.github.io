@@ -22,14 +22,14 @@
     },
     "C002": {
       "title": "首页左右半露字符画背景层",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C002.json",
       "version": ""
     },
     "C003": {
       "title": "浅色字标配色与主题扩散切换动画",
-      "status": "in_progress",
+      "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C003.json",
       "version": ""

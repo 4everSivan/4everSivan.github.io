@@ -4,19 +4,16 @@
   "title": "首页左右半露字符画背景层",
   "version": "",
   "type": "Enhancement",
-  "status": "in_progress",
+  "status": "closed",
   "branch": "main",
   "is_hotfix": false,
-
   "target": {
     "module": "博客首页",
     "component": "页面背景层",
     "design_doc": "docs/devel/design/01-博客首页.md",
     "design_topic": "BlogHome"
   },
-
   "why": "用户要求把提供的两幅图像转为字符画，作为页面垂直居中、分别贴在视口左右边缘只露出内侧一半的常驻底图：左侧为鸢尾花（再右移一个字符宽），右侧为带翼人像；两幅同字号、同 44 行高。浅色模式用棕色符号、深色模式用与字标 S 相同的强调橘色。底图必须始终位于内容之后，不干扰正文，不拦截点击与选择，也不进入可访问性树。",
-
   "precheck": {
     "description": "检查首页是否已存在字符画底图层。",
     "command": "grep -c \"page-art\" index.html || true",
@@ -24,7 +21,6 @@
     "is_completed": false,
     "evidence": "开工前 index.html 无 .page-art 层；实现后 grep 返回 1。"
   },
-
   "callback": {
     "before": [
       "# 按用户指示直接在 main 分支实施，不另建分支"
@@ -34,7 +30,6 @@
       "scripts/adflow-verify"
     ]
   },
-
   "changes": [
     {
       "scope": "页面结构",
@@ -67,7 +62,6 @@
       "impact": "窄屏布局"
     }
   ],
-
   "design": {
     "doc": "docs/devel/design/01-博客首页.md",
     "topic": "BlogHome",
@@ -77,12 +71,11 @@
       "after": "在上述五个区块之外新增居中的字符画底图，固定在视口中心、位于内容之后；浅色棕色、深色橙色，低对比，不拦截交互，打印隐藏。"
     }
   },
-
   "verification": {
     "result": true,
     "run_id": "local-20261107-01",
-    "user_quote": "",
-    "signoff": "",
+    "user_quote": "用“确认”签收所有卡片",
+    "signoff": "sivan (AI代签)",
     "checks": [
       {
         "item": "底图位置",
@@ -114,19 +107,21 @@
       }
     ]
   },
-
   "rejections": [],
-
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "dc7ff3d5737fa497f29763f369a7f52904440679",
     "tag": ""
   },
   "gate": {
     "tool": "adflow-verify",
     "version": "1.7.0",
-    "ran_at": "",
-    "exit_code": null
+    "ran_at": "2026-11-07",
+    "exit_code": 0,
+    "from_status": "verified",
+    "target_status": "closed",
+    "signed_quote": "用“确认”签收所有卡片",
+    "signed_rejection_count": 0
   }
 }

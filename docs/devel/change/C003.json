@@ -4,7 +4,7 @@
   "title": "浅色字标配色与主题扩散切换动画",
   "version": "",
   "type": "Enhancement",
-  "status": "in_progress",
+  "status": "closed",
   "branch": "main",
   "is_hotfix": false,
   "target": {
@@ -62,8 +62,8 @@
   "verification": {
     "result": true,
     "run_id": "local-20261107-02",
-    "user_quote": "",
-    "signoff": "",
+    "user_quote": "用“确认”签收所有卡片",
+    "signoff": "sivan (AI代签)",
     "checks": [
       {
         "item": "字标配色",
@@ -92,13 +92,17 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "03096812ab28e78eca256743c11f11d86e160f48",
     "tag": ""
   },
   "gate": {
     "tool": "adflow-verify",
     "version": "1.7.0",
-    "ran_at": "",
-    "exit_code": null
+    "ran_at": "2026-11-07",
+    "exit_code": 0,
+    "from_status": "verified",
+    "target_status": "closed",
+    "signed_quote": "用“确认”签收所有卡片",
+    "signed_rejection_count": 0
   }
 }
