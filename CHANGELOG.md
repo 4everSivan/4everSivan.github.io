@@ -21,6 +21,7 @@
 - [C010](docs/devel/change/C010.json)：点击顶栏字标改为 460ms 缓动滚回顶部，reduced-motion 下也不再瞬时跳转。
 - [C011](docs/devel/change/C011.json)：引文默认折叠，页面从 PROJECTS 开始；点击字标切换展开/收起，展开时滑回顶部，收起时回到 PROJECTS。
 - [C012](docs/devel/change/C012.json)：页面打开时 PROJECTS、SKILLS、BLOGS、页脚从上到下依次淡入上移，间隔 80ms；顶栏不参与；不随 reduced-motion 关闭。
+- [C013](docs/devel/change/C013.json)：顶栏主题按钮左侧新增搜索：默认 28px 放大镜，点击展开 180×28 纸面填充搜索栏，内置 ⌘F/Ctrl F 快捷键提示；窄屏收窄不溢出。
 
 ### Fixed
 

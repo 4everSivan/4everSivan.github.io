@@ -1,0 +1,104 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C013",
+  "title": "顶栏搜索栏",
+  "version": "",
+  "type": "Feature",
+  "status": "in_progress",
+  "branch": "main",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "顶栏搜索",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "用户确认在主题切换按钮左侧增加搜索栏：默认收缩为放大镜图标，点击展开为纸面填充搜索栏，内置 Mac/Windows 自适应快捷键提示（⌘F / Ctrl F）。",
+  "precheck": {
+    "description": "检查顶栏是否已存在搜索栏。",
+    "command": "grep -c \"search-toggle\" index.html || true",
+    "expected": "开工前为 0（尚未实现）",
+    "is_completed": false,
+    "evidence": "开工前 index.html 无 search-toggle；实现后 grep 返回 1。"
+  },
+  "callback": {
+    "before": [
+      "# 按用户指示直接在 main 分支实施，不另建分支"
+    ],
+    "after": [
+      "node tests/search.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "顶栏结构",
+      "before": "顶栏导航只有主题切换按钮与 GitHub 图标",
+      "after": "主题切换按钮左侧新增搜索控件：默认 28px 放大镜图标，点击展开 180×28 纸面填充搜索栏（8px 圆角）",
+      "impact": "顶栏导航布局"
+    },
+    {
+      "scope": "快捷键",
+      "before": "无搜索快捷键",
+      "after": "按平台显示 ⌘F / Ctrl F；⌘F / Ctrl+F 展开并聚焦输入框，Esc 收起，点击外部收起",
+      "impact": "搜索栏交互"
+    },
+    {
+      "scope": "响应式",
+      "before": "无搜索栏",
+      "after": "窄屏展开宽度收窄，320px 下不产生横向滚动",
+      "impact": "窄屏顶栏"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "顶栏导航只有主题切换按钮与 GitHub 图标。",
+      "after": "主题切换按钮左侧新增搜索控件：默认收缩为放大镜，展开为纸面填充搜索栏，内置平台自适应快捷键提示；⌘F/Ctrl+F 展开并聚焦。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261107-16",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "展开与收起",
+        "true_if": "默认 28px 放大镜、输入框 tabindex=-1；点击后展开 180×28、输入框聚焦；Esc 收起",
+        "false_if": "默认展开、点击不展开、焦点未进入输入框或 Esc 无效",
+        "evidence": "node tests/search.test.cjs：默认 28×28、输入 tabindex=-1；点击展开 180×28、输入聚焦；Esc 收起并聚焦放大镜。",
+        "result": true
+      },
+      {
+        "item": "快捷键与响应式",
+        "true_if": "快捷键按平台显示 ⌘F / Ctrl F；⌘F/Ctrl+F 展开并聚焦；390px 与 320px 展开后无横向滚动",
+        "false_if": "快捷键文案错误、快捷键无效或窄屏溢出",
+        "evidence": "MacIntel -> ⌘ F；⌘F 展开并聚焦；390px 宽 150、320px 宽 144，均无横向滚动。",
+        "result": true
+      },
+      {
+        "item": "结构与门禁",
+        "true_if": "node tests/search.test.cjs 全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "测试失败或门禁非 0",
+        "evidence": "node tests/search.test.cjs 13/13 通过；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

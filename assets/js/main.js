@@ -82,6 +82,62 @@
     });
   }
 
+  // 顶栏搜索: 默认放大镜, 点击展开; 快捷键按平台显示.
+  const search = document.querySelector('[data-search]');
+  if (search) {
+    const searchToggle = search.querySelector('.search-toggle');
+    const searchContent = search.querySelector('.search-content');
+    const searchInput = search.querySelector('.search-input');
+    const searchKey = search.querySelector('[data-search-key]');
+    const isMac =
+      /Mac|iPhone|iPad|iPod/i.test(navigator.platform || '') ||
+      (navigator.userAgentData &&
+        navigator.userAgentData.platform === 'macOS');
+    if (searchKey) {
+      searchKey.textContent = isMac ? '⌘ F' : 'Ctrl F';
+    }
+
+    function setSearch(open, focus) {
+      search.classList.toggle('is-open', open);
+      searchToggle.setAttribute('aria-expanded', String(open));
+      searchContent.setAttribute('aria-hidden', String(!open));
+      searchInput.tabIndex = open ? 0 : -1;
+      if (open && focus) {
+        searchInput.focus();
+      }
+    }
+
+    searchToggle.addEventListener('click', () => {
+      setSearch(!search.classList.contains('is-open'), true);
+    });
+
+    search.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        setSearch(false, false);
+        searchToggle.focus();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key.toLowerCase() === 'f'
+      ) {
+        event.preventDefault();
+        setSearch(true, true);
+      }
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+      if (
+        search.classList.contains('is-open') &&
+        !search.contains(event.target)
+      ) {
+        setSearch(false, false);
+      }
+    });
+  }
+
   // 引文默认折叠: 页面从 PROJECTS 开始, 点击字标后展开.
   const versePanel = document.querySelector('[data-verse-panel]');
   if (versePanel) {

@@ -17,7 +17,8 @@
         "C009",
         "C010",
         "C011",
-        "C012"
+        "C012",
+        "C013"
       ]
     }
   },
@@ -104,6 +105,13 @@
       "status": "closed",
       "branch": "main",
       "file": "docs/devel/change/C012.json",
+      "version": ""
+    },
+    "C013": {
+      "title": "顶栏搜索栏",
+      "status": "in_progress",
+      "branch": "main",
+      "file": "docs/devel/change/C013.json",
       "version": ""
     }
   }

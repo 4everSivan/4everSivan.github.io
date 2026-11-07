@@ -33,7 +33,7 @@
   <title>Sivan</title>
   <meta name="description" content="Sivan 的个人主页。">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=20261107r">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261107s">
   <script>
     document.documentElement.classList.add('js');
     // 若增强脚本未在 2 秒内接管，撤销隐藏态，保证内容始终可见。
@@ -139,6 +139,19 @@
     <div class="masthead-inner">
       <h1 class="wordmark"><a href="#top" aria-label="Sivan 首页"><span class="wordmark-initial">S</span>ivan.</a></h1>
       <nav class="nav" aria-label="主导航">
+        <div class="search" role="search" data-search>
+          <button class="search-toggle" type="button" aria-label="搜索" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.3-4.3"/>
+            </svg>
+          </button>
+          <span class="search-content" aria-hidden="true">
+            <span class="search-key" data-search-key>⌘ F</span>
+            <span class="search-divider" aria-hidden="true"></span>
+            <input class="search-input" type="search" placeholder="Search…" aria-label="搜索" tabindex="-1">
+          </span>
+        </div>
         <button class="theme-toggle" type="button" aria-label="切换到深色模式" title="切换到深色模式">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -362,6 +375,6 @@
     </footer>
   </div>
 
-  <script src="assets/js/main.js?v=20261107r" defer></script>
+  <script src="assets/js/main.js?v=20261107s" defer></script>
 </body>
 </html>
