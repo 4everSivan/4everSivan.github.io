@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="270" viewBox="0 0 880 270" role="img" aria-label="同一组数据在欠拟合、恰当拟合与过拟合下的曲线">
+  <rect width="880" height="270" fill="#fcf1e2"/>
+  <g font-family="Times New Roman, Songti SC, STSong, SimSun, serif">
+  <g transform="translate(40,0)">
+    <text x="115" y="34" text-anchor="middle" font-size="14" font-weight="700" letter-spacing="2" fill="#211a15">欠拟合</text>
+    <path d="M 20,52 L 20,222 L 210,222" fill="none" stroke="#211a15" stroke-opacity="0.3" stroke-width="1.2"/>
+    <path d="M 24,106 L 206,100" fill="none" stroke="#9b3a24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="30" cy="126" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="55" cy="86" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="80" cy="70" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="105" cy="63" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="130" cy="70" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="155" cy="92" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="180" cy="124" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="200" cy="146" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+    <text x="115" y="246" text-anchor="middle" font-size="12" fill="#6f6054">高偏差 · 连趋势都没抓住</text>
+  </g>
+  <g transform="translate(335,0)">
+    <text x="115" y="34" text-anchor="middle" font-size="14" font-weight="700" letter-spacing="2" fill="#211a15">恰到好处</text>
+    <path d="M 20,52 L 20,222 L 210,222" fill="none" stroke="#211a15" stroke-opacity="0.3" stroke-width="1.2"/>
+    <path d="M 24,140 C 48,100 72,72 100,63 C 128,55 146,63 165,86 C 183,108 196,128 206,150" fill="none" stroke="#9b3a24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="30" cy="126" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="55" cy="86" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="80" cy="70" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="105" cy="63" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="130" cy="70" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="155" cy="92" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="180" cy="124" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="200" cy="146" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+    <text x="115" y="246" text-anchor="middle" font-size="12" fill="#6f6054">拟合与泛化的平衡</text>
+  </g>
+  <g transform="translate(630,0)">
+    <text x="115" y="34" text-anchor="middle" font-size="14" font-weight="700" letter-spacing="2" fill="#211a15">过拟合</text>
+    <path d="M 20,52 L 20,222 L 210,222" fill="none" stroke="#211a15" stroke-opacity="0.3" stroke-width="1.2"/>
+    <path d="M 24,140 L 38,116 L 46,130 L 55,86 L 68,64 L 63,96 L 80,70 L 93,50 L 99,79 L 105,63 L 118,88 L 111,59 L 130,70 L 143,94 L 136,64 L 155,92 L 168,116 L 160,86 L 180,124 L 193,104 L 206,150" fill="none" stroke="#9b3a24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="30" cy="126" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="55" cy="86" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="80" cy="70" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="105" cy="63" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="130" cy="70" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="155" cy="92" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="180" cy="124" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+      <circle cx="200" cy="146" r="3.5" fill="#5d5045" fill-opacity="0.85"/>
+    <text x="115" y="246" text-anchor="middle" font-size="12" fill="#6f6054">高方差 · 连噪声都背下来了</text>
+  </g>
+  </g>
+</svg>
