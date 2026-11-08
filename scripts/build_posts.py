@@ -14,6 +14,7 @@
 import argparse
 import datetime
 import html
+import io
 import re
 import shutil
 import sys
@@ -34,6 +35,10 @@ MD_EXTENSIONS = ["extra", "footnotes", "codehilite"]
 MD_EXTENSION_CONFIGS = {
     "codehilite": {"guess_lang": False, "css_class": "codehilite"}
 }
+
+# 数学公式 (C015): 行内 $…$ / 整行 $$…$$ 构建期经 mathtext 渲染为内联 SVG.
+MATH_COLOR = "#211a15"  # 渲染色, 输出前改写为 currentColor 跟随主题令牌
+SENTINEL_MARK = "\ue000{}\ue001"  # 私用区字符, markdown 不会转义
 
 
 def die(errors):
@@ -78,11 +83,96 @@ def validate(meta, source, errors):
     return meta["date"]
 
 
-def render_markdown(body):
+def render_math_svg(expr, display, plt):
+    """单条公式 → 内联 SVG 字符串（fill=currentColor, pt→px，见设计 4.2 规则 14）."""
+    fig = plt.figure()
+    fig.text(0, 0, f"${expr}$", fontsize=13 if display else 11, color=MATH_COLOR)
+    buf = io.BytesIO()
+    fig.savefig(
+        buf, format="svg", bbox_inches="tight", transparent=True, pad_inches=0.02
+    )
+    plt.close(fig)
+    svg = buf.getvalue().decode("utf-8")
+    svg = re.sub(r"<\?xml[^>]*\?>|<!DOCTYPE[^>]*>", "", svg)
+    svg = re.sub(r"<!--.*?-->", "", svg, flags=re.DOTALL)
+    svg = re.sub(r"<metadata>.*?</metadata>", "", svg, flags=re.DOTALL)
+    # pt 尺寸换算 px (1pt = 4/3px), 保留 viewBox 供窄屏等比收缩
+    def px(match):
+        return f'{match.group(1)}="{float(match.group(2)) * 4 / 3:.1f}"'
+
+    svg = re.sub(r'\b(width|height)="([\d.]+)pt"', px, svg, count=2)
+    svg = svg.replace(MATH_COLOR, "currentColor")
+    cls = "md-math md-math-block" if display else "md-math"
+    return f'<span class="{cls}">{svg.strip()}</span>'
+
+
+def extract_math(body, source):
+    """提取公式渲染为 SVG, 正文以哨兵占位; 返回 (正文, {哨兵: svg html})."""
+    protected = []
+
+    def stash_code(match):
+        protected.append(match.group(0))
+        return SENTINEL_MARK.format(f"K{len(protected) - 1}")
+
+    # 代码块内的 $ 不是公式: 围栏块与行内代码先整体摘出
+    body = re.sub(r"```.*?```", stash_code, body, flags=re.DOTALL)
+    body = re.sub(r"`[^`\n]*`", stash_code, body)
+
+    pending = []
+
+    def stash_math(expr, display):
+        expr = expr.strip()
+        token = SENTINEL_MARK.format(f"M{len(pending)}")
+        pending.append((token, expr, display))
+        return token
+
+    body = re.sub(
+        r"\$\$(.+?)\$\$",
+        lambda m: stash_math(m.group(1), True),
+        body,
+        flags=re.DOTALL,
+    )
+
+    def inline(m):
+        expr = m.group(1)
+        return stash_math(expr, False) if expr.strip() else m.group(0)
+
+    body = re.sub(r"\$([^$\n]+?)\$", inline, body)
+
+    # 还原代码段, 公式哨兵留待 HTML 阶段替换
+    body = re.sub(
+        SENTINEL_MARK.format(r"K(\d+)"), lambda m: protected[int(m.group(1))], body
+    )
+    if not pending:
+        return body, {}
+
+    try:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except ImportError:
+        die([f"{source}: 文章含数学公式, 构建需安装 matplotlib"])
+
+    rendered, errors = {}, []
+    for token, expr, display in pending:
+        try:
+            rendered[token] = render_math_svg(expr, display, plt)
+        except Exception as error:  # noqa: BLE001
+            errors.append(f"{source}: 公式渲染失败: {expr[:60]}… ({error})")
+    if errors:
+        die(errors)
+    return body, rendered
+
+
+def render_markdown(body, source=""):
     """md → HTML；# / ## 都落为 h2，### 落为 h3，更深收拢到 h4。"""
+    body, math_html = extract_math(body, source)
     rendered = markdown.markdown(
         body, extensions=MD_EXTENSIONS, extension_configs=MD_EXTENSION_CONFIGS
     )
+    for token, svg in math_html.items():
+        rendered = rendered.replace(token, svg)
     rendered = re.sub(r"<h1\b", "<h2", rendered)
     rendered = re.sub(r"</h1>", "</h2>", rendered)
     rendered = re.sub(r"<h[56]\b", "<h4", rendered)
@@ -240,7 +330,7 @@ def main():
                 {
                     "slug": path.stem,
                     "meta": meta,
-                    "html": render_markdown(body),
+                    "html": render_markdown(body, path.name),
                 }
             )
     if errors:

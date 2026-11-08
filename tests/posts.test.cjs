@@ -13,7 +13,7 @@ const CHROME =
 const ROOT = path.resolve(__dirname, '..');
 const PORT = Number(process.env.POSTS_TEST_PORT || process.env.CHROME_PORT || 9244);
 const OUT_DIR = path.join(ROOT, 'local', 'site-test');
-const POST_SLUG = '2026-11-08-back-to-static';
+const POST_SLUG = '2026-11-08-machine-learning-intro';
 
 const VENV_PYTHON = path.join(ROOT, 'local', 'venv', 'bin', 'python');
 const PYTHON = fs.existsSync(VENV_PYTHON) ? VENV_PYTHON : 'python3';
@@ -229,7 +229,7 @@ function check(name, passed, detail) {
     check('列表项为摘要式网格布局', home.itemDisplay === 'grid', home.itemDisplay);
     check(
       '首项标题/链接/日期/摘要来自 frontmatter',
-      home.title === '回到静态：把个人主页迁到 GitHub Pages' &&
+      home.title === '机器学习入门：核心范式、数学直觉与可运行代码' &&
         home.href === `posts/${POST_SLUG}/` &&
         home.date === '2026-11' &&
         home.summary.length > 10,
@@ -258,7 +258,14 @@ function check(name, passed, detail) {
           time: document.querySelector('time')?.getAttribute('datetime') || '',
           bodySize: read('.md-body', 'fontSize'),
           h2Size: read('.md-body h2', 'fontSize'),
-          h3Size: read('.md-body h3', 'fontSize'),
+          // h3 排印探针: 文章可以不含 ###, 注入临时节点量 CSS 契约后移除.
+          h3Size: (() => {
+            const probe = document.createElement('h3');
+            document.querySelector('.md-body').appendChild(probe);
+            const size = getComputedStyle(probe).fontSize;
+            probe.remove();
+            return size;
+          })(),
           h1IsArticle: Boolean(document.querySelector('article h1')),
           wordmarkTag: document.querySelector('.masthead .wordmark')?.tagName || '',
           wordmarkHref: document.querySelector('.masthead .wordmark a')?.getAttribute('href') || '',
@@ -266,6 +273,13 @@ function check(name, passed, detail) {
           scriptSrc: document.querySelector('script[src*="main.js"]')?.getAttribute('src') || '',
           highlightSpans: document.querySelectorAll('.codehilite span').length,
           keywordColor: keyword ? getComputedStyle(keyword).color : '',
+          mathSvgs: document.querySelectorAll('.md-body .md-math svg').length,
+          mathBlocks: document.querySelectorAll('.md-body .md-math-block').length,
+          mathDollars: document.querySelector('.md-body').textContent.split('$').length - 1,
+          mathColor: (() => {
+            const node = document.querySelector('.md-body .md-math');
+            return node ? getComputedStyle(node).color : '';
+          })(),
           hasFootnoteRef: Boolean(document.querySelector('.footnote-ref')),
           hasBackref: Boolean(document.querySelector('.footnote-backref')),
           hasTag: /class="[^"]*tag/.test(document.documentElement.outerHTML),
@@ -278,7 +292,7 @@ function check(name, passed, detail) {
       '文章标题为唯一 h1, 字标降为链接',
       post.h1Count === 1 &&
         post.h1IsArticle &&
-        post.title === '回到静态：把个人主页迁到 GitHub Pages' &&
+        post.title === '机器学习入门：核心范式、数学直觉与可运行代码' &&
         post.wordmarkTag === 'DIV' &&
         post.wordmarkHref === '../../',
       `h1=${post.h1Count}, wordmark=${post.wordmarkTag}@${post.wordmarkHref}`
@@ -304,6 +318,16 @@ function check(name, passed, detail) {
       `spans=${post.highlightSpans}, keyword=${post.keywordColor}`
     );
     check(
+      '数学公式: 内联 SVG 齐备且无原始 $ 残留 (C015)',
+      post.mathSvgs >= 60 && post.mathBlocks === 4 && post.mathDollars === 0,
+      `svgs=${post.mathSvgs}, blocks=${post.mathBlocks}, dollars=${post.mathDollars}`
+    );
+    check(
+      '数学公式颜色跟随墨色令牌 (浅色)',
+      post.mathColor === 'rgb(33, 26, 21)',
+      post.mathColor
+    );
+    check(
       '脚注: 上标与回跳齐备',
       post.hasFootnoteRef && post.hasBackref,
       ''
@@ -318,13 +342,19 @@ function check(name, passed, detail) {
         document.querySelector('.theme-toggle').click();
         await new Promise((resolve) => setTimeout(resolve, 400));
         const bg = getComputedStyle(document.body).backgroundColor;
-        return { theme: document.documentElement.getAttribute('data-theme'), bg };
+        const mathColor = getComputedStyle(document.querySelector('.md-body .md-math')).color;
+        return { theme: document.documentElement.getAttribute('data-theme'), bg, mathColor };
       })()`
     );
     check(
       '文章页主题切换生效 (暖黑纸面)',
       toggled.theme === 'dark' && toggled.bg === 'rgb(23, 19, 15)',
       `theme=${toggled.theme}, bg=${toggled.bg}`
+    );
+    check(
+      '数学公式颜色跟随墨色令牌 (深色)',
+      toggled.mathColor === 'rgb(236, 228, 216)',
+      toggled.mathColor
     );
 
     // 窄屏无横向滚动.

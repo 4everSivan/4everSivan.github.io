@@ -1208,6 +1208,26 @@ html[data-theme="dark"] .foot {
   border-radius: 8px;
 }
 
+/* 数学公式: 构建期 mathtext 内联 SVG, 颜色跟随主题令牌 (C015) */
+.md-math {
+  color: var(--ink);
+}
+
+.md-math svg {
+  vertical-align: middle;
+}
+
+.md-math-block {
+  display: block;
+  margin: 1.4em auto 1.2em;
+  text-align: center;
+}
+
+.md-math-block svg {
+  max-width: 100%;
+  height: auto;
+}
+
 /* 脚注：正文上标强调色，文末次级墨 + 回跳 */
 .md-body .footnote-ref {
   color: var(--accent);
