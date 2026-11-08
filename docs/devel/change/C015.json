@@ -1,0 +1,108 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C015",
+  "title": "博客文章数学公式构建期渲染为内联 SVG",
+  "version": "",
+  "type": "Enhancement",
+  "status": "verified",
+  "branch": "fix/C015-math-svg",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "构建管线公式渲染",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "机器学习入门文章（2026-11-08 上线内容）包含 4 处整行公式与 67 处行内 LaTeX 公式，而 T02 交付的 md 构建管线（markdown extra/footnotes/codehilite）不含数学渲染，运行时又是零第三方依赖基线，公式在文章页以原始 $$\\frac{1}{N}…$$ 文本裸露显示，可读性差。经与用户确认，选择构建期方案：扩展 build_posts.py，用 matplotlib mathtext 在构建期把公式预渲染为内联 SVG（fill 改写为 currentColor 跟随主题令牌），不引入任何运行时依赖。",
+  "precheck": {
+    "description": "确认构建管线尚未具备公式渲染能力。",
+    "command": "grep -c 'md-math' assets/css/style.css; grep -c 'MATH' scripts/build_posts.py",
+    "expected": "开工前两者均为 0（无公式渲染样式与逻辑）",
+    "is_completed": true,
+    "evidence": "开工前 assets/css/style.css 无 md-math 样式（grep 计 0）、scripts/build_posts.py 无公式逻辑；开工后分别为 4 处与 3 处，确认本变更为新能力而非既有实现。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C015-math-svg"
+    ],
+    "after": [
+      "node tests/posts.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "公式解析与渲染（scripts/build_posts.py）",
+      "before": "markdown 正文直接交给 markdown 扩展渲染，$…$ / $$…$$ 按普通文本输出",
+      "after": "渲染前先保护围栏代码块与行内代码，再提取整行 $$…$$ 与行内 $…$ 公式，逐个经 matplotlib mathtext 渲染为 SVG；SVG 剥离 xml 声明/metadata、fill 改写为 currentColor、pt 尺寸换算为 px；行内公式包 .md-math、整行公式包 .md-math-block 居中；任何公式渲染失败即构建报错并列出公式原文，不静默降级；无公式的文章不触发 matplotlib 依赖",
+      "impact": "全部含公式文章的构建产物；不含公式的文章产物逐字节不变"
+    },
+    {
+      "scope": "样式（assets/css/style.css）",
+      "before": "无公式相关样式",
+      "after": ".md-math 颜色取 var(--ink) 使 SVG 双主题自适应，svg 垂直居中对齐正文基线；.md-math-block 居中块级展示，窄屏 max-width 100% 等比收缩",
+      "impact": "文章页正文排印；缓存版本 ?v= 同步升位"
+    },
+    {
+      "scope": "CI 依赖（.github/workflows/pages.yaml）",
+      "before": "pip install markdown pygments",
+      "after": "pip install markdown pygments matplotlib",
+      "impact": "Pages 部署工作流构建步骤"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "正文语法子集不含数学公式；构建依赖仅 python3 + markdown + pygments。",
+      "after": "正文语法子集新增行内 $…$ 与整行 $$…$$ 数学公式，构建期经 matplotlib mathtext 预渲染为内联 SVG（currentColor 适配双主题）；构建依赖增加 matplotlib（仅含公式的文章触发）；公式渲染失败为构建失败条件。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261108-1",
+    "user_quote": "验收通过，合入主干并收口",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "全量单测全绿，退出码为 0，含针对性回归测试",
+        "false_if": "存在任何测试失败、报错或未覆盖回归用例",
+        "evidence": "node tests/posts.test.cjs 21/21（新增：公式内联 SVG ≥60 且整行 4 处、正文无原始 $ 残留、浅色公式 rgb(33,26,21)、深色 rgb(236,228,216)）；tests/ 下 12 个测试文件全部 EXIT=0。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "文章页公式以内联 SVG 呈现，无原始 $…$ 文本残留；双主题下公式颜色跟随墨色令牌；窄屏无横向滚动",
+        "false_if": "出现原始 LaTeX 文本、公式缺失、颜色不随主题或窄屏溢出",
+        "evidence": "构建日志 1 篇文章；产物 .md-math 71 处（整行 4 + 行内 67）、svg 75 个、无 $$ 残留；两次构建 diff 一致（确定性）；深色主题截图人工核对：行内基线协调、整行居中完整、颜色与正文一致、无裸露 LaTeX；390px 无横向滚动。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "无公式文章构建产物不变；代码块/行内代码中的 $ 不被误解析；既有排印（标题/高亮/脚注/表格）不受影响",
+        "false_if": "破坏既有语法子集或产物漂移",
+        "evidence": "围栏代码块与行内代码先于公式解析受保护（代码内 $ 不误伤，文中 5 个代码块内容不变）；无公式文章不触发 matplotlib 导入（extract_math 早返回）；既有断言（标题/高亮/脚注/表格/主题）全部保持 PASS。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": false,
+    "changelog": false,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "2026-11-08",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "verified",
+    "signed_quote": "验收通过，合入主干并收口",
+    "signed_rejection_count": 0
+  }
+}

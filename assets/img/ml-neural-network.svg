@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="360" viewBox="0 0 880 360" role="img" aria-label="一个多层全连接神经网络示意">
+  <rect width="880" height="360" fill="#fcf1e2"/>
+  <g font-family="Times New Roman, Songti SC, STSong, SimSun, serif">
+    <text x="459" y="42" text-anchor="middle" font-size="13" fill="#5d5045">每个神经元：输出 = 激活(Σ 权重 × 输入 + 偏置)</text>
+  <g stroke="#211a15" stroke-opacity="0.13" stroke-width="1">
+    <line x1="150" y1="96" x2="356" y2="81"/>
+    <line x1="150" y1="96" x2="356" y2="135"/>
+    <line x1="150" y1="96" x2="356" y2="189"/>
+    <line x1="150" y1="96" x2="356" y2="243"/>
+    <line x1="150" y1="96" x2="356" y2="297"/>
+    <line x1="150" y1="158" x2="356" y2="81"/>
+    <line x1="150" y1="158" x2="356" y2="135"/>
+    <line x1="150" y1="158" x2="356" y2="189"/>
+    <line x1="150" y1="158" x2="356" y2="243"/>
+    <line x1="150" y1="158" x2="356" y2="297"/>
+    <line x1="150" y1="220" x2="356" y2="81"/>
+    <line x1="150" y1="220" x2="356" y2="135"/>
+    <line x1="150" y1="220" x2="356" y2="189"/>
+    <line x1="150" y1="220" x2="356" y2="243"/>
+    <line x1="150" y1="220" x2="356" y2="297"/>
+    <line x1="150" y1="282" x2="356" y2="81"/>
+    <line x1="150" y1="282" x2="356" y2="135"/>
+    <line x1="150" y1="282" x2="356" y2="189"/>
+    <line x1="150" y1="282" x2="356" y2="243"/>
+    <line x1="150" y1="282" x2="356" y2="297"/>
+    <line x1="356" y1="81" x2="562" y2="81"/>
+    <line x1="356" y1="81" x2="562" y2="135"/>
+    <line x1="356" y1="81" x2="562" y2="189"/>
+    <line x1="356" y1="81" x2="562" y2="243"/>
+    <line x1="356" y1="81" x2="562" y2="297"/>
+    <line x1="356" y1="135" x2="562" y2="81"/>
+    <line x1="356" y1="135" x2="562" y2="135"/>
+    <line x1="356" y1="135" x2="562" y2="189"/>
+    <line x1="356" y1="135" x2="562" y2="243"/>
+    <line x1="356" y1="135" x2="562" y2="297"/>
+    <line x1="356" y1="189" x2="562" y2="81"/>
+    <line x1="356" y1="189" x2="562" y2="135"/>
+    <line x1="356" y1="189" x2="562" y2="189"/>
+    <line x1="356" y1="189" x2="562" y2="243"/>
+    <line x1="356" y1="189" x2="562" y2="297"/>
+    <line x1="356" y1="243" x2="562" y2="81"/>
+    <line x1="356" y1="243" x2="562" y2="135"/>
+    <line x1="356" y1="243" x2="562" y2="189"/>
+    <line x1="356" y1="243" x2="562" y2="243"/>
+    <line x1="356" y1="243" x2="562" y2="297"/>
+    <line x1="356" y1="297" x2="562" y2="81"/>
+    <line x1="356" y1="297" x2="562" y2="135"/>
+    <line x1="356" y1="297" x2="562" y2="189"/>
+    <line x1="356" y1="297" x2="562" y2="243"/>
+    <line x1="356" y1="297" x2="562" y2="297"/>
+    <line x1="562" y1="81" x2="768" y2="135"/>
+    <line x1="562" y1="81" x2="768" y2="189"/>
+    <line x1="562" y1="81" x2="768" y2="243"/>
+    <line x1="562" y1="135" x2="768" y2="135"/>
+    <line x1="562" y1="135" x2="768" y2="189"/>
+    <line x1="562" y1="135" x2="768" y2="243"/>
+    <line x1="562" y1="189" x2="768" y2="135"/>
+    <line x1="562" y1="189" x2="768" y2="189"/>
+    <line x1="562" y1="189" x2="768" y2="243"/>
+    <line x1="562" y1="243" x2="768" y2="135"/>
+    <line x1="562" y1="243" x2="768" y2="189"/>
+    <line x1="562" y1="243" x2="768" y2="243"/>
+    <line x1="562" y1="297" x2="768" y2="135"/>
+    <line x1="562" y1="297" x2="768" y2="189"/>
+    <line x1="562" y1="297" x2="768" y2="243"/>
+  </g>
+    <line x1="150" y1="220" x2="356" y2="243" stroke="#9b3a24" stroke-opacity="0.7" stroke-width="1.6"/>
+    <line x1="356" y1="243" x2="562" y2="189" stroke="#9b3a24" stroke-opacity="0.7" stroke-width="1.6"/>
+    <line x1="562" y1="189" x2="768" y2="189" stroke="#9b3a24" stroke-opacity="0.7" stroke-width="1.6"/>
+    <circle cx="150" cy="96" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="150" cy="158" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="150" cy="220" r="13" fill="#f7e5d1" stroke="#9b3a24" stroke-width="1.6"/>
+    <circle cx="150" cy="282" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="356" cy="81" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="356" cy="135" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="356" cy="189" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="356" cy="243" r="13" fill="#f7e5d1" stroke="#9b3a24" stroke-width="1.6"/>
+    <circle cx="356" cy="297" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="562" cy="81" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="562" cy="135" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="562" cy="189" r="13" fill="#f7e5d1" stroke="#9b3a24" stroke-width="1.6"/>
+    <circle cx="562" cy="243" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="562" cy="297" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="768" cy="135" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <circle cx="768" cy="189" r="13" fill="#f7e5d1" stroke="#9b3a24" stroke-width="1.6"/>
+    <circle cx="768" cy="243" r="13" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.4" stroke-width="1.2"/>
+    <text x="150" y="334" text-anchor="middle" font-size="12.5" letter-spacing="1" fill="#6f6054">输入层</text>
+    <text x="356" y="334" text-anchor="middle" font-size="12.5" letter-spacing="1" fill="#6f6054">隐藏层 1</text>
+    <text x="562" y="334" text-anchor="middle" font-size="12.5" letter-spacing="1" fill="#6f6054">隐藏层 2</text>
+    <text x="768" y="334" text-anchor="middle" font-size="12.5" letter-spacing="1" fill="#6f6054">输出层</text>
+  </g>
+</svg>

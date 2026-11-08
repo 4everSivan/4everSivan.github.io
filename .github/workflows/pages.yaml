@@ -31,7 +31,7 @@ jobs:
         run: ./scripts/adflow-verify --json
 
       - name: Install build dependencies
-        run: python3 -m pip install --user markdown pygments
+        run: python3 -m pip install --user markdown pygments matplotlib
 
       - name: Build site
         run: python3 scripts/build_posts.py --out public

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="250" viewBox="0 0 880 250" role="img" aria-label="传统编程与机器学习的流程对比">
+  <rect width="880" height="250" fill="#fcf1e2"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#6f6054"/>
+    </marker>
+  </defs>
+  <g font-family="Times New Roman, Songti SC, STSong, SimSun, serif">
+  <text x="230" y="54" text-anchor="middle" font-size="15" font-weight="700" letter-spacing="3" fill="#211a15">传统编程</text>
+  <rect x="56" y="100" width="88" height="56" rx="6" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.32"/>
+  <text x="100" y="133" text-anchor="middle" font-size="14" fill="#211a15">数据</text>
+  <rect x="178" y="100" width="104" height="56" rx="6" fill="#f7e5d1" stroke="#9b3a24" stroke-width="1.4"/>
+  <text x="230" y="133" text-anchor="middle" font-size="14" fill="#9b3a24">规则 · 人写</text>
+  <rect x="316" y="100" width="88" height="56" rx="6" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.32"/>
+  <text x="360" y="133" text-anchor="middle" font-size="14" fill="#211a15">答案</text>
+  <text x="230" y="208" text-anchor="middle" font-size="12.5" fill="#6f6054">人把规则写成代码，程序只负责执行</text>
+  <line x1="440" y1="88" x2="440" y2="212" stroke="#211a15" stroke-opacity="0.18"/>
+  <text x="665" y="54" text-anchor="middle" font-size="15" font-weight="700" letter-spacing="3" fill="#211a15">机器学习</text>
+  <rect x="472" y="100" width="112" height="56" rx="6" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.32"/>
+  <text x="528" y="133" text-anchor="middle" font-size="14" fill="#211a15">数据 · 答案</text>
+  <rect x="616" y="100" width="104" height="56" rx="6" fill="#f7e5d1" stroke="#211a15" stroke-opacity="0.32"/>
+  <text x="668" y="133" text-anchor="middle" font-size="14" fill="#211a15">学习算法</text>
+  <rect x="750" y="100" width="108" height="56" rx="6" fill="#f7e5d1" stroke="#9b3a24" stroke-width="1.4"/>
+  <text x="804" y="133" text-anchor="middle" font-size="14" fill="#9b3a24">规则 · 学出</text>
+  <text x="665" y="208" text-anchor="middle" font-size="12.5" fill="#6f6054">机器从样本里把规则学出来</text>
+  <line x1="148" y1="128" x2="172" y2="128" stroke="#6f6054" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="286" y1="128" x2="310" y2="128" stroke="#6f6054" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="590" y1="128" x2="612" y2="128" stroke="#6f6054" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="726" y1="128" x2="748" y2="128" stroke="#6f6054" stroke-width="1.2" marker-end="url(#arr)"/>
+  </g>
+</svg>
