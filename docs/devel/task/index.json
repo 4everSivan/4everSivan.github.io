@@ -36,7 +36,7 @@
     "T02": {
       "title": "博客文章体系：Markdown 构建与首页列表",
       "milestone": "M2-博客文章",
-      "status": "in_progress",
+      "status": "completed",
       "branch": "feat/T02-blog-posts",
       "depends_on": [],
       "file": "docs/devel/task/T02.json"
