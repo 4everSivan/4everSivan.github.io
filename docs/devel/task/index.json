@@ -1,10 +1,13 @@
 {
   "$schema": "https://ad-flow.org/schemas/task-index.v1.json",
-  "phase": "Phase 1 - 个人博客首页改版",
-  "updated_at": "2026-11-06",
+  "phase": "Phase 2 - 博客文章体系",
+  "updated_at": "2026-11-08",
   "milestones": {
     "M1-博客改版": [
       "T01"
+    ],
+    "M2-博客文章": [
+      "T02"
     ]
   },
   "topics": {
@@ -12,6 +15,12 @@
       "design_doc": "docs/devel/design/01-博客首页.md",
       "tasks": [
         "T01"
+      ]
+    },
+    "BlogPosts": {
+      "design_doc": "docs/devel/design/02-博客文章.md",
+      "tasks": [
+        "T02"
       ]
     }
   },
@@ -23,6 +32,14 @@
       "branch": "feat/T01-blog-home",
       "depends_on": [],
       "file": "docs/devel/task/T01.json"
+    },
+    "T02": {
+      "title": "博客文章体系：Markdown 构建与首页列表",
+      "milestone": "M2-博客文章",
+      "status": "in_progress",
+      "branch": "feat/T02-blog-posts",
+      "depends_on": [],
+      "file": "docs/devel/task/T02.json"
     }
   }
 }

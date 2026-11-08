@@ -130,9 +130,13 @@
   }
 
   // 字标回顶: 自定义缓动, 不受 reduced-motion 的瞬时跳转影响.
+  // 仅首页锚点 (href="#top") 走回顶; 文章页字标链接回首页, 保持默认导航.
   const wordmark = document.querySelector('.wordmark a');
   if (wordmark) {
     wordmark.addEventListener('click', (event) => {
+      if (wordmark.getAttribute('href') !== '#top') {
+        return;
+      }
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return;
       }

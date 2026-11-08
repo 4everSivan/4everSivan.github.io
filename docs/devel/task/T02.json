@@ -1,0 +1,104 @@
+{
+  "$schema": "https://ad-flow.org/schemas/task-card.v1.json",
+  "id": "T02",
+  "title": "博客文章体系：Markdown 构建与首页列表",
+  "version": "",
+  "milestone": "M2-博客文章",
+  "status": "in_progress",
+  "branch": "feat/T02-blog-posts",
+  "depends_on": [],
+  "target": {
+    "module": "site",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "goal": "以 posts/*.md 为唯一真源，构建期生成文章静态页（语法高亮 + 脚注，无标签）并把 V3 摘要列表注入首页 BLOGS 区块，产物不入库、运行时零依赖。",
+  "precheck": {
+    "description": "预检文章构建是否已存在可复用实现",
+    "command": "test -f scripts/build_posts.py",
+    "expected": "开工前退出码非 0（尚无构建脚本）",
+    "is_completed": false,
+    "evidence": "开工前 scripts/build_posts.py 不存在（test 退出码 1），仓库无 posts/ 目录，BLOGS 区块为 C005 空状态。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b feat/T02-blog-posts",
+      "python3 -m venv local/venv && local/venv/bin/pip install -q markdown pygments"
+    ],
+    "after": [
+      "node tests/posts.test.cjs",
+      "node tests/blogs.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "T02-1",
+      "title": "构建脚本",
+      "capability": "scripts/build_posts.py：解析 frontmatter 契约，markdown+pygments 渲染（extra/footnotes/codehilite），从 index.html 抽取 head/masthead/page-art/foot 生成文章页，注入首页 V3 列表，复制 assets 并透传 ?v=",
+      "done": true
+    },
+    {
+      "id": "T02-2",
+      "title": "文章排印样式",
+      "capability": "style.css 新增 V3 摘要列表与文章页排印（15px 正文、h2/h3 字号字重层级、代码块双色高亮令牌映射、脚注、表格/引用/hr），双主题适配，打印可用",
+      "done": true
+    },
+    {
+      "id": "T02-3",
+      "title": "文章真源与示例",
+      "capability": "posts/ 目录 + 首篇示例文章（含高亮代码、脚注、表格、列表、引用），frontmatter 三键齐备",
+      "done": true
+    },
+    {
+      "id": "T02-4",
+      "title": "部署与本地预览",
+      "capability": "pages workflow 增加构建步（pip 安装 markdown/pygments 后 build 到 public/）；本地走 local/venv + --out local/site；字标回顶逻辑仅对 href=#top 生效",
+      "done": true
+    },
+    {
+      "id": "T02-5",
+      "title": "回归测试",
+      "capability": "tests/posts.test.cjs：源占位不被污染、列表 V3 结构与排序、文章页标题/日期/高亮 token/脚注回跳、相对路径与 ?v= 透传、双主题、390px 无横向滚动",
+      "done": true
+    }
+  ],
+  "acceptance": {
+    "result": true,
+    "run_id": "local-20261108-01",
+    "user_quote": "确认",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "构建契约",
+        "true_if": "posts/*.md 按 frontmatter（title/date/summary）生成 posts/<slug>/index.html；首页输出副本注入 V3 列表且按日期倒序；仓库 index.html 的空状态占位不被修改；缺必填键时构建报错退出",
+        "false_if": "生成页缺失、列表顺序错乱、源 index.html 被污染或非法输入静默通过",
+        "evidence": "node tests/posts.test.cjs：构建退出 0 且产物齐备（index.html/assets/posts/<slug>/index.html）；仓库源 index.html 仍含 blog-placeholder 且无 post-list--summary（源不被污染）；产物首页 ul.post-list--summary 存在、占位移除；缺 summary 的 md 使构建 exit=1 并报出文件与键名。列表项 frontmatter 三字段逐字一致（href=posts/2026-11-08-back-to-static/、date=2026-11），grid 布局、摘要两行截断。",
+        "result": true
+      },
+      {
+        "item": "文章页排印",
+        "true_if": "正文 15px；#/## 映射 h2、### 映射 h3；代码块出现 Pygments token span 且双色令牌在浅/深主题下均可读；脚注含上标与 ↩ 回跳；不出现标签；资源以 ../../ 引用且 ?v= 与首页一致",
+        "false_if": "字号/层级不符、高亮或脚注缺失、路径或缓存版本错位、出现标签",
+        "evidence": "文章页唯一 h1 为标题、字标降为 DIV 链接指 ../../；正文 15px、h2 17.5px、h3 15.5px；.codehilite 34 个 Pygments span，关键字/键名 rgb(155,58,36)=浅色强调橘（深色截图同为令牌色）；脚注上标 + ↩ 回跳齐备；全页无 tag 类元素；css/js 以 ../../assets 引用且 ?v=20261108a 与首页一致；主题点击后 dark + 纸面 rgb(23,19,15)；390px 无横向滚动。",
+        "result": true
+      },
+      {
+        "item": "回归与门禁",
+        "true_if": "node tests/posts.test.cjs 与既有 11 个测试全部通过，scripts/adflow-verify Exit 0",
+        "false_if": "任一测试失败或门禁非 0",
+        "evidence": "tests/ 下 12 个测试文件全部 EXIT=0（posts 18/18、blogs 14/14、theme 19/19，其余 4–17 项）；scripts/adflow-verify Exit 0，0 error / 0 warning / 0 advisory。构建产物截图（local/frames/posts-*.png）浅/深两主题人工核对通过。",
+        "result": true
+      }
+    ]
+  },
+  "sync": {
+    "commit": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

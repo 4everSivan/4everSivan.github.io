@@ -30,11 +30,11 @@ jobs:
       - name: Verify governance and structure
         run: ./scripts/adflow-verify --json
 
-      - name: Stage static site
-        run: |
-          mkdir -p public
-          cp index.html public/
-          cp -R assets public/
+      - name: Install build dependencies
+        run: python3 -m pip install --user markdown pygments
+
+      - name: Build site
+        run: python3 scripts/build_posts.py --out public
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
