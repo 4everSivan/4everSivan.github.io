@@ -2,7 +2,7 @@
   "$schema": "adflow-devel-index-v1",
   "project": "Sivan",
   "created": "2026-11-06",
-  "last_change": "2026-11-06",
+  "last_change": "2026-11-08",
   "status": "active",
   "description": "研发内场核心工作区总账路由，聚合现行设计基线与执行卡池",
   "subsystems": [
@@ -57,6 +57,13 @@
       "name": "博客首页",
       "path": "docs/devel/design/01-博客首页.md",
       "topic": "BlogHome",
+      "status": "baseline"
+    },
+    {
+      "id": "DESIGN-POSTS",
+      "name": "博客文章",
+      "path": "docs/devel/design/02-博客文章.md",
+      "topic": "BlogPosts",
       "status": "baseline"
     }
   ]

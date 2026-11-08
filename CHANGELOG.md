@@ -7,6 +7,7 @@
 ### Added
 
 - [C002](docs/devel/change/C002.json)：首页新增左右两侧各半露的字符画底图（左鸢尾花、右带翼人像），浅色模式棕色、深色模式与字标 S 相同的强调橘色；底图固定在视口内，不拦截交互，打印隐藏。
+- [T02](docs/devel/task/T02.json)：博客文章体系：`posts/*.md`（frontmatter：title/date/summary）为唯一真源，`scripts/build_posts.py` 构建期生成文章页（Pygments 双色语法高亮 + 脚注，无标签）并把 V3 摘要列表（标题 + 两行摘要 + Times 日期，最多 5 篇）注入首页 BLOGS；产物不入库，Actions 部署时现构建，运行时零依赖。
 
 ### Changed
 
