@@ -1,7 +1,7 @@
 {
   "$schema": "https://ad-flow.org/schemas/change-index.v1.json",
   "version": "1.0",
-  "updated_at": "2026-11-07",
+  "updated_at": "2026-11-08",
   "topics": {
     "BlogHome": {
       "design_doc": "docs/devel/design/01-博客首页.md",
@@ -20,6 +20,12 @@
         "C012",
         "C013",
         "C014"
+      ]
+    },
+    "BlogPosts": {
+      "design_doc": "docs/devel/design/02-博客文章.md",
+      "changes": [
+        "C015"
       ]
     }
   },
@@ -120,6 +126,13 @@
       "status": "closed",
       "branch": "fix/C014-theme-reveal-up",
       "file": "docs/devel/change/C014.json",
+      "version": ""
+    },
+    "C015": {
+      "title": "博客文章数学公式构建期渲染为内联 SVG",
+      "status": "in_progress",
+      "branch": "fix/C015-math-svg",
+      "file": "docs/devel/change/C015.json",
       "version": ""
     }
   }
