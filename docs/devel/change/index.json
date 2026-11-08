@@ -130,7 +130,7 @@
     },
     "C015": {
       "title": "博客文章数学公式构建期渲染为内联 SVG",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C015-math-svg",
       "file": "docs/devel/change/C015.json",
       "version": ""

@@ -8,6 +8,7 @@
 
 - [C002](docs/devel/change/C002.json)：首页新增左右两侧各半露的字符画底图（左鸢尾花、右带翼人像），浅色模式棕色、深色模式与字标 S 相同的强调橘色；底图固定在视口内，不拦截交互，打印隐藏。
 - [T02](docs/devel/task/T02.json)：博客文章体系：`posts/*.md`（frontmatter：title/date/summary）为唯一真源，`scripts/build_posts.py` 构建期生成文章页（Pygments 双色语法高亮 + 脚注，无标签）并把 V3 摘要列表（标题 + 两行摘要 + Times 日期，最多 5 篇）注入首页 BLOGS；产物不入库，Actions 部署时现构建，运行时零依赖。
+- [C015](docs/devel/change/C015.json)：博客正文支持数学公式：行内 `$…$` 与整行 `$$…$$` 在构建期经 matplotlib mathtext 预渲染为内联 SVG（fill 改写为 `currentColor`，浅深主题随墨色令牌自动适配），行内公式与正文基线对齐、整行公式居中且窄屏等比收缩；代码块内的 `$` 不参与解析，公式渲染失败即构建报错并报出原文；新增首篇正式文章《机器学习入门：核心范式、数学直觉与可运行代码》（含 3 张原理配图），替换原 demo 文章；构建依赖增加 matplotlib（仅含公式文章触发）。
 
 ### Changed
 
