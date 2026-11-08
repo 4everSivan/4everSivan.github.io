@@ -66,8 +66,8 @@
   "acceptance": {
     "result": true,
     "run_id": "local-20261108-01",
-    "user_quote": "",
-    "signoff": "",
+    "user_quote": "确认",
+    "signoff": "sivan (AI代签)",
     "checks": [
       {
         "item": "构建契约",
