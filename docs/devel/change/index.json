@@ -146,7 +146,7 @@
     },
     "C017": {
       "title": "数学公式字体改为 STIX 衬线",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C017-math-font",
       "file": "docs/devel/change/C017.json",
       "version": ""

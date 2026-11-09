@@ -4,7 +4,7 @@
   "title": "数学公式字体改为 STIX 衬线",
   "version": "",
   "type": "Enhancement",
-  "status": "verified",
+  "status": "closed",
   "branch": "fix/C017-math-font",
   "is_hotfix": false,
   "target": {
@@ -93,7 +93,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "6778046e1bbf0b658121b24bfc05c8ed0c9fc89c",
     "tag": ""
   },
   "gate": {
@@ -101,8 +101,8 @@
     "version": "1.7.0",
     "ran_at": "2026-11-09",
     "exit_code": 0,
-    "from_status": "in_progress",
-    "target_status": "verified",
+    "from_status": "verified",
+    "target_status": "closed",
     "signed_quote": "确认，我已验收",
     "signed_rejection_count": 0
   }
