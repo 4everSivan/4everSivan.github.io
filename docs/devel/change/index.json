@@ -34,7 +34,8 @@
         "C020",
         "C021",
         "C022",
-        "C023"
+        "C023",
+        "C025"
       ]
     }
   },
@@ -205,6 +206,13 @@
       "status": "in_progress",
       "branch": "fix/C024-carousel-keyboard",
       "file": "docs/devel/change/C024.json",
+      "version": ""
+    },
+    "C025": {
+      "title": "切页过渡测试偶发失败与文档失真",
+      "status": "in_progress",
+      "branch": "fix/C025-test-doc-drift",
+      "file": "docs/devel/change/C025.json",
       "version": ""
     }
   }

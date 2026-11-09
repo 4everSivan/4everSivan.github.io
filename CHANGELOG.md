@@ -29,15 +29,16 @@
 - [C017](docs/devel/change/C017.json)：数学公式字体由 matplotlib 默认 DejaVu Sans 改为 STIX 衬线（Times 风格），与正文 Times New Roman + 宋体统一；字形随 matplotlib 内置分发，本地与 CI 构建一致。
 - [C018](docs/devel/change/C018.json)：文章代码块左上角显示围栏语言；行号距左边框收紧到 8px 并默认隐藏，鼠标悬停、键盘聚焦或触屏轻触代码块时淡入，点按外部/移出后隐藏；横向溢出改用 10px 透明轨道 + 强调色胶囊滑块的自定义滚动条，悬停加深；右上角新增复制按钮（复制时剔除行号，成功后 1.6s 对勾反馈，Clipboard API 失败回退 execCommand）；Firefox 以 thin/scrollbar-color 降级。
 - [C019](docs/devel/change/C019.json)：文章页新增内容列背景模糊带：固定层比 36rem 正文列左右各宽 40px，1px 高斯模糊 + 55% 纸面提亮，左右 72px 羽化淡出；列外字符画保持清晰，首页不出现，打印隐藏。
+- [C021](docs/devel/change/C021.json)：文章标题层级调整：h2 提升到 20px/700 并在标题前显示两位强调色序号（`01 /`，CSS counter 生成，不改 Markdown 正文），h3 17px/700 墨色，h4 15.5px/700 次级墨，解决标题与正文难以分辨的问题。
 
 ### Fixed
 
 - [C020](docs/devel/change/C020.json)：修复文章页背景模糊带在浅色主题下出现近白色提亮块；移除 `.article-blur` 的 55% 纸面提亮背景，只保留 1px 背景模糊与 72px 羽化，列外字符画仍保持清晰。
-- [C021](docs/devel/change/C021.json)：文章标题层级调整：h2 提升到 20px/700 并在标题前显示两位强调色序号（`01 /`，CSS counter 生成，不改 Markdown 正文），h3 17px/700 墨色，h4 15.5px/700 次级墨，解决标题与正文难以分辨的问题。
 - [C001](docs/devel/change/C001.json)：修复 SKILLS 技能轮播翻页卡顿、连续点击丢失与回绕中途吸附；翻页动画改用 Web Animations API 驱动，连续点击合并为一次连续过渡，卡片宽度改取布局宽度以消除 hover 缩放导致的偏移。
 - [C022](docs/devel/change/C022.json)：修复数学公式内联 SVG 自带的 `<style>` 作用于整页、把文章页顶栏与复制按钮图标的线帽改成 `butt`；同时去掉每个公式重复的 `figure_1`/`text_1` 等 id，字形定义收拢为每页一份共享 defs（整页 id 唯一，文章页 309KB→162KB），并为每个公式补 `role="img"` 与 TeX 原文替代文本。
 - [C023](docs/devel/change/C023.json)：修复文章页「← 上一篇」指向更新的文章（最新一篇反而没有上一篇）的方向错误，改为指向发布日期更早的一篇；标题或摘要含 `\U`、`\1` 等反斜杠时不再导致构建崩溃或文本被改写；`--out` 指向仓库外目录时构建不再在结尾报错退出。
 - [C024](docs/devel/change/C024.json)：修复键盘用户 Tab 到 SKILLS 技能卡时卡片停在视窗边缘甚至屏外、浏览器滚动轮播视窗后轨道位置与索引永久错开的问题；键盘聚焦的卡片现在滑到正中，回车即打开，视窗改为 `overflow: clip` 且脚本兜底把 `scrollLeft` 归零。
+- [C025](docs/devel/change/C025.json)：修正文档与测试失真：切页过渡回归测试改为等待导航完成与入场动画 `finished`，不再因固定 900ms 采样偶发失败；部署指南补上 `matplotlib` 依赖、改正已删除的示例文章路径与「减少动态效果」说明；C021 在本日志中改归入「Changed」；样式表与脚本中与现状不符的注释同步改正。
 
 <!-- 只添加真实变更并关联真实 C/T 卡，不预登记示例卡或发布版本。
 真实卡片建立后的链接语法示例：

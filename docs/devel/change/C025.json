@@ -1,0 +1,110 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C025",
+  "title": "切页过渡测试偶发失败与文档失真",
+  "version": "",
+  "type": "BugFix",
+  "status": "in_progress",
+  "branch": "fix/C025-test-doc-drift",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "回归测试与操作文档",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "项目评审发现两类失真：(1) tests/page-transition.test.cjs 点击后固定 sleep(900) 再断言入场动画已回到终态，但 220ms 离场 + 页面加载 + 560ms 入场只剩约 100ms 余量，机器稍忙即失败（评审期间约 22 次运行失败 2 次，均为「结束回到终态」opacity≈0.9998）。(2) 文档与现状不符：部署指南的首次准备命令只装 markdown pygments，按此配置构建当前含公式的文章会报「构建需安装 matplotlib」；指南示例路径指向 C015 已删除的 2026-11-08-back-to-static；指南称「减少动态效果」下动效直接呈现终态，与 C010/C012/C016 的设计相反；CHANGELOG 把 Enhancement 类的 C021 记在 Fixed 下；样式表头注释仍写「单一杏色主题，无构建步骤」、h2 注释仍写「不画编号」，main.js 头注释仍称仅为首页脚本。",
+  "precheck": {
+    "description": "以 150ms 网络延迟复现切页过渡测试的时序失败；核对文档失真点。",
+    "command": "node tests/page-transition.test.cjs  # 副本中注入 Network.emulateNetworkConditions latency=150；grep -n 'back-to-static\\|install markdown pygments' docs/guide/01-本地部署指南.md",
+    "expected": "修复前带延迟的测试稳定失败于「结束回到终态」；指南含已删除路径与缺 matplotlib 的安装命令",
+    "is_completed": true,
+    "evidence": "main 版测试副本 +150ms 延迟 3/3 次 FAIL「文章正文与页脚以 page-enter 入场, 结束回到终态」（opacity=0.9980/0.9988/0.9980）；评审首轮全量运行与 8 次重复运行中各出现 1 次同一失败（opacity=0.999779）。指南第 30 行为 posts/2026-11-08-back-to-static，第 40 行为 pip install markdown pygments，第 84 行称 reduced-motion 下直接呈现终态。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C025-test-doc-drift"
+    ],
+    "after": [
+      "node tests/page-transition.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "切页过渡回归测试（tests/page-transition.test.cjs）",
+      "before": "首页加载、进入文章页、返回首页与 reduced-motion 导航后均固定 sleep(900)，再一次性读取入场动画终态。",
+      "after": "新增 waitFor 轮询（50ms，5s 超时，容忍导航中执行上下文销毁），以路径 + readyState=complete + 目标节点判定导航完成；入场检查先读动画名/时长/延迟，再等 .post 与 .foot 的 getAnimations() 全部 finished 后读取 opacity/transform。断言内容不变；修饰键「不导航」的 350ms 等待与离场中途 80ms 采样保留。",
+      "impact": "测试稳定性；断言契约不变"
+    },
+    {
+      "scope": "部署指南（docs/guide/01-本地部署指南.md）",
+      "before": "依赖只列 markdown + pygments；示例文章路径为已删除的 2026-11-08-back-to-static；称 reduced-motion 下动效直接呈现终态。",
+      "after": "依赖补「含公式另需 matplotlib」，首次准备命令改为 pip install markdown pygments matplotlib；示例路径改为 2026-11-08-machine-learning-intro；排障表改为「入场、悬停、轮播、主题揭示、引文展开、字标回顶与切页过渡均不随 reduced-motion 关闭，仅原生锚点滚动变瞬时」，并新增「构建需安装 matplotlib」一行。",
+      "impact": "本地预览与构建操作"
+    },
+    {
+      "scope": "CHANGELOG 与代码注释",
+      "before": "C021（Enhancement）记在 Fixed；style.css 头注释写单一杏色主题、无构建步骤，h2 注释写不画编号；main.js 头注释称首页渐进增强。",
+      "after": "C021 移到 Changed（C019 之后）；style.css 头注释改为杏色/暖黑双主题、运行时无外部依赖且文章页由构建脚本生成，h2 注释改为以字号、字重与 h2 序号表达；main.js 头注释改为首页与文章页共用并列出现有能力。仅注释变动，不影响行为，资源版本串不变。",
+      "impact": "文档与注释准确性"
+    },
+    {
+      "scope": "设计基线（docs/devel/design/02-博客文章.md）",
+      "before": "4.3 切页过渡回归只列覆盖项。",
+      "after": "4.3 补充 C025 起的等待策略（轮询导航完成、动画 finished 后读终态）；4.4 登记 C025；业务规则不变。",
+      "impact": "博客文章设计基线（验证说明）"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "切页过渡回归以固定等待时长后读取导航与入场终态。",
+      "after": "切页过渡回归以轮询判定导航完成，入场终态在 getAnimations() 全部 finished 后读取；切页过渡业务规则不变。"
+    }
+  },
+  "verification": {
+    "result": null,
+    "run_id": "local-20261109-13",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "新测试在正常与 150ms 网络延迟下均 10/10；同等延迟下修复前测试稳定失败",
+        "false_if": "新测试仍偶发失败，或断言被放宽",
+        "evidence": "+150ms 延迟：修复前副本 3/3 次 9/10（终态 opacity≈0.998），修复后副本 3/3 次 10/10；6 路 CPU 满载下修复后 node tests/page-transition.test.cjs 连续 12 次 0 失败；断言条件逐项未改。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "按部署指南的首次准备命令可直接构建当前文章；指南路径真实存在",
+        "false_if": "按指南操作仍缺依赖或打开不存在的路径",
+        "evidence": "local/venv（markdown 3.9、pygments 2.21.0、matplotlib 3.9.4）构建当前文章 exit 0；产物 local/site/posts/2026-11-08-machine-learning-intro/index.html 存在；文章含 71 个公式；以 sys.modules['matplotlib']=None 模拟未安装时构建输出「2026-11-08-machine-learning-intro.md: 文章含数学公式, 构建需安装 matplotlib」并 exit 1，即旧指南命令的实际结果。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "仅测试、文档与注释变动；站点行为与产物不变",
+        "false_if": "改动影响页面行为或其他测试",
+        "evidence": "assets 改动仅为注释，资源版本串保持 20261109j；tests/ 下 13 个测试文件全部 EXIT=0（page-transition 10/10、posts 41/41、carousel 14/14）；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}
