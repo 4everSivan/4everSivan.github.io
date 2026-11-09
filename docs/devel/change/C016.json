@@ -4,7 +4,7 @@
   "title": "博客列表点击切换文章页过渡动画",
   "version": "",
   "type": "Enhancement",
-  "status": "verified",
+  "status": "closed",
   "branch": "fix/C016-page-transition",
   "is_hotfix": false,
   "target": {
@@ -93,7 +93,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "a272a9452f5cbbdd509e28314820b644b2d490b9",
     "tag": ""
   },
   "gate": {
@@ -101,8 +101,8 @@
     "version": "1.7.0",
     "ran_at": "2026-11-09",
     "exit_code": 0,
-    "from_status": "in_progress",
-    "target_status": "verified",
+    "from_status": "verified",
+    "target_status": "closed",
     "signed_quote": "确认，我已验收",
     "signed_rejection_count": 0
   }

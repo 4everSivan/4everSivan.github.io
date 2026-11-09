@@ -138,7 +138,7 @@
     },
     "C016": {
       "title": "博客列表点击切换文章页过渡动画",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C016-page-transition",
       "file": "docs/devel/change/C016.json",
       "version": ""
