@@ -258,6 +258,54 @@ async function resetTo(client, targetIndex) {
   throw new Error(`无法复位到 index ${targetIndex}`);
 }
 
+async function pressKey(client, key, code, keyCode, text) {
+  await client.send('Input.dispatchKeyEvent', {
+    type: 'keyDown',
+    key,
+    code,
+    windowsVirtualKeyCode: keyCode,
+    ...(text ? { text } : {}),
+  });
+  await client.send('Input.dispatchKeyEvent', {
+    type: 'keyUp',
+    key,
+    code,
+    windowsVirtualKeyCode: keyCode,
+  });
+}
+
+// 从最后一张项目卡出发, 用 Tab 依次聚焦中间副本的技能卡 (C024).
+async function keyboardTour(client, stops) {
+  await evaluate(
+    client,
+    "document.querySelector('.project-grid .project-card:last-of-type').focus()"
+  );
+  const visited = [];
+  for (let i = 0; i < stops; i += 1) {
+    await pressKey(client, 'Tab', 'Tab', 9);
+    await sleep(SETTLE_MS);
+    visited.push(
+      await evaluate(
+        client,
+        `(() => {
+          const carousel = document.querySelector('[data-skill-carousel]');
+          const active = document.activeElement;
+          const view = carousel.getBoundingClientRect();
+          const box = active.getBoundingClientRect();
+          const name = active.querySelector('.project-name');
+          return {
+            name: name ? name.textContent : active.tagName,
+            offset: Math.round(box.left + box.width / 2 - (view.left + view.width / 2)),
+            scrollLeft: carousel.scrollLeft,
+            index: window.__carouselTest.info().index,
+          };
+        })()`
+      )
+    );
+  }
+  return visited;
+}
+
 async function scenario(client, { label, hoverMs, clicks, gapMs }) {
   // 先把指针移开, 保证 hover 过渡从本次进入卡片开始计时.
   await move(client, 700, 80);
@@ -448,6 +496,73 @@ async function scenario(client, { label, hoverMs, clicks, gapMs }) {
       '侧边卡片拦截为翻页',
       nav.side === true,
       `defaultPrevented=${nav.side}`
+    );
+
+    // 场景 5: 键盘 Tab 进入轨道, 聚焦卡片滑到正中, 视窗不被焦点滚动 (C024).
+    // 先等场景 4 的拦截翻页结束, 否则 resetTo 会读到动画中途的位置.
+    await sleep(SETTLE_MS);
+    await resetTo(client, 3);
+    await move(client, 700, 80);
+    await sleep(SETTLE_MS);
+    const names = (await evaluate(client, 'window.__carouselTest.info()')).names;
+    const describe = (stops) =>
+      stops
+        .map(
+          (stop) =>
+            `${stop.name}@offset=${stop.offset},scroll=${stop.scrollLeft},index=${stop.index}`
+        )
+        .join(', ');
+    const tour = await keyboardTour(client, names.length);
+    check(
+      'Tab 聚焦的技能卡依次滑到正中且视窗不滚动 (C024)',
+      tour.map((stop) => stop.name).join(',') === names.join(',') &&
+        tour.every(
+          (stop) => Math.abs(stop.offset) <= 3 && stop.scrollLeft === 0
+        ),
+      describe(tour)
+    );
+
+    // 聚焦卡片已居中: 回车按普通链接打开 (临时 preventDefault 避免打开新标签).
+    await evaluate(
+      client,
+      `(() => {
+        window.__enterPrevented = null;
+        document.activeElement.addEventListener('click', (event) => {
+          window.__enterPrevented = event.defaultPrevented;
+          event.preventDefault();
+        }, { once: true });
+      })()`
+    );
+    await pressKey(client, 'Enter', 'Enter', 13, '\r');
+    await sleep(100);
+    const enterPrevented = await evaluate(client, 'window.__enterPrevented');
+    check(
+      '回车打开居中的聚焦卡片, 不被拦截为翻页 (C024)',
+      enterPrevented === false,
+      `defaultPrevented=${enterPrevented}`
+    );
+
+    // 不支持 overflow: clip 的浏览器: 视窗仍可被焦点滚动, 由脚本立即归零.
+    await evaluate(
+      client,
+      `(() => {
+        const style = document.createElement('style');
+        style.id = 'force-overflow-hidden';
+        style.textContent = '.skill-carousel { overflow: hidden !important; }';
+        document.head.appendChild(style);
+      })()`
+    );
+    const fallback = await keyboardTour(client, names.length);
+    await evaluate(
+      client,
+      "document.getElementById('force-overflow-hidden').remove(); document.activeElement.blur()"
+    );
+    check(
+      'overflow: hidden 降级下聚焦仍居中且 scrollLeft 归零 (C024)',
+      fallback.every(
+        (stop) => Math.abs(stop.offset) <= 3 && stop.scrollLeft === 0
+      ),
+      describe(fallback)
     );
 
     client.close();

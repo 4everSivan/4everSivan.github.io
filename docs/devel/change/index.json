@@ -19,7 +19,8 @@
         "C011",
         "C012",
         "C013",
-        "C014"
+        "C014",
+        "C024"
       ]
     },
     "BlogPosts": {
@@ -197,6 +198,13 @@
       "status": "in_progress",
       "branch": "fix/C023-build-nav-escape",
       "file": "docs/devel/change/C023.json",
+      "version": ""
+    },
+    "C024": {
+      "title": "技能轮播键盘聚焦居中与视窗滚动错位",
+      "status": "in_progress",
+      "branch": "fix/C024-carousel-keyboard",
+      "file": "docs/devel/change/C024.json",
       "version": ""
     }
   }

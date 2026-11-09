@@ -1,0 +1,113 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C024",
+  "title": "技能轮播键盘聚焦居中与视窗滚动错位",
+  "version": "",
+  "type": "BugFix",
+  "status": "in_progress",
+  "branch": "fix/C024-carousel-keyboard",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "SKILLS 技能轮播",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "项目评审发现键盘用户无法正常使用 SKILLS 轮播：中间副本的三张卡可 Tab 聚焦，但轮播不跟随焦点——第二张聚焦时停在视窗右缘半露、处于淡出区（卡片右缘 1126px，视窗右缘 988px）；第三张完全在屏外，浏览器为显示焦点把 overflow:hidden 的视窗 scrollLeft 滚到 546。轨道只靠 transform 定位，脚本不知道视窗被滚动，此后可见卡片与内部索引永久错开两格，直到刷新页面。",
+  "precheck": {
+    "description": "headless Chrome 1440px 下从最后一张项目卡开始连按 Tab，记录聚焦卡片相对视窗中心的偏移与视窗 scrollLeft。",
+    "command": "node tests/carousel.test.cjs  # 场景 5 在修复前的 main.js/style.css 上运行",
+    "expected": "修复前聚焦卡片不居中，第三张聚焦后 scrollLeft 变为非 0",
+    "is_completed": true,
+    "evidence": "main@e838734：ad-flow 偏移 0、knowledge-map 偏移 +273（半露在右侧淡出区）、test-anything 偏移 0 但 scrollLeft=546、脚本索引仍为 3；离开轮播后 scrollLeft 保持 546 不复位。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C024-carousel-keyboard"
+    ],
+    "after": [
+      "node tests/carousel.test.cjs",
+      "TEST_WIDTH=390 node tests/carousel.test.cjs",
+      "TEST_MOTION=reduce node tests/carousel.test.cjs",
+      "node tests/card-layout.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "轮播脚本（assets/js/main.js）",
+      "before": "只处理点击翻页；焦点进入卡片时轨道不动，视窗被浏览器滚动后无人复位。",
+      "after": "中间副本卡片 focus 且匹配 :focus-visible 时调用 go(count + position - index) 让该卡居中（鼠标按下带来的聚焦不匹配 :focus-visible，仍交给点击逻辑，不会重复翻页）；视窗 scroll 事件立即把 scrollLeft 归零。",
+      "impact": "键盘导航；鼠标点击翻页行为不变"
+    },
+    {
+      "scope": "轮播样式（assets/css/style.css）与缓存版本（index.html）",
+      "before": ".skill-carousel 为 overflow: hidden（仍是可被程序滚动的滚动容器）；资源版本串 20261109i。",
+      "after": "保留 overflow: hidden 作为回退，其后声明 overflow: clip（不形成滚动容器，焦点无法滚动视窗）；资源版本串升至 20261109j。",
+      "impact": "轮播视窗；视觉不变"
+    },
+    {
+      "scope": "回归测试（tests/carousel.test.cjs）",
+      "before": "只覆盖鼠标翻页时序、连续点击、回绕与点击判定。",
+      "after": "新增场景 5（3 项）：Tab 依次聚焦三张卡均居中（偏移 ≤3px）且 scrollLeft 恒为 0；回车打开居中聚焦卡、不被拦截为翻页；注入 overflow: hidden !important 模拟不支持 clip 的浏览器，聚焦仍居中且 scrollLeft 归零。",
+      "impact": "轮播回归测试"
+    },
+    {
+      "scope": "设计基线（docs/devel/design/01-博客首页.md）",
+      "before": "轮播规则未定义键盘聚焦行为与视窗滚动约束。",
+      "after": "交互、可访问性与核心规则 9 增补：键盘聚焦中间副本卡片时滑到正中、回车打开；视窗 overflow: clip + 脚本归零，轨道只由 transform 定位；4.3 与 4.4 同步登记 C024。",
+      "impact": "博客首页设计基线"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "只有真正居中的中间副本卡片按普通链接打开，其余点击一律翻页；回绕只在动画结束后瞬时完成。",
+      "after": "在此基础上，键盘 Tab 聚焦中间副本卡片（:focus-visible）时轨道滑动使该卡居中，回车即打开；轨道只由 transform 定位，视窗 overflow: clip 且脚本把 scrollLeft 归零，焦点不得滚动视窗。"
+    }
+  },
+  "verification": {
+    "result": null,
+    "run_id": "local-20261109-12",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "carousel 测试在 1440px、390px 与 reduced-motion 下全绿，C024 三项新断言通过，且在修复前代码上失败；既有翻页断言不回归",
+        "false_if": "存在任何测试失败、报错，或新断言在修复前同样通过",
+        "evidence": "修复前 main.js/style.css：carousel 12/14，两项 FAIL（knowledge-map 偏移 273、test-anything scrollLeft=546 而索引仍为 3；hidden 降级同样失败），回车项通过（居中卡本就可打开）。修复后 node tests/carousel.test.cjs 14/14；TEST_WIDTH=390 14/14；TEST_MOTION=reduce 14/14。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "Tab 到每张技能卡时该卡滑到正中、完整可见，视窗 scrollLeft 恒为 0；离开轮播后鼠标翻页正常",
+        "false_if": "聚焦卡片半露/屏外，或视窗被滚动",
+        "evidence": "headless Chrome 1440px 连按 Tab：ad-flow / knowledge-map / test-anything 依次居中（卡片 587–853px，视窗 452–988px，偏移 0），索引 3→4→5，scrollLeft 恒为 0；Tab 离开后焦点进入 BLOGS 列表，scrollLeft 仍为 0；随后场景 1–4 的真实鼠标点击翻页仍单步前进、无中途跳变。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "鼠标点击不会因聚焦而重复翻页；卡片布局、首页其他测试不受影响",
+        "false_if": "点击侧卡翻两格、布局变化或其他测试回归",
+        "evidence": "真实鼠标点击会聚焦链接但不匹配 :focus-visible，聚焦处理不触发——场景 1「悬停稳定后单击前进一格」与场景 2「连续两次点击不丢失」保持 PASS；tests/ 下 13 个测试文件全部 EXIT=0（carousel 14/14、card-layout 17/17）；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}
