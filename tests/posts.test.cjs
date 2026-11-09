@@ -252,6 +252,39 @@ function check(name, passed, detail) {
         const keyword = document.querySelector(
           '.codehilite .nt, .codehilite .k, .codehilite .kn, .codehilite .ow'
         );
+        const blocks = Array.from(
+          document.querySelectorAll('.md-body .codehilite')
+        );
+        const lineNumberMismatches = blocks.filter((block) => {
+          const numbers = block.querySelectorAll('.linenos').length;
+          const code = block.querySelector('code');
+          if (!code) {
+            return true;
+          }
+          const lines = code.textContent.replace(/\\n$/, '').split('\\n').length;
+          return numbers !== lines;
+        }).length;
+        const lineno = document.querySelector('.md-body .codehilite .linenos');
+        const scrollPre = blocks[1] ? blocks[1].querySelector('pre') : null;
+        const copyButton = document.querySelector(
+          '.md-body .codehilite .code-copy'
+        );
+        const copyBlock = copyButton
+          ? copyButton.closest('.codehilite')
+          : null;
+        const copyRect = copyButton
+          ? copyButton.getBoundingClientRect()
+          : null;
+        const copyBlockRect = copyBlock
+          ? copyBlock.getBoundingClientRect()
+          : null;
+        const langLabel = document.querySelector(
+          '.md-body .codehilite .code-lang'
+        );
+        const firstBlockRect = blocks[0]
+          ? blocks[0].getBoundingClientRect()
+          : null;
+        const linenoRect = lineno ? lineno.getBoundingClientRect() : null;
         return {
           h1Count: document.querySelectorAll('h1').length,
           title: document.querySelector('h1.post-title')?.textContent || '',
@@ -273,6 +306,57 @@ function check(name, passed, detail) {
           scriptSrc: document.querySelector('script[src*="main.js"]')?.getAttribute('src') || '',
           highlightSpans: document.querySelectorAll('.codehilite span').length,
           keywordColor: keyword ? getComputedStyle(keyword).color : '',
+          codeBlocks: blocks.length,
+          lineNumberMismatches,
+          linenoDisplay: lineno ? getComputedStyle(lineno).display : '',
+          linenoSelect: lineno ? getComputedStyle(lineno).userSelect : '',
+          linenoAlign: lineno ? getComputedStyle(lineno).textAlign : '',
+          linenoOpacity: lineno ? getComputedStyle(lineno).opacity : '',
+          linenoInsetLeft:
+            linenoRect && firstBlockRect
+              ? Math.round(linenoRect.left - firstBlockRect.left)
+              : -1,
+          linenoAria: lineno
+            ? lineno.getAttribute('aria-hidden')
+            : '',
+          scrollbarHeight: scrollPre
+            ? getComputedStyle(scrollPre, '::-webkit-scrollbar').height
+            : '',
+          scrollbarThumb: scrollPre
+            ? getComputedStyle(scrollPre, '::-webkit-scrollbar-thumb')
+                .backgroundColor
+            : '',
+          copyButtons: document.querySelectorAll(
+            '.md-body .codehilite .code-copy'
+          ).length,
+          copyLabel: copyButton
+            ? copyButton.getAttribute('aria-label')
+            : '',
+          copyPosition: copyButton
+            ? getComputedStyle(copyButton).position
+            : '',
+          copyInsetTop:
+            copyRect && copyBlockRect
+              ? Math.round(copyRect.top - copyBlockRect.top)
+              : -1,
+          copyInsetRight:
+            copyRect && copyBlockRect
+              ? Math.round(copyBlockRect.right - copyRect.right)
+              : -1,
+          codeLanguages: blocks.map(
+            (block) => block.getAttribute('data-language') || ''
+          ),
+          labelTexts: Array.from(
+            document.querySelectorAll('.md-body .codehilite .code-lang')
+          ).map((node) => node.textContent),
+          langPosition: langLabel
+            ? getComputedStyle(langLabel).position
+            : '',
+          langTop: langLabel ? getComputedStyle(langLabel).top : '',
+          langLeft: langLabel ? getComputedStyle(langLabel).left : '',
+          codeTopPadding: scrollPre
+            ? getComputedStyle(scrollPre).paddingTop
+            : '',
           mathSvgs: document.querySelectorAll('.md-body .md-math svg').length,
           mathBlocks: document.querySelectorAll('.md-body .md-math-block').length,
           mathDollars: document.querySelector('.md-body').textContent.split('$').length - 1,
@@ -318,6 +402,174 @@ function check(name, passed, detail) {
       `spans=${post.highlightSpans}, keyword=${post.keywordColor}`
     );
     check(
+      '代码块逐行显示行号且默认隐藏 (C018)',
+      post.codeBlocks === 5 &&
+        post.lineNumberMismatches === 0 &&
+        post.linenoDisplay === 'inline-block' &&
+        post.linenoSelect === 'none' &&
+        post.linenoAlign === 'right' &&
+        post.linenoOpacity === '0' &&
+        post.linenoInsetLeft === 9 &&
+        post.linenoAria === 'true',
+      `blocks=${post.codeBlocks}, mismatches=${post.lineNumberMismatches}, display=${post.linenoDisplay}, select=${post.linenoSelect}, aria=${post.linenoAria}, opacity=${post.linenoOpacity}, inset=${post.linenoInsetLeft}`
+    );
+    check(
+      '代码块横向滚动条为细胶囊样式 (C018)',
+      post.scrollbarHeight === '10px' &&
+        post.scrollbarThumb === 'rgba(155, 58, 36, 0.38)',
+      `height=${post.scrollbarHeight}, thumb=${post.scrollbarThumb}`
+    );
+    check(
+      '代码块右上角提供复制按钮 (C018)',
+      post.copyButtons === 5 &&
+        post.copyLabel === '复制代码' &&
+        post.copyPosition === 'absolute' &&
+        post.copyInsetTop >= 6 &&
+        post.copyInsetTop <= 8 &&
+        post.copyInsetRight >= 7 &&
+        post.copyInsetRight <= 9,
+      `buttons=${post.copyButtons}, label=${post.copyLabel}, position=${post.copyPosition}, inset=${post.copyInsetTop}/${post.copyInsetRight}`
+    );
+    check(
+      '代码块左上角显示围栏语言 (C018)',
+      post.codeLanguages.join(',') === 'bash,python,text,python,text' &&
+        post.labelTexts.join(',') === post.codeLanguages.join(',') &&
+        post.langPosition === 'absolute' &&
+        post.langTop === '9px' &&
+        post.langLeft === '8px' &&
+        post.codeTopPadding === '32px',
+      `langs=${post.codeLanguages.join(',')}, pos=${post.langPosition}@${post.langTop}/${post.langLeft}, padding=${post.codeTopPadding}`
+    );
+
+    // 复制行为: 行号不得进入剪贴板; 成功后切换对勾, 1.6s 后复位.
+    const copyState = await evaluate(
+      client,
+      `(async () => {
+        const button = document.querySelector('.md-body .codehilite .code-copy');
+        const icon = button.querySelector('.code-copy-icon');
+        const done = button.querySelector('.code-copy-done');
+        let copied = null;
+        Object.defineProperty(navigator, 'clipboard', {
+          configurable: true,
+          value: {
+            writeText: (text) => {
+              copied = text;
+              return Promise.resolve();
+            },
+          },
+        });
+        button.click();
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        const state = {
+          copied,
+          label: button.getAttribute('aria-label'),
+          copiedClass: button.classList.contains('is-copied'),
+          iconDisplay: getComputedStyle(icon).display,
+          doneDisplay: getComputedStyle(done).display,
+        };
+        await new Promise((resolve) => setTimeout(resolve, 1700));
+        state.resetLabel = button.getAttribute('aria-label');
+        state.resetClass = button.classList.contains('is-copied');
+        state.resetIcon = getComputedStyle(icon).display;
+        delete navigator.clipboard;
+        return state;
+      })()`
+    );
+    check(
+      '复制正文且剔除行号, 成功后对勾并在 1.6s 复位 (C018)',
+      copyState.copied ===
+        'python3 -m venv .venv\nsource .venv/bin/activate\npip install numpy scikit-learn' &&
+        copyState.label === '已复制' &&
+        copyState.copiedClass === true &&
+        copyState.iconDisplay === 'none' &&
+        copyState.doneDisplay === 'block' &&
+        copyState.resetLabel === '复制代码' &&
+        copyState.resetClass === false &&
+        copyState.resetIcon !== 'none',
+      `copied=${JSON.stringify(copyState.copied)}, label=${copyState.label}, icon=${copyState.iconDisplay}/${copyState.doneDisplay}, reset=${copyState.resetLabel}`
+    );
+
+    // 行号默认隐藏: 真实鼠标悬停代码块时淡入, 移开后归零.
+    const hoverPoint = await evaluate(
+      client,
+      `(() => {
+        const block = document.querySelector('.md-body .codehilite');
+        block.scrollIntoView({ block: 'center', behavior: 'instant' });
+        const rect = block.getBoundingClientRect();
+        return {
+          x: Math.round(rect.left + rect.width / 2),
+          y: Math.round(rect.top + rect.height / 2),
+        };
+      })()`
+    );
+    await sleep(200);
+    await client.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      x: hoverPoint.x,
+      y: hoverPoint.y,
+    });
+    await sleep(260);
+    const hoveredOpacity = await evaluate(
+      client,
+      `getComputedStyle(document.querySelector('.md-body .codehilite .linenos')).opacity`
+    );
+    await client.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      x: 5,
+      y: 5,
+    });
+    await sleep(260);
+    const unhoveredOpacity = await evaluate(
+      client,
+      `getComputedStyle(document.querySelector('.md-body .codehilite .linenos')).opacity`
+    );
+    check(
+      '行号默认隐藏, 悬停代码块才淡入 (C018)',
+      hoveredOpacity === '1' && unhoveredOpacity === '0',
+      `hover=${hoveredOpacity}, leave=${unhoveredOpacity}`
+    );
+
+    // 触屏没有 hover: 轻触显示, 点按外部隐藏.
+    const touchState = await evaluate(
+      client,
+      `(async () => {
+        const block = document.querySelector('.md-body .codehilite');
+        block.dispatchEvent(
+          new PointerEvent('pointerdown', {
+            bubbles: true,
+            pointerType: 'touch',
+          })
+        );
+        await new Promise((resolve) => setTimeout(resolve, 260));
+        const shown = {
+          active: block.classList.contains('is-active'),
+          opacity: getComputedStyle(block.querySelector('.linenos')).opacity,
+        };
+        document.body.dispatchEvent(
+          new PointerEvent('pointerdown', {
+            bubbles: true,
+            pointerType: 'touch',
+          })
+        );
+        await new Promise((resolve) => setTimeout(resolve, 260));
+        return {
+          shown,
+          hidden: {
+            active: block.classList.contains('is-active'),
+            opacity: getComputedStyle(block.querySelector('.linenos')).opacity,
+          },
+        };
+      })()`
+    );
+    check(
+      '触屏轻触代码块显示行号, 点按外部隐藏 (C018)',
+      touchState.shown.active === true &&
+        touchState.shown.opacity === '1' &&
+        touchState.hidden.active === false &&
+        touchState.hidden.opacity === '0',
+      `shown=${touchState.shown.active}/${touchState.shown.opacity}, hidden=${touchState.hidden.active}/${touchState.hidden.opacity}`
+    );
+    check(
       '数学公式: 内联 SVG 齐备且无原始 $ 残留 (C015)',
       post.mathSvgs >= 60 && post.mathBlocks === 4 && post.mathDollars === 0,
       `svgs=${post.mathSvgs}, blocks=${post.mathBlocks}, dollars=${post.mathDollars}`
@@ -352,7 +604,20 @@ function check(name, passed, detail) {
         await new Promise((resolve) => setTimeout(resolve, 400));
         const bg = getComputedStyle(document.body).backgroundColor;
         const mathColor = getComputedStyle(document.querySelector('.md-body .md-math')).color;
-        return { theme: document.documentElement.getAttribute('data-theme'), bg, mathColor };
+        const pre = document.querySelector('.md-body .codehilite pre');
+        return {
+          theme: document.documentElement.getAttribute('data-theme'),
+          bg,
+          mathColor,
+          lineNumberColor: getComputedStyle(
+            document.querySelector('.md-body .codehilite .linenos')
+          ).color,
+          langColor: getComputedStyle(
+            document.querySelector('.md-body .codehilite .code-lang')
+          ).color,
+          codeThumb: getComputedStyle(pre, '::-webkit-scrollbar-thumb')
+            .backgroundColor,
+        };
       })()`
     );
     check(
@@ -365,6 +630,13 @@ function check(name, passed, detail) {
       toggled.mathColor === 'rgb(236, 228, 216)',
       toggled.mathColor
     );
+    check(
+      '语言标签/行号/滚动条颜色跟随深色令牌 (C018)',
+      toggled.lineNumberColor === 'rgb(140, 127, 112)' &&
+        toggled.langColor === 'rgb(140, 127, 112)' &&
+        toggled.codeThumb === 'rgba(217, 133, 95, 0.42)',
+      `lineno=${toggled.lineNumberColor}, lang=${toggled.langColor}, thumb=${toggled.codeThumb}`
+    );
 
     // 窄屏无横向滚动.
     await client.send('Emulation.setDeviceMetricsOverride', {
@@ -376,11 +648,21 @@ function check(name, passed, detail) {
     await sleep(400);
     const narrow = await evaluate(
       client,
-      `(() => ({
-        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      }))()`
+      `(() => {
+        const pre = document.querySelectorAll('.md-body .codehilite pre')[1];
+        return {
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          codeOverflow: pre ? pre.scrollWidth - pre.clientWidth : 0,
+          codeOverflowX: pre ? getComputedStyle(pre).overflowX : '',
+        };
+      })()`
     );
     check('文章页 390px 无横向滚动', narrow.overflow <= 0, `diff=${narrow.overflow}`);
+    check(
+      '390px 代码块内部可横向滚动 (C018)',
+      narrow.codeOverflow > 0 && narrow.codeOverflowX === 'auto',
+      `codeOverflow=${narrow.codeOverflow}, overflowX=${narrow.codeOverflowX}`
+    );
 
     client.close();
   } finally {

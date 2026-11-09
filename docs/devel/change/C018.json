@@ -1,0 +1,121 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C018",
+  "title": "代码块语言标签、行号、滚动条与复制按钮",
+  "version": "",
+  "type": "Enhancement",
+  "status": "verified",
+  "branch": "fix/C018-code-block",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "代码块排印",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "文章页的代码块目前只有高亮，没有语言标识、行号与复制入口，长代码难以按行引用，也不方便直接取用；横向溢出时用的是浏览器默认滚动条，在隐藏了整页滚动栏的纸面版式里显得突兀、与主题色也不统一。需要给代码块左上角标注围栏语言、逐行加等宽浅墨行号、把滚动条改成与纸面/墨色体系一致的细胶囊滑块，并在右上角提供复制按钮。",
+  "precheck": {
+    "description": "确认代码块尚无语言标签、行号标记与自定义滚动条样式。",
+    "command": "grep -c 'linenos' scripts/build_posts.py assets/css/style.css; grep -c 'linenums' scripts/build_posts.py; grep -c 'code-lang' scripts/build_posts.py assets/css/style.css",
+    "expected": "开工前三组计数均为 0",
+    "is_completed": true,
+    "evidence": "开工前 grep 计数均为 0：构建脚本无 linenums 与 code-lang 配置、CSS 无 linenos/code-lang 规则；产物代码块只有 Pygments token span，无语言标签与行号；横向滚动条为浏览器默认样式。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C018-code-block"
+    ],
+    "after": [
+      "node tests/posts.test.cjs",
+      "node tests/page-transition.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "代码高亮（scripts/build_posts.py）",
+      "before": "codehilite 使用默认 Pygments 输出，代码块无语言标签与行号。",
+      "after": "通过 CodeHiliteExtension 子类把 linenums 设为 inline：每行行首输出 <span class=\"linenos\">N</span>，与代码同一 pre/code 结构，不引入表格；自定义 HtmlFormatter 在外层写入 data-language 并输出 .code-lang 语言标签（取围栏语言，无语言回退 text）；语言高亮、token 与失败策略不变。",
+      "impact": "全部含代码块的文章构建产物"
+    },
+    {
+      "scope": "代码块样式（assets/css/style.css）",
+      "before": ".md-body pre 仅设置边框/底色/横向滚动，无语言标签/行号样式；滚动条为浏览器默认。",
+      "after": "代码块顶部预留 32px 标签带：语言 11px 等宽浅墨固定左上角，复制按钮固定右上角；行号固定 1.7em 列宽右对齐、距左边框 8px、等宽小号、浅墨且不可选中（user-select:none），默认 opacity:0，悬停/键盘聚焦/触屏激活时 160ms 淡入；横向滚动条改为 10px 透明轨道 + 4px 强调色圆角胶囊滑块，悬停转强调色；Firefox 用 scrollbar-width:thin + scrollbar-color 降级；深浅主题随令牌自动适配，打印时行号强制显示。",
+      "impact": "文章页代码块排印与可读性；缓存版本 ?v= 同步升位"
+    },
+    {
+      "scope": "行号显隐（assets/js/main.js + assets/css/style.css）",
+      "before": "行号始终可见。",
+      "after": "默认隐藏；鼠标悬停与键盘 focus-within 由 CSS 淡入；触屏设备 pointerdown 给代码块加 is-active 显示行号，点按其他区域后移除，避开 pointerleave 在触摸抬起时立即清掉；打印时覆盖为不透明。",
+      "impact": "文章页代码块触屏与键盘交互"
+    },
+    {
+      "scope": "回归测试（tests/posts.test.cjs）",
+      "before": "只校验代码高亮 token 数量与关键字颜色。",
+      "after": "新增断言：每个代码块行号数与其代码行数一致、行号为 inline-block/固定宽/不可选中/默认 opacity:0 且距左边框 9px、悬停淡入/移出归零、触屏轻触显示且点按外部隐藏、语言标签与围栏语言一致且位于左上角、390px 下代码块内部可横向滚动且页面无横向溢出、滚动条伪元素高度与滑块颜色生效；复制按钮数量/位置/无障碍标签正确，点击后剪贴板文本不含行号且按钮切换为已复制态并在 1.6s 后复位。",
+      "impact": "文章构建回归测试"
+    },
+    {
+      "scope": "复制按钮（assets/js/main.js + assets/css/style.css）",
+      "before": "代码块只能手动选择复制，行号会混入选区。",
+      "after": "main.js 为每个 .codehilite 创建右上角复制按钮（禁用 JS 时不出现）；复制时克隆 code 节点并移除 .linenos 行号，优先 navigator.clipboard.writeText，失败回退 execCommand；成功后按钮显示对勾并更新 aria-label 1.6s。",
+      "impact": "文章页代码块交互；缓存版本 ?v= 同步升位"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "代码块由 Pygments 在构建期高亮，无语言标识、行号、自定义滚动条与复制入口。",
+      "after": "代码块左上角静态显示围栏语言（data-language/.code-lang）；行号距左边框 8px 并默认隐藏，鼠标悬停、键盘聚焦或触屏轻触时淡入，点按外部/移出后隐藏；横向溢出使用纸面风格细胶囊滚动条，Firefox 走 thin/scrollbar-color 降级；右上角由 main.js 创建复制按钮，复制内容剔除行号，成功后短暂切换对勾。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261109-6",
+    "user_quote": "确认，我已完成验收",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "node tests/posts.test.cjs 全绿且退出码 0，新增语言标签/行号显隐/悬停/触屏/滚动条/复制按钮断言通过，既有高亮与排印断言不回归",
+        "false_if": "存在任何测试失败、报错或未覆盖回归用例",
+        "evidence": "node tests/posts.test.cjs 31/31（5 个代码块、63 个行号，逐块行号数=代码行数；语言标签依次 bash/python/text/python/text、与 data-language 一致、绝对定位 9px/8px、顶部标签带 32px；行号 inline-block/右对齐/user-select:none/aria-hidden、默认 opacity:0、距左边框 9px；真实鼠标悬停代码块后 opacity=1、移开归 0；合成 touch pointerdown 显示行号、点按 body 隐藏；滚动条伪元素 10px、浅色替身 rgba(155,58,36,.38)、深色 rgba(217,133,95,.42)；5 个复制按钮 position:absolute、右上内缩 6/7、aria-label=复制代码；点击后剪贴板文本为无行号的三行命令、按钮显示对勾并在 1.6s 后复位；390px 代码块内部可横向滚动 238px 且页面无溢出）；node tests/page-transition.test.cjs 10/10；tests/ 下 13 个测试文件全部 EXIT=0。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "全部代码块左侧显示正确围栏语言；行号默认隐藏且距左边框更近，悬停/触屏轻触显示并与代码行严格对齐；长行在 390px 下可横向滚动，滑块为细胶囊样式；右上角复制按钮可用且反馈正确；浅深主题颜色正常",
+        "false_if": "语言标签缺失/错误、行号未隐藏/错位、滚动条无样式、复制按钮缺失/复制内容含行号或代码块撑破页面",
+        "evidence": "构建产物经 headless Chrome 1440×900 与 390×844 截图核对：顶部标签带左上角显示 python/bash/text；默认状态行号不可见（opacity 0），行号起点距左边框 9px（原 17px）；鼠标移入代码块后 1–24 行号淡入并与代码逐行对齐，移出后归零；390px 下长行溢出 238px，底部为 4px 强调色圆角胶囊滑块，块内可横向拖动且页面无横向滚动；右上角复制按钮可见，点击后剪贴板拿到 `python3 -m venv .venv / source .venv/bin/activate / pip install numpy scikit-learn`（无行号），图标切换为对勾并复位；深色主题语言标签与行号 rgb(140,127,112)、滑块 rgba(217,133,95,.42) 随令牌切换。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "代码高亮 token 颜色、公式/脚注/表格排印、C016 切页过渡与构建确定性不受影响",
+        "false_if": "破坏既有代码高亮、文章排印或切页过渡",
+        "evidence": "高亮 token 从 296 增至 364（新增 63 个行号 span 与 5 个语言标签 span），关键字仍为 rgb(155,58,36)、注释/字符串配色不变；语言标签在 code 节点之外，复制文本不含标签与行号；公式 71 处、脚注、表格与 390px 页面宽度断言全部保持 PASS；C016 切页过渡 10/10；复制按钮由 main.js 创建，禁用 JS 时无空控件；构建同输入同输出。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "2026-11-09",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "verified",
+    "signed_quote": "确认，我已完成验收",
+    "signed_rejection_count": 0
+  }
+}

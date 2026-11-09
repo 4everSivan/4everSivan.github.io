@@ -21,7 +21,9 @@ import sys
 from pathlib import Path
 
 try:
-    import markdown  # noqa: F401  仅声明依赖，实际使用在下方
+    import markdown
+    from markdown.extensions.codehilite import CodeHiliteExtension
+    from pygments.formatters import HtmlFormatter
 except ImportError:
     print("缺少依赖: pip install markdown pygments", file=sys.stderr)
     sys.exit(2)
@@ -31,10 +33,53 @@ REQUIRED_KEYS = ("title", "date", "summary")
 SUMMARY_MAX_CHARS = 96
 HOME_LIST_LIMIT = 5
 
-MD_EXTENSIONS = ["extra", "footnotes", "codehilite"]
-MD_EXTENSION_CONFIGS = {
-    "codehilite": {"guess_lang": False, "css_class": "codehilite"}
-}
+MD_EXTENSIONS = ["extra", "footnotes"]
+
+
+class InlineLineNumbers(CodeHiliteExtension):
+    """行号内联在每行行首.
+
+    codehilite 的 linenums 配置只解析布尔值, 无法从外部传 'inline',
+    因此在子类构造完成后直接写入 Pygments 支持的 inline 模式.
+    """
+
+    def __init__(self, **kwargs):
+        kwargs.pop("linenums", None)
+        super().__init__(**kwargs)
+        self.config["linenums"] = ["inline", self.config["linenums"][1]]
+
+
+class LanguageFormatter(HtmlFormatter):
+    """在代码块外层写入语言标签, 供左上角静态展示."""
+
+    def __init__(self, **options):
+        self.label = options.pop("lang_str", "")
+        prefix = "language-"
+        if self.label.startswith(prefix):
+            self.label = self.label[len(prefix) :]
+        super().__init__(**options)
+
+    def _wrap_div(self, inner):
+        label = html.escape(self.label)
+        yield 0, (
+            f'<div class="{html.escape(self.cssclass)}" '
+            f'data-language="{label}">'
+            f'<span class="code-lang">{label}</span>'
+        )
+        yield from inner
+        yield 0, "</div>\n"
+
+
+def markdown_extensions():
+    return [
+        *MD_EXTENSIONS,
+        InlineLineNumbers(
+            guess_lang=False,
+            css_class="codehilite",
+            pygments_formatter=LanguageFormatter,
+        ),
+    ]
+
 
 # 数学公式 (C015): 行内 $…$ / 整行 $$…$$ 构建期经 mathtext 渲染为内联 SVG.
 MATH_COLOR = "#211a15"  # 渲染色, 输出前改写为 currentColor 跟随主题令牌
@@ -171,8 +216,10 @@ def extract_math(body, source):
 def render_markdown(body, source=""):
     """md → HTML；# / ## 都落为 h2，### 落为 h3，更深收拢到 h4。"""
     body, math_html = extract_math(body, source)
-    rendered = markdown.markdown(
-        body, extensions=MD_EXTENSIONS, extension_configs=MD_EXTENSION_CONFIGS
+    rendered = markdown.markdown(body, extensions=markdown_extensions())
+    # 行号只是排版辅助, 不进入辅助技术阅读顺序.
+    rendered = rendered.replace(
+        '<span class="linenos">', '<span class="linenos" aria-hidden="true">'
     )
     for token, svg in math_html.items():
         rendered = rendered.replace(token, svg)
