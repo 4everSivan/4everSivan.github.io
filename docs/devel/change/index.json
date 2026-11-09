@@ -154,7 +154,7 @@
     },
     "C018": {
       "title": "代码块语言标签、行号、滚动条与复制按钮",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C018-code-block",
       "file": "docs/devel/change/C018.json",
       "version": ""
