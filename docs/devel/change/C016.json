@@ -1,0 +1,109 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C016",
+  "title": "博客列表点击切换文章页过渡动画",
+  "version": "",
+  "type": "Enhancement",
+  "status": "verified",
+  "branch": "fix/C016-page-transition",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "页面切换过渡",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "首页 BLOGS 列表点击标题时，浏览器直接整页跳转，旧页内容瞬间消失、文章页内容瞬间出现，两页之间缺少任何视觉连续性；顶栏与两侧字符画本来就同构，跳变反而破坏了「同一个站」的观感。需要在不引入运行时依赖的前提下，为博客列表到文章页的站内导航补一段克制的过渡，并让文章页打开时与首页入场使用同一套淡入语言。",
+  "precheck": {
+    "description": "确认当前代码库尚未实现跨页面切换过渡（无离场类、无文章页入场动画、无过渡标记属性）。",
+    "command": "grep -c 'is-page-leaving' assets/css/style.css assets/js/main.js; grep -c 'data-page-transition' scripts/build_posts.py index.html",
+    "expected": "开工前四项均为 0",
+    "is_completed": true,
+    "evidence": "开工前 grep 计数均为 0：assets/css/style.css 与 assets/js/main.js 无 is-page-leaving，scripts/build_posts.py 与 index.html 无 data-page-transition；确认本变更为新能力。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C016-page-transition"
+    ],
+    "after": [
+      "node tests/page-transition.test.cjs",
+      "node tests/posts.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "离场与入场动效（assets/css/style.css）",
+      "before": "页面点击后瞬间跳转；文章页 .post 无入场动画，顶栏与字符画虽同构但无过渡衔接。",
+      "after": "首页内容层 .page 在 is-page-leaving 下以 200ms ease 淡出并上移 8px；文章页 (body.post-page) 的 .post 与 .foot 以 560ms 曲线自下方 14px 淡入归位（页脚延迟 80ms）；顶栏、字符画与页面底色不参与过渡；打印时重置动画。",
+      "impact": "首页 BLOGS 列表、文章页正文与页脚；缓存版本 ?v= 同步升位"
+    },
+    {
+      "scope": "导航拦截（assets/js/main.js）",
+      "before": "站内链接全部走浏览器默认整页跳转。",
+      "after": "仅拦截带 data-page-transition 的普通左键站内导航：加 is-page-leaving 后延迟 220ms 导航，重复点击合并为一次，修饰键/中键/新窗口/下载/同页锚点保持默认；禁用 JS 或脚本失败时退回普通跳转。",
+      "impact": "博客列表标题、文章页上一篇/返回首页与字标返回首页"
+    },
+    {
+      "scope": "构建标记（scripts/build_posts.py）",
+      "before": "首页注入的列表链接与文章页导航、字标链接无过渡标记；文章页 body 无页面类型类名。",
+      "after": "列表标题链接、上一篇、返回首页与文章页字标均输出 data-page-transition；文章页 body 增加 post-page 类，作为入场动画作用域。",
+      "impact": "构建产物首页与文章页 HTML"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "文章页与首页各自独立加载，博客列表点击后无跨页过渡；文章页正文直接呈现。",
+      "after": "博客列表标题、文章页上一篇/返回首页与字标返回首页为显式过渡链接：离场时内容层 200ms 淡出上移，导航后文章页正文与页脚以 560ms 自下方淡入归位；顶栏与字符画保持静止；过渡不因 reduced-motion 关闭，禁用 JS 时退回默认导航。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261109-1",
+    "user_quote": "确认，我已验收",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "node tests/page-transition.test.cjs 全绿且退出码 0，既有 posts 测试不回归",
+        "false_if": "存在任何测试失败、报错或未覆盖回归用例",
+        "evidence": "node tests/page-transition.test.cjs 10/10（离场类与 200ms 过渡、80ms 时 opacity≈0.29 且上移约 5.6px、220ms 后进入文章页、正文与页脚 page-enter 0.56s/0.08s、Ctrl 点击不拦截、reduced-motion 保留过渡）；node tests/posts.test.cjs 21/21；tests/ 下 12 个测试文件全部 EXIT=0。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "列表点击后内容层先淡出再进入文章页，文章标题与正文淡入归位；顶栏与字符画不跳动；修饰键与禁用 JS 不拦截",
+        "false_if": "点击后无过渡、重复导航、修饰键被吞或文章页内容缺失",
+        "evidence": "构建产物经 headless Chrome 1440×900 实测：点击列表标题立即进入离场态，80ms 时内容层 opacity=0.29、transform=matrix(1,0,0,1,0,-5.6)，约 220ms 后进入 /posts/<slug>/；文章正文 animationName=page-enter、duration=0.56s、页脚延迟 0.08s，结束后 opacity=1；文章页「返回首页」同样先离场再回首页；顶栏与两侧字符画在截图关键帧中位置不变。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "首页入场、文章页主题切换、上一篇导航、打印样式与窄屏布局均不受影响",
+        "false_if": "破坏既有动效、导航或响应式行为",
+        "evidence": "全量回归全部通过：首页入场 5/5、技能轮播 11/11、主题 19/19、搜索 16/16、页脚 13/13、卡片布局 17/17、字符画底图 16/16、滚动 4/4、引文 9/9、字标 6/6、BLOGS 14/14、文章构建 21/21；打印样式重置 .post-page 入场动画，390px 无横向滚动。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "2026-11-09",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "verified",
+    "signed_quote": "确认，我已验收",
+    "signed_rejection_count": 0
+  }
+}

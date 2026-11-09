@@ -238,17 +238,19 @@ def build_post_page(post, layout, prev_post):
     masthead_part = masthead.replace(
         '<h1 class="wordmark">', '<div class="wordmark">'
     ).replace("</h1>", "</div>", 1)
-    masthead_part = masthead_part.replace('href="#top"', 'href="../../"')
+    masthead_part = masthead_part.replace(
+        'href="#top"', 'href="../../" data-page-transition'
+    )
 
     prev_link = ""
     if prev_post:
         prev_link = (
-            f'<a href="../{prev_post["slug"]}/">← 上一篇：'
-            f'{html.escape(prev_post["meta"]["title"])}</a>'
+            f'<a href="../{prev_post["slug"]}/" data-page-transition>'
+            f'← 上一篇：{html.escape(prev_post["meta"]["title"])}</a>'
         )
     nav = (
         f'<nav class="post-nav" aria-label="文章导航">'
-        f"{prev_link}<a href=\"../../\">返回首页</a></nav>"
+        f'{prev_link}<a href="../../" data-page-transition>返回首页</a></nav>'
     )
 
     article = (
@@ -267,7 +269,8 @@ def build_post_page(post, layout, prev_post):
         "<!doctype html>\n"
         '<html lang="zh-CN">\n'
         + head_part
-        + '\n<body id="top">\n  <a class="skip-link" href="#main">跳到正文</a>\n\n  '
+        + '\n<body id="top" class="post-page">\n'
+        + '  <a class="skip-link" href="#main">跳到正文</a>\n\n  '
         + page_art
         + "\n\n  "
         + masthead_part
@@ -288,7 +291,8 @@ def build_home_list(posts):
         month = meta["date"][:7]
         items.append(
             f'        <li class="post-item">\n'
-            f'          <a class="post-title-link" href="posts/{post["slug"]}/">'
+            f'          <a class="post-title-link" '
+            f'href="posts/{post["slug"]}/" data-page-transition>'
             f"{html.escape(meta['title'])}</a>\n"
             f'          <span class="post-date">{month}</span>\n'
             f'          <p class="post-summary">{html.escape(meta["summary"])}</p>\n'
