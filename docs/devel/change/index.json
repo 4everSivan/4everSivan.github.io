@@ -27,7 +27,8 @@
       "changes": [
         "C015",
         "C016",
-        "C017"
+        "C017",
+        "C018"
       ]
     }
   },
@@ -149,6 +150,13 @@
       "status": "closed",
       "branch": "fix/C017-math-font",
       "file": "docs/devel/change/C017.json",
+      "version": ""
+    },
+    "C018": {
+      "title": "代码块语言标签、行号、滚动条与复制按钮",
+      "status": "verified",
+      "branch": "fix/C018-code-block",
+      "file": "docs/devel/change/C018.json",
       "version": ""
     }
   }

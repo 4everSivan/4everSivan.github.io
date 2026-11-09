@@ -445,3 +445,119 @@
     document.documentElement.classList.remove('is-page-leaving');
   });
 })();
+
+// 代码块复制: 行号是 aria-hidden 的内联排版, 复制前从克隆节点移除.
+// 按钮由脚本创建, 禁用 JS 时不会出现不可用的空控件.
+(function () {
+  'use strict';
+
+  const blocks = document.querySelectorAll('.md-body .codehilite');
+  if (blocks.length === 0) {
+    return;
+  }
+
+  const RESET_MS = 1600;
+  const COPY_ICON =
+    '<svg class="code-copy-icon" viewBox="0 0 24 24" fill="none" ' +
+    'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" ' +
+    'stroke-linejoin="round" aria-hidden="true">' +
+    '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>' +
+    '<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>' +
+    '</svg>';
+  const DONE_ICON =
+    '<svg class="code-copy-done" viewBox="0 0 24 24" fill="none" ' +
+    'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" ' +
+    'stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M20 6 9 17l-5-5"/>' +
+    '</svg>';
+
+  function codeText(block) {
+    const code = block.querySelector('code');
+    if (!code) {
+      return '';
+    }
+    const clone = code.cloneNode(true);
+    clone.querySelectorAll('.linenos').forEach((node) => node.remove());
+    return clone.textContent.replace(/\n$/, '');
+  }
+
+  function legacyCopy(text) {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.top = '-1000px';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    let copied = false;
+    try {
+      area.select();
+      area.setSelectionRange(0, area.value.length);
+      copied = document.execCommand('copy');
+    } catch (error) {
+      copied = false;
+    }
+    area.remove();
+    return copied;
+  }
+
+  async function copyText(text) {
+    if (
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === 'function'
+    ) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (error) {
+        // 权限被拒或非安全上下文: 回退到 execCommand.
+      }
+    }
+    return legacyCopy(text);
+  }
+
+  blocks.forEach((block) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'code-copy';
+    button.setAttribute('aria-label', '复制代码');
+    button.setAttribute('title', '复制代码');
+    button.innerHTML = COPY_ICON + DONE_ICON;
+
+    let resetTimer = 0;
+
+    function reset() {
+      button.classList.remove('is-copied', 'is-failed');
+      button.setAttribute('aria-label', '复制代码');
+      button.setAttribute('title', '复制代码');
+    }
+
+    button.addEventListener('click', async () => {
+      const copied = await copyText(codeText(block));
+      window.clearTimeout(resetTimer);
+      button.classList.toggle('is-copied', copied);
+      button.classList.toggle('is-failed', !copied);
+      const label = copied ? '已复制' : '复制失败';
+      button.setAttribute('aria-label', label);
+      button.setAttribute('title', label);
+      resetTimer = window.setTimeout(reset, RESET_MS);
+    });
+
+    block.appendChild(button);
+  });
+
+  // 触屏没有 hover: 轻触代码块显示行号, 点按其他区域后隐藏.
+  document.addEventListener('pointerdown', (event) => {
+    if (event.pointerType === 'mouse') {
+      return;
+    }
+    const target = event.target;
+    const active =
+      target instanceof Element
+        ? target.closest('.md-body .codehilite')
+        : null;
+    blocks.forEach((block) => {
+      block.classList.toggle('is-active', block === active);
+    });
+  });
+})();

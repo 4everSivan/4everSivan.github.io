@@ -1082,6 +1082,136 @@ html[data-theme="dark"] .foot {
   line-height: 1.65;
 }
 
+/* 行号 (C018): 内联在每行行首, 固定列宽右对齐, 不参与选择.
+   默认隐藏, 悬停 / 聚焦 / 触屏轻触代码块时淡入. */
+.md-body .codehilite .linenos {
+  display: inline-block;
+  width: 1.7em;
+  margin-right: 0.6em;
+  color: var(--ink-faint);
+  font-size: 0.85em;
+  text-align: right;
+  opacity: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: opacity 160ms var(--ease);
+}
+
+.md-body .codehilite:hover .linenos,
+.md-body .codehilite:focus-within .linenos,
+.md-body .codehilite.is-active .linenos {
+  opacity: 1;
+}
+
+/* 横向滚动条 (C018): 透明轨道 + 发丝色胶囊滑块.
+   Firefox 不支持 ::-webkit-scrollbar, 用标准属性降级为细滚动条. */
+@supports not selector(::-webkit-scrollbar) {
+  .md-body pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-soft) transparent;
+  }
+}
+
+@supports selector(::-webkit-scrollbar) {
+  .md-body pre::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .md-body pre::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .md-body pre::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-color: var(--accent-soft);
+    background-clip: content-box;
+  }
+
+  .md-body pre::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent);
+  }
+}
+
+/* 复制按钮 (C018): 代码块右上角, 成功后短暂切换为对勾. */
+.md-body .codehilite {
+  position: relative;
+}
+
+.md-body .codehilite pre {
+  padding-top: 32px;
+  padding-left: 8px;
+}
+
+/* 语言标签 (C018): 代码块左上角, 构建期静态写入. */
+.code-lang {
+  position: absolute;
+  top: 9px;
+  left: 8px;
+  color: var(--ink-faint);
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  pointer-events: none;
+}
+
+.code-copy {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: var(--paper-raise);
+  color: var(--ink-faint);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: color 180ms var(--ease), border-color 180ms var(--ease),
+    opacity 180ms var(--ease);
+}
+
+.code-copy:hover,
+.code-copy:focus-visible {
+  border-color: var(--rule-strong);
+  color: var(--ink);
+  opacity: 1;
+}
+
+.code-copy svg {
+  width: 14px;
+  height: 14px;
+}
+
+.code-copy-done {
+  display: none;
+}
+
+.code-copy.is-copied {
+  border-color: var(--accent-soft);
+  color: var(--accent);
+  opacity: 1;
+}
+
+.code-copy.is-copied .code-copy-icon {
+  display: none;
+}
+
+.code-copy.is-copied .code-copy-done {
+  display: block;
+}
+
+.code-copy.is-failed {
+  color: var(--accent);
+  opacity: 1;
+}
+
 /* Pygments 双色映射：关键字/数字/内建名 = 强调橘；
    字符串/类型名 = 次级墨；注释 = 浅墨。令牌随主题自动适配。 */
 .codehilite .k,
@@ -1339,5 +1469,13 @@ html.is-page-leaving .page {
 @media print {
   .md-body pre {
     white-space: pre-wrap;
+  }
+
+  .md-body .codehilite .linenos {
+    opacity: 1;
+  }
+
+  .code-copy {
+    display: none;
   }
 }
