@@ -189,7 +189,7 @@
     },
     "C022": {
       "title": "数学公式内联 SVG 样式泄漏、重复 id 与替代文本",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C022-math-svg-hygiene",
       "file": "docs/devel/change/C022.json",
       "version": ""
