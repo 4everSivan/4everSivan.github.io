@@ -4,7 +4,7 @@
   "title": "文章页「上一篇」方向与构建脚本转义缺陷",
   "version": "",
   "type": "BugFix",
-  "status": "verified",
+  "status": "closed",
   "branch": "fix/C023-build-nav-escape",
   "is_hotfix": false,
   "target": {
@@ -105,7 +105,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "bcf283d3b4644bba2663f13676f3688b3f9721fc",
     "tag": ""
   },
   "gate": {
@@ -113,8 +113,8 @@
     "version": "1.7.0",
     "ran_at": "2026-11-09",
     "exit_code": 0,
-    "from_status": "in_progress",
-    "target_status": "verified",
+    "from_status": "verified",
+    "target_status": "closed",
     "signed_quote": "确认，我同意验收",
     "signed_rejection_count": 0
   }

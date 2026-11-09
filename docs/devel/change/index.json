@@ -196,7 +196,7 @@
     },
     "C023": {
       "title": "文章页「上一篇」方向与构建脚本转义缺陷",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C023-build-nav-escape",
       "file": "docs/devel/change/C023.json",
       "version": ""
