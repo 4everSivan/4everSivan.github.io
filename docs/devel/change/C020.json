@@ -4,7 +4,7 @@
   "title": "移除文章页模糊带白色提亮层",
   "version": "",
   "type": "BugFix",
-  "status": "verified",
+  "status": "closed",
   "branch": "fix/C020-blur-no-tint",
   "is_hotfix": false,
   "target": {
@@ -93,7 +93,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "8b11005f04adcc73f2d9a73f7208a00a63ebbd3b",
     "tag": ""
   },
   "gate": {
@@ -101,8 +101,8 @@
     "version": "1.7.0",
     "ran_at": "2026-11-09",
     "exit_code": 0,
-    "from_status": "in_progress",
-    "target_status": "verified",
+    "from_status": "verified",
+    "target_status": "closed",
     "signed_quote": "完全去掉提亮层",
     "signed_rejection_count": 0
   }
