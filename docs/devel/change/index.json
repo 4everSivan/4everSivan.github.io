@@ -32,7 +32,8 @@
         "C019",
         "C020",
         "C021",
-        "C022"
+        "C022",
+        "C023"
       ]
     }
   },
@@ -189,6 +190,13 @@
       "status": "in_progress",
       "branch": "fix/C022-math-svg-hygiene",
       "file": "docs/devel/change/C022.json",
+      "version": ""
+    },
+    "C023": {
+      "title": "文章页「上一篇」方向与构建脚本转义缺陷",
+      "status": "in_progress",
+      "branch": "fix/C023-build-nav-escape",
+      "file": "docs/devel/change/C023.json",
       "version": ""
     }
   }
