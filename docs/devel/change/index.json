@@ -178,7 +178,7 @@
     },
     "C021": {
       "title": "文章标题字号阶梯与 h2 序号",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C021-headings",
       "file": "docs/devel/change/C021.json",
       "version": ""
