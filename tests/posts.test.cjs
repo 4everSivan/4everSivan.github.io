@@ -196,6 +196,78 @@ function check(name, passed, detail) {
     `exit=${badBuild.status}`
   );
 
+  // 两个临时构建都输出到仓库外的 --out (C023):
+  // A 校验上一篇指向时间更早的一篇; B 校验标题/摘要里的反斜杠原样输出.
+  const buildTemp = (prefix, files) => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+    for (const [name, text] of Object.entries(files)) {
+      fs.writeFileSync(path.join(dir, name), text);
+    }
+    const out = path.join(dir, 'out');
+    const result = spawnSync(
+      PYTHON,
+      [
+        path.join(ROOT, 'scripts', 'build_posts.py'),
+        '--posts-dir',
+        dir,
+        '--out',
+        out,
+      ],
+      { encoding: 'utf8' }
+    );
+    const page = (slug) => {
+      const file = path.join(out, 'posts', slug, 'index.html');
+      return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+    };
+    const pages = Object.keys(files).map((name) => page(name.replace(/\.md$/, '')));
+    fs.rmSync(dir, { recursive: true, force: true });
+    return {
+      status: result.status,
+      stdout: result.stdout.trim(),
+      error: result.stderr.trim().split('\n').pop() || '',
+      out,
+      pages,
+    };
+  };
+
+  const nav = buildTemp('navposts-', {
+    '2026-01-01-old.md':
+      '---\ntitle: 旧文\ndate: 2026-01-01\nsummary: 较早的一篇\n---\n\n正文\n',
+    '2026-02-01-new.md':
+      '---\ntitle: 新文\ndate: 2026-02-01\nsummary: 较新的一篇\n---\n\n正文\n',
+  });
+  const [olderPage, newerPage] = nav.pages;
+  const postNav = (page) =>
+    (page.match(/<nav class="post-nav"[^>]*>(.*?)<\/nav>/) || ['', ''])[1];
+  check(
+    '上一篇指向更早的文章, 最早一篇不显示上一篇 (C023)',
+    newerPage.includes(
+      '<a href="../2026-01-01-old/" data-page-transition>← 上一篇：旧文</a>'
+    ) &&
+      olderPage !== '' &&
+      !olderPage.includes('上一篇'),
+    `newer=${postNav(newerPage)}, older=${postNav(olderPage)}`
+  );
+  check(
+    '仓库外 --out 构建正常结束并报出输出路径 (C023)',
+    nav.status === 0 && nav.stdout.includes(nav.out),
+    `exit=${nav.status}${nav.error ? ', ' + nav.error : ''}`
+  );
+
+  const slash = buildTemp('slashposts-', {
+    '2026-03-01-slash.md':
+      '---\ntitle: 路径 C:\\Users\\1\ndate: 2026-03-01\nsummary: 摘要含 \\n 与 \\1\n---\n\n正文\n',
+  });
+  check(
+    '标题/摘要中的反斜杠原样写入 <title> 与 description (C023)',
+    slash.status === 0 &&
+      slash.pages[0].includes('<title>路径 C:\\Users\\1 · Sivan</title>') &&
+      slash.pages[0].includes(
+        '<meta name="description" content="摘要含 \\n 与 \\1"'
+      ),
+    `exit=${slash.status}${slash.error ? ', ' + slash.error : ''}`
+  );
+
   // ---------- 浏览器 ----------
   const profile = path.join(ROOT, 'local', 'chrome-posts-profile');
   fs.rmSync(profile, { recursive: true, force: true });

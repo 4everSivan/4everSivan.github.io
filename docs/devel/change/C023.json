@@ -1,0 +1,117 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C023",
+  "title": "文章页「上一篇」方向与构建脚本转义缺陷",
+  "version": "",
+  "type": "BugFix",
+  "status": "in_progress",
+  "branch": "fix/C023-build-nav-escape",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "文章构建脚本",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "项目评审发现 scripts/build_posts.py 的三处缺陷，目前只有一篇文章所以线上尚未暴露：(1) 文章按日期倒序排列后取 posts[index - 1] 作为「← 上一篇」，实际指向更新的一篇——最新文章反而没有上一篇，较早文章的「上一篇」跳到更新的文章；用户确认过的 demo（local/blogs-md-demo.html）中 2026-11-08 文章的上一篇是 2026-10 的文章，即应指向更早的一篇。(2) 标题与摘要以字符串形式作为 re.sub 的替换值，含 \\U 时构建直接崩溃（re.error: bad escape），含 \\n、\\1 时被改写或报错。(3) --out 指向仓库外目录时，产物写完后在最后的 out_dir.relative_to(ROOT) 处抛 ValueError、以退出码 1 结束。",
+  "precheck": {
+    "description": "以仓库外临时目录复现三处缺陷。",
+    "command": "T=$(mktemp -d); mkdir $T/p; printf -- '---\\ntitle: 旧文\\ndate: 2026-01-01\\nsummary: a\\n---\\n\\nx\\n' > $T/p/2026-01-01-old.md; printf -- '---\\ntitle: 新文\\ndate: 2026-02-01\\nsummary: b\\n---\\n\\nx\\n' > $T/p/2026-02-01-new.md; local/venv/bin/python scripts/build_posts.py --posts-dir $T/p --out $T/out; echo exit=$?; grep -o '上一篇：[^<]*' $T/out/posts/*/index.html",
+    "expected": "修复前：exit=1（relative_to ValueError），且「上一篇：新文」出现在 2026-01-01-old 页面、2026-02-01-new 页面没有上一篇",
+    "is_completed": true,
+    "evidence": "main@e838734：仓库外 --out 构建在结尾抛 ValueError 'is not in the subpath' 并 exit 1；旧文页面导航为「← 上一篇：新文 / 返回首页」，新文页面只有「返回首页」；另建标题为「路径 C:\\Users\\sivan」的文章，构建报 re.error: bad escape \\U at position 12。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C023-build-nav-escape"
+    ],
+    "after": [
+      "node tests/posts.test.cjs",
+      "node tests/page-transition.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "上一篇方向（scripts/build_posts.py main）",
+      "before": "prev_post = posts[index - 1]（日期倒序中的上一项，即更新的一篇）。",
+      "after": "prev_post = posts[index + 1]（日期倒序中的下一项，即发布日期更早的一篇）；最早一篇为 None，不显示上一篇。",
+      "impact": "第二篇文章发布后的文章页导航"
+    },
+    {
+      "scope": "页头标题与描述替换（scripts/build_posts.py build_post_page）",
+      "before": "re.sub 以 f-string 作为替换值，标题/摘要中的反斜杠被当作转义或分组引用解析。",
+      "after": "替换值改为 lambda 返回，标题与摘要按 html.escape 后的原文写入 <title> 与 meta description。",
+      "impact": "含反斜杠的文章元信息"
+    },
+    {
+      "scope": "构建结束提示（scripts/build_posts.py main）",
+      "before": "无条件调用 out_dir.relative_to(ROOT)，仓库外 --out 抛 ValueError、退出码 1。",
+      "after": "out_dir 在仓库内时显示相对路径，否则显示绝对路径；构建以 0 正常结束。",
+      "impact": "以临时目录构建的测试与本地调用"
+    },
+    {
+      "scope": "回归测试（tests/posts.test.cjs）",
+      "before": "无多篇文章导航与元信息转义用例。",
+      "after": "新增 3 项：仓库外临时目录构建两篇文章，较新一篇的「上一篇」指向较早一篇且最早一篇不显示；同一构建 exit 0 并报出输出路径；另一构建中含 \\U、\\1、\\n 的标题与摘要原样写入 <title> 与 description。三项在修复前各自因对应缺陷失败。",
+      "impact": "文章构建回归测试"
+    },
+    {
+      "scope": "设计基线（docs/devel/design/02-博客文章.md）",
+      "before": "规则 11 只写「← 上一篇（有则显示）」，未定义方向。",
+      "after": "规则 11 明确「上一篇」为发布日期更早的一篇（日期倒序中的下一项），最早一篇不显示；4.3 与 4.4 同步登记 C023。",
+      "impact": "博客文章设计基线"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "文章页导航：页脚为「← 上一篇（有则显示）/ 返回首页」；无下一篇入口。",
+      "after": "文章页导航：页脚为「← 上一篇（有则显示）/ 返回首页」；「上一篇」为发布日期更早的一篇（即日期倒序列表中的下一项），最早的一篇不显示；无下一篇入口。"
+    }
+  },
+  "verification": {
+    "result": null,
+    "run_id": "local-20261109-11",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "node tests/posts.test.cjs 全绿且退出码 0，C023 三项新断言通过，且在修复前的构建脚本上各自因对应缺陷失败",
+        "false_if": "存在任何测试失败、报错，或新断言在修复前同样通过",
+        "evidence": "修复前构建脚本：posts 38/41，C023 三项 FAIL（新文导航仅「返回首页」、旧文导航为「← 上一篇：新文」；仓库外 --out ValueError exit 1；re.error: bad escape \\U）。修复后 node tests/posts.test.cjs 41/41、exit 0。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "两篇文章时较新一篇显示「← 上一篇：较早文章」，最早一篇只有「返回首页」；反斜杠标题原样输出；仓库外 --out 退出码 0",
+        "false_if": "上一篇方向仍错误、反斜杠被改写或构建崩溃",
+        "evidence": "临时目录构建：新文导航为「← 上一篇：旧文 / 返回首页」，旧文导航只有「返回首页」；<title>路径 C:\\Users\\1 · Sivan</title> 与 description「摘要含 \\n 与 \\1」原样输出；stdout 报出仓库外绝对路径，exit 0。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "当前单篇文章的线上产物除既有差异外不变；其余测试不受影响",
+        "false_if": "现有文章页或首页产物出现非预期变化，或其他测试回归",
+        "evidence": "与 C022 产物 diff -r：仅资源版本串差异（C022 产物快照早于其版本串提升），文章页与首页内容逐字节一致；本卡未改 CSS/JS，无需提升版本串。tests/ 下 13 个测试文件全部 EXIT=0（posts 41/41、page-transition 10/10）；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

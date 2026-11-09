@@ -315,13 +315,14 @@ def build_post_page(post, layout, prev_post):
     title = html.escape(post["meta"]["title"])
     summary = html.escape(post["meta"]["summary"])
 
+    # 替换值用函数传入: 字符串形式会把标题/摘要里的 \U、\1 等当作转义解析.
     head_part = relativize(head)
     head_part = re.sub(
-        r"<title>.*?</title>", f"<title>{title} · Sivan</title>", head_part
+        r"<title>.*?</title>", lambda _: f"<title>{title} · Sivan</title>", head_part
     )
     head_part = re.sub(
         r'<meta name="description" content="[^"]*"',
-        f'<meta name="description" content="{summary}"',
+        lambda _: f'<meta name="description" content="{summary}"',
         head_part,
     )
 
@@ -440,8 +441,9 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
     shutil.copytree(ROOT / "assets", out_dir / "assets", dirs_exist_ok=True)
 
+    # 列表为日期倒序, 「上一篇」是时间更早的一篇, 即列表中的下一项.
     for index, post in enumerate(posts):
-        prev_post = posts[index - 1] if index > 0 else None
+        prev_post = posts[index + 1] if index + 1 < len(posts) else None
         page = build_post_page(post, layout, prev_post)
         target = out_dir / "posts" / post["slug"] / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -459,8 +461,10 @@ def main():
         )
     (out_dir / "index.html").write_text(home_html, encoding="utf-8")
 
+    # --out 可指向仓库外 (如临时目录), 此时直接显示绝对路径.
+    shown = out_dir.relative_to(ROOT) if out_dir.is_relative_to(ROOT) else out_dir
     print(
-        f"build_posts: {len(posts)} 篇文章 → {out_dir.relative_to(ROOT)} "
+        f"build_posts: {len(posts)} 篇文章 → {shown} "
         f"(首页列表 {min(len(posts), HOME_LIST_LIMIT)} 条)"
     )
 
