@@ -322,6 +322,15 @@ function check(name, passed, detail) {
       post.mathSvgs >= 60 && post.mathBlocks === 4 && post.mathDollars === 0,
       `svgs=${post.mathSvgs}, blocks=${post.mathBlocks}, dollars=${post.mathDollars}`
     );
+    const mathGlyphIds = Array.from(
+      postHtml.matchAll(/<path id="([^"]+)"/g)
+    ).map((match) => match[1]);
+    check(
+      '数学公式字形为 STIX 衬线, 不回落到 DejaVu Sans (C017)',
+      mathGlyphIds.some((id) => id.startsWith('STIX')) &&
+        !mathGlyphIds.some((id) => id.startsWith('DejaVu')),
+      `glyphs=${mathGlyphIds.length}`
+    );
     check(
       '数学公式颜色跟随墨色令牌 (浅色)',
       post.mathColor === 'rgb(33, 26, 21)',

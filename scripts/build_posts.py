@@ -150,6 +150,9 @@ def extract_math(body, source):
         import matplotlib
 
         matplotlib.use("Agg")
+        # 默认 dejavusans 与正文 Times/宋体冲突; STIX 为 Times 风格衬线,
+        # 随 matplotlib 内置分发, CI 与本地产物一致.
+        matplotlib.rcParams["mathtext.fontset"] = "stix"
         import matplotlib.pyplot as plt
     except ImportError:
         die([f"{source}: 文章含数学公式, 构建需安装 matplotlib"])

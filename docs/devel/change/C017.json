@@ -1,0 +1,109 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C017",
+  "title": "数学公式字体改为 STIX 衬线",
+  "version": "",
+  "type": "Enhancement",
+  "status": "verified",
+  "branch": "fix/C017-math-font",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "公式渲染",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "C015 的公式 SVG 沿用 matplotlib mathtext 默认的 DejaVu Sans（无衬线），与站点正文的 Times New Roman + 宋体衬线体系冲突：整段中文里夹杂无衬线数学符号，字重、x-height 与笔画收尾都不一致。改用 matplotlib 内置的 STIX 字体集（Times 风格衬线，随 matplotlib 分发，不依赖系统字体），让行内与整行公式回到同一排印语汇，并保证 CI 与本地构建产物一致。",
+  "precheck": {
+    "description": "确认公式渲染仍使用默认无衬线字体集，尚未指定 STIX。",
+    "command": "local/venv/bin/python -c \"import matplotlib; print(matplotlib.rcParams['mathtext.fontset'])\"; grep -c 'mathtext.fontset' scripts/build_posts.py",
+    "expected": "开工前输出 dejavusans，且构建脚本中 mathtext.fontset 计数为 0",
+    "is_completed": true,
+    "evidence": "开工前 local/venv 的 matplotlib 3.9.4 输出 mathtext.fontset=dejavusans，scripts/build_posts.py 无 mathtext.fontset 配置；产物公式 SVG 的 glyph path id 为 DejaVuSans-*，确认公式与正文衬线体系冲突。"
+  },
+  "callback": {
+    "before": [
+      "# 与 C016 并行开发，公式字体改动独立成卡；提交时按卡拆分 fix/C017-math-font 分支"
+    ],
+    "after": [
+      "node tests/posts.test.cjs",
+      "node tests/page-transition.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "公式渲染（scripts/build_posts.py）",
+      "before": "matplotlib mathtext 使用默认 dejavusans，公式 SVG 字形为 DejaVu Sans 无衬线。",
+      "after": "渲染前设置 matplotlib.rcParams['mathtext.fontset'] = 'stix'，公式字形改为 STIX 衬线（Times 风格，随 matplotlib 内置分发）；公式提取、尺寸、颜色与失败策略不变。",
+      "impact": "全部含公式文章的构建产物；无公式文章不触发 matplotlib，产物不变"
+    },
+    {
+      "scope": "回归测试（tests/posts.test.cjs）",
+      "before": "只校验公式 SVG 数量、整行块数量、$ 残留与主题颜色。",
+      "after": "新增字形指纹断言：产物中的公式 path id 必须包含 STIX 字形且不出现 DejaVuSans。",
+      "impact": "文章构建回归测试"
+    },
+    {
+      "scope": "设计基线（docs/devel/design/02-博客文章.md）",
+      "before": "规则 14 只规定公式的提取、SVG 化与 currentColor 颜色，未规定字形。",
+      "after": "规则 14 明确公式字体集固定为 STIX 衬线，与正文 Times New Roman/宋体同一排印体系，不依赖系统字体。",
+      "impact": "博客文章设计基线"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "公式经 mathtext 渲染为内联 SVG，未规定数学字体集，实际回落为 DejaVu Sans 无衬线。",
+      "after": "公式字体集固定为 STIX 衬线（Times 风格，随 matplotlib 内置分发），与正文 Times New Roman + 宋体统一，不依赖系统字体。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261109-2",
+    "user_quote": "确认，我已验收",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "node tests/posts.test.cjs 全绿且退出码 0，新增 STIX 字形断言通过，既有公式/排印断言不回归",
+        "false_if": "存在任何测试失败、报错或未覆盖回归用例",
+        "evidence": "node tests/posts.test.cjs 22/22（新增：354 个公式 glyph path 含 STIX 字形、无 DejaVuSans；既有公式数量/主题颜色/脚注/排印断言全部保持 PASS）；node tests/page-transition.test.cjs 10/10；tests/ 下 13 个测试文件全部 EXIT=0。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "构建产物公式字形为 STIX 衬线，浅深主题下颜色仍跟随墨色令牌，行内基线与整行居中正常",
+        "false_if": "公式仍为无衬线、颜色不随主题或基线错位",
+        "evidence": "构建产物公式 glyph id 为 STIXGeneral-* / STIXNonUnicode-*（开工前为 DejaVuSans-*）；浅色公式 rgb(33,26,21)、深色 rgb(236,228,216) 仍随墨色令牌；文章页截图人工核对：行内公式为衬线字形、与 15px 宋体基线协调，整行公式居中完整。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "无公式文章构建产物逐字节不变；C016 切页过渡与既有文章测试不受影响",
+        "false_if": "破坏构建确定性、无公式文章产物或切页过渡",
+        "evidence": "STIX 配置位于 extract_math 检测到公式后的 matplotlib 导入分支，无公式文章不触发该分支、产物不变；C016 切页过渡 10/10，全量 13 个测试文件全部通过；构建仍为同输入同输出。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "2026-11-09",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "verified",
+    "signed_quote": "确认，我已验收",
+    "signed_rejection_count": 0
+  }
+}
