@@ -14,7 +14,6 @@
   --paper: #f7e5d1;
   --paper-rgb: 247, 229, 209;
   --paper-raise: #fcf1e2;
-  --paper-raise-rgb: 252, 241, 226;
   --ink: #211a15;
   --ink-soft: #5d5045;
   --ink-faint: #6f6054;
@@ -41,7 +40,6 @@ html[data-theme="dark"] {
   --paper: #17130f;
   --paper-rgb: 23, 19, 15;
   --paper-raise: #211b16;
-  --paper-raise-rgb: 33, 27, 22;
   --ink: #ece4d8;
   --ink-soft: #b5a898;
   --ink-faint: #8c7f70;
@@ -151,7 +149,6 @@ body {
   width: calc(var(--measure) + 80px);
   transform: translateX(-50%);
   pointer-events: none;
-  background: rgba(var(--paper-raise-rgb), 0.55);
   -webkit-backdrop-filter: blur(1px);
   backdrop-filter: blur(1px);
   -webkit-mask-image: linear-gradient(

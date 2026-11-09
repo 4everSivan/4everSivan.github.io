@@ -417,13 +417,13 @@ function check(name, passed, detail) {
     );
     check('日期 time[datetime]', post.time === '2026-11-08', post.time);
     check(
-      '文章页内容列背景模糊带 (C019)',
+      '文章页内容列背景模糊带且无提亮 (C019/C020)',
       post.hasArticleBlur &&
         post.articleBlurWidth === 656 &&
         post.articleBlurPosition === 'fixed' &&
         post.articleBlurZ === '0' &&
         post.articleBlurBackdrop === 'blur(1px)' &&
-        post.articleBlurBackground === 'rgba(252, 241, 226, 0.55)' &&
+        post.articleBlurBackground === 'rgba(0, 0, 0, 0)' &&
         post.articleBlurMask.includes('72px') &&
         post.pageZ === '1' &&
         post.artZ === '0',
@@ -664,9 +664,6 @@ function check(name, passed, detail) {
           ).color,
           codeThumb: getComputedStyle(pre, '::-webkit-scrollbar-thumb')
             .backgroundColor,
-          articleBlurBg: getComputedStyle(
-            document.querySelector('.article-blur')
-          ).backgroundColor,
         };
       })()`
     );
@@ -681,12 +678,11 @@ function check(name, passed, detail) {
       toggled.mathColor
     );
     check(
-      '语言标签/行号/滚动条/模糊带颜色跟随深色令牌 (C018/C019)',
+      '语言标签/行号/滚动条颜色跟随深色令牌 (C018)',
       toggled.lineNumberColor === 'rgb(140, 127, 112)' &&
         toggled.langColor === 'rgb(140, 127, 112)' &&
-        toggled.codeThumb === 'rgba(217, 133, 95, 0.42)' &&
-        toggled.articleBlurBg === 'rgba(33, 27, 22, 0.55)',
-      `lineno=${toggled.lineNumberColor}, lang=${toggled.langColor}, thumb=${toggled.codeThumb}, blur=${toggled.articleBlurBg}`
+        toggled.codeThumb === 'rgba(217, 133, 95, 0.42)',
+      `lineno=${toggled.lineNumberColor}, lang=${toggled.langColor}, thumb=${toggled.codeThumb}`
     );
 
     // 窄屏无横向滚动.
