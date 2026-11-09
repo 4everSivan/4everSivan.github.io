@@ -1,0 +1,109 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C020",
+  "title": "移除文章页模糊带白色提亮层",
+  "version": "",
+  "type": "BugFix",
+  "status": "verified",
+  "branch": "fix/C020-blur-no-tint",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "文章页背景",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "C019 为了让 1px 背景模糊在桌面宽度下可见，给 .article-blur 叠了 55% 的纸面提亮（浅色 rgba(252,241,226,.55)）。这层在浅色主题下把内容列抬成接近白色，用户实际看到的是「文章页模糊带有一块白色背景」，与本意不符。经用户选择，完全去掉提亮层，只保留 1px 背景模糊与 72px 羽化。",
+  "precheck": {
+    "description": "确认白色背景来自 .article-blur 的纸面提亮背景。",
+    "command": "grep -n 'article-blur' -A12 assets/css/style.css | grep 'background'",
+    "expected": "存在 background: rgba(var(--paper-raise-rgb), 0.55)",
+    "is_completed": true,
+    "evidence": "assets/css/style.css 的 .article-blur 规则含 background: rgba(var(--paper-raise-rgb), 0.55)；浅色 --paper-raise-rgb 为 252,241,226，55% 叠在 #f7e5d1 上得到近白纸面色，即用户看到的白色背景。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C020-blur-no-tint"
+    ],
+    "after": [
+      "node tests/posts.test.cjs",
+      "node tests/page-transition.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "模糊层样式（assets/css/style.css）",
+      "before": ".article-blur 含 background: rgba(var(--paper-raise-rgb), 0.55)，浅色主题下形成近白色叠层。",
+      "after": "移除 .article-blur 的 background，仅保留 backdrop-filter: blur(1px) 与 72px 羽化 mask；同时删除不再使用的 --paper-raise-rgb 双主题令牌。",
+      "impact": "文章页背景层；浅色主题不再出现白色块，桌面宽度下带体基本不可见"
+    },
+    {
+      "scope": "回归测试（tests/posts.test.cjs）",
+      "before": "断言 .article-blur 背景为浅色 rgba(252,241,226,.55)、深色 rgba(33,27,22,.55)。",
+      "after": "改为断言背景透明 rgba(0, 0, 0, 0)，保留 fixed/宽 656px/z-index/blur(1px)/72px mask 断言；深色检查移除模糊带背景项。",
+      "impact": "文章构建回归测试"
+    },
+    {
+      "scope": "设计基线（docs/devel/design/02-博客文章.md）",
+      "before": "规则 16 写明 55% 纸面提亮，4.4 的 C019 行同样描述提亮带。",
+      "after": "规则 16 改为透明装饰层，只保留 1px 背景模糊 + 72px 羽化，不再提亮纸面。",
+      "impact": "博客文章设计基线"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "文章页 .article-blur 使用 1px 背景模糊 + 55% 纸面提亮 + 72px 羽化。",
+      "after": "文章页 .article-blur 只使用 1px 背景模糊 + 72px 羽化，不再叠加纸面提亮；列外字符画保持清晰，首页不出现、打印隐藏。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261109-8",
+    "user_quote": "完全去掉提亮层",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "node tests/posts.test.cjs 全绿且退出码 0，.article-blur 背景为透明且既有模糊/羽化断言不回归",
+        "false_if": "存在任何测试失败、报错或未覆盖回归用例",
+        "evidence": "node tests/posts.test.cjs 33/33（.article-blur 背景为 rgba(0,0,0,0)，fixed/宽 656px/z-index 0/blur(1px)/72px mask 断言仍 PASS；首页无该层；代码块/公式/排印断言全部保持 PASS）；node tests/page-transition.test.cjs 10/10；tests/ 下 13 个测试文件全部 EXIT=0。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "浅色/深色文章页均不再出现白色或提亮色块；1px 模糊与 72px 羽化仍生效，正文清晰",
+        "false_if": "仍见白色叠层、模糊层错位或正文受影响",
+        "evidence": "构建产物经 headless Chrome 1440×900 浅色/深色截图核对：内容列背景与两侧纸面一致（浅色均 rgb(247,229,209)、深色均 rgb(23,19,15)），不再出现 55% 纸面提亮形成的近白色块；1px 背景模糊与 72px 羽化仍保留，正文/代码块清晰，390px 无横向滚动。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "首页、切页过渡、代码块、公式与打印样式不受影响；无新增未使用令牌",
+        "false_if": "破坏既有功能或残留死代码",
+        "evidence": "已删除仅为提亮层服务的 --paper-raise-rgb 双主题令牌；首页仍无 article-blur，page-art 16/16、C016 切页过渡 10/10、代码块 33 项中的 C018 断言全部 PASS；打印隐藏 article-blur；构建同输入同输出。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "2026-11-09",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "verified",
+    "signed_quote": "完全去掉提亮层",
+    "signed_rejection_count": 0
+  }
+}

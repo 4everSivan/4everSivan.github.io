@@ -29,7 +29,8 @@
         "C016",
         "C017",
         "C018",
-        "C019"
+        "C019",
+        "C020"
       ]
     }
   },
@@ -165,6 +166,13 @@
       "status": "closed",
       "branch": "fix/C019-article-blur",
       "file": "docs/devel/change/C019.json",
+      "version": ""
+    },
+    "C020": {
+      "title": "移除文章页模糊带白色提亮层",
+      "status": "verified",
+      "branch": "fix/C020-blur-no-tint",
+      "file": "docs/devel/change/C020.json",
       "version": ""
     }
   }
