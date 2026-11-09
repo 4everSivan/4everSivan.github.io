@@ -4,7 +4,7 @@
   "title": "技能轮播键盘聚焦居中与视窗滚动错位",
   "version": "",
   "type": "BugFix",
-  "status": "verified",
+  "status": "closed",
   "branch": "fix/C024-carousel-keyboard",
   "is_hotfix": false,
   "target": {
@@ -101,7 +101,7 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "0774c798ff2621834d4ea5530e29e4d5b231e558",
     "tag": ""
   },
   "gate": {
@@ -109,8 +109,8 @@
     "version": "1.7.0",
     "ran_at": "2026-11-09",
     "exit_code": 0,
-    "from_status": "in_progress",
-    "target_status": "verified",
+    "from_status": "verified",
+    "target_status": "closed",
     "signed_quote": "确认，我同意验收",
     "signed_rejection_count": 0
   }
