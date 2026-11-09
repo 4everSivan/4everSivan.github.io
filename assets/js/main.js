@@ -364,3 +364,84 @@
     });
   });
 })();
+
+// 博客切页: 内容层先淡出, 再进入文章页; 文章页加载时自下方淡入归位.
+// 过渡链接由构建期写入 data-page-transition; 禁用 JS 时保持普通整页导航.
+(function () {
+  'use strict';
+
+  const links = Array.from(
+    document.querySelectorAll('a[data-page-transition]')
+  );
+  if (links.length === 0) {
+    return;
+  }
+
+  // 与样式表里的 200ms 离场过渡对齐, 再留 20ms 收尾缓冲.
+  const LEAVE_MS = 220;
+  let leaving = false;
+
+  function prefetch(link) {
+    if (link.dataset.prefetched === 'true') {
+      return;
+    }
+    link.dataset.prefetched = 'true';
+    const hint = document.createElement('link');
+    hint.rel = 'prefetch';
+    hint.href = link.href;
+    document.head.appendChild(hint);
+  }
+
+  links.forEach((link) => {
+    link.addEventListener('pointerenter', () => prefetch(link), {
+      passive: true,
+    });
+    link.addEventListener('focus', () => prefetch(link));
+  });
+
+  function leave(url) {
+    if (leaving) {
+      return;
+    }
+    leaving = true;
+    document.documentElement.classList.add('is-page-leaving');
+    window.setTimeout(() => {
+      window.location.assign(url);
+    }, LEAVE_MS);
+  }
+
+  links.forEach((link) => {
+    link.addEventListener('click', (event) => {
+      if (event.defaultPrevented) {
+        return;
+      }
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+      if (link.target && link.target !== '_self') {
+        return;
+      }
+      if (link.hasAttribute('download')) {
+        return;
+      }
+      const url = new URL(link.href, window.location.href);
+      if (url.origin !== window.location.origin) {
+        return;
+      }
+      event.preventDefault();
+      leave(url.href);
+    });
+  });
+
+  // 返回时页面可能从 bfcache 恢复: 清掉离场态, 避免内容保持透明.
+  window.addEventListener('pageshow', () => {
+    leaving = false;
+    document.documentElement.classList.remove('is-page-leaving');
+  });
+})();
