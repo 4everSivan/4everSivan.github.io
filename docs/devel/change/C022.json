@@ -1,0 +1,111 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C022",
+  "title": "数学公式内联 SVG 样式泄漏、重复 id 与替代文本",
+  "version": "",
+  "type": "BugFix",
+  "status": "in_progress",
+  "branch": "fix/C022-math-svg-hygiene",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "数学公式构建",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "项目评审发现：matplotlib 输出的每个公式 SVG 都自带 <style>*{stroke-linejoin: round; stroke-linecap: butt}</style>。内联 SVG 的 <style> 在 HTML 中是整页样式表，CSS 规则又优先于 SVG 呈现属性，于是文章页顶栏搜索/太阳/月亮与代码块复制按钮图标的 stroke-linecap=\"round\" 全部被改成 butt，与首页不一致（headless Chrome 实测：首页 round、文章页 butt）。同时 71 个公式各带 figure_1/patch_1/text_1 分组 id，并各自重复定义字形（同一字形最多重复 25 次），整页 id 大量重复、HTML 不合法，公式 SVG 占文章页 309KB 中的 266KB；公式也没有任何可供辅助技术读取的文本。",
+  "precheck": {
+    "description": "确认文章页公式 SVG 携带全局 <style> 与重复 id，且图标线帽被改写。",
+    "command": "local/venv/bin/python scripts/build_posts.py --out local/site >/dev/null && grep -o '<style' local/site/posts/2026-11-08-machine-learning-intro/index.html | wc -l && grep -o 'id=\"figure_1\"' local/site/posts/2026-11-08-machine-learning-intro/index.html | wc -l",
+    "expected": "修复前两项均为 71（每个公式一份 <style> 与一份 figure_1）",
+    "is_completed": true,
+    "evidence": "main@e838734 构建产物：<style> 71 个、id=\"figure_1\"/\"patch_1\"/\"text_1\" 各 71 个，STIXGeneral-Regular-29 等字形 id 最多重复 25 次；headless Chrome 计算样式：首页 .search-toggle/.icon-sun/.icon-moon path 为 round，文章页同一图标与 .code-copy path 为 butt。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C022-math-svg-hygiene"
+    ],
+    "after": [
+      "node tests/posts.test.cjs",
+      "node tests/page-transition.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "公式 SVG 后处理（scripts/build_posts.py）",
+      "before": "render_math_svg 只剥离 xml 声明、注释与 metadata，保留 matplotlib 的 <style>、透明背景矩形、figure_1/text_1 分组 id 与每个公式内的字形 <defs>；公式包裹层无替代文本。",
+      "after": "额外剥离 <style>、patch 背景矩形与分组 id，并压缩标签间空白；字形 <path> 按 id 收进共享字典（同 id 内容不一致即构建失败），由 math_defs_html 在文章页 <div class=\"md-body\"> 前输出唯一的零尺寸 .md-math-defs 隐藏 SVG，公式内只保留 <use> 引用；包裹层加 role=\"img\" 与 TeX 原文 aria-label。render_markdown/extract_math 额外返回字形定义 HTML；无公式文章输出不变。",
+      "impact": "文章页公式产物；整页 id 唯一，文章页 309KB→162KB（gzip 53.5KB→41.9KB）"
+    },
+    {
+      "scope": "样式（assets/css/style.css）与缓存版本（index.html）",
+      "before": "无 .md-math-defs 规则；资源版本串 20261109h。",
+      "after": "新增 .md-math-defs：position:absolute、0×0、overflow:hidden（不用 display:none，避免被引用字形不渲染）；资源版本串升至 20261109i。",
+      "impact": "文章页布局不变；浏览器取到新样式"
+    },
+    {
+      "scope": "回归测试（tests/posts.test.cjs）",
+      "before": "只校验公式数量、无 $ 残留、STIX 字形与双主题颜色。",
+      "after": "新增 3 项：文章页无 <style>、整页 id 唯一、所有 href=\"#…\" 可解析且 .md-math-defs 唯一；全部公式带 role=img 与非空 aria-label、共享字形 getBBox 宽度 > 0、定义层 0×0；顶栏搜索/太阳/月亮与复制按钮图标线帽为 round。",
+      "impact": "文章构建回归测试"
+    },
+    {
+      "scope": "设计基线（docs/devel/design/02-博客文章.md）",
+      "before": "规则 14 只要求剥离 xml 声明与 metadata。",
+      "after": "规则 14 增补内联 SVG 卫生：剥离 <style>/背景矩形/分组 id，字形按 id 收拢为每页一份共享 defs，整页 id 唯一，公式带 role=img + TeX aria-label；4.3 与 4.4 同步登记 C022。",
+      "impact": "博客文章设计基线"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "公式经 mathtext 渲染为内联 SVG：剥离 xml 声明与 metadata、pt 换算 px、fill 改写为 currentColor。",
+      "after": "在此基础上剥离 matplotlib 自带 <style>、背景矩形与分组 id；字形 <path> 按 id 去重收拢到文章页唯一的零尺寸 .md-math-defs，公式内只保留 <use>，整页 id 唯一；每个公式包裹层带 role=\"img\" 与 TeX 原文 aria-label。"
+    }
+  },
+  "verification": {
+    "result": null,
+    "run_id": "local-20261109-10",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "node tests/posts.test.cjs 全绿且退出码 0，C022 三项新断言通过，既有文章/代码块/公式断言不回归；新断言在修复前的构建脚本上失败",
+        "false_if": "存在任何测试失败、报错，或新断言在修复前同样通过",
+        "evidence": "修复前构建脚本：posts 35/38，C022 三项 FAIL（styles=71、dupIds=figure_1,patch_1,text_1；labelled=0/71；线帽 butt,butt,butt,butt）。修复后 node tests/posts.test.cjs 38/38、exit 0（styles=0、无重复 id、无悬空引用；labelled=71/71、glyphWidth=70.1、defs=0x0；线帽 round×4）。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "公式视觉与修复前逐像素一致；文章页图标恢复 round 线帽；页面体积下降",
+        "false_if": "公式缺字、错位或尺寸变化，或图标仍为 butt",
+        "evidence": "headless Chrome 1440×900@2x 截取 .md-body 全长（1072×19833）前后像素比对：差异仅位于 x=1022–1038 的复制按钮图标列（线帽修复所致），公式区域零差异；493 个 <use> 全部解析，公式总高 1351px 不变；文章页 309031→162185 字节，gzip 53511→41907。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "构建确定性保持；无公式文章产物不变；首页与其他测试不受影响",
+        "false_if": "两次构建产物不同，或其他测试回归",
+        "evidence": "两次构建 diff -r 完全一致；math_defs 在无公式时为空串，文章页结构不变；首页仅资源版本串变化。tests/ 下 13 个测试文件全部 EXIT=0（posts 38/38、page-transition 10/10，其余与修复前一致）；scripts/adflow-verify Exit 0。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

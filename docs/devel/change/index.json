@@ -31,7 +31,8 @@
         "C018",
         "C019",
         "C020",
-        "C021"
+        "C021",
+        "C022"
       ]
     }
   },
@@ -181,6 +182,13 @@
       "status": "closed",
       "branch": "fix/C021-headings",
       "file": "docs/devel/change/C021.json",
+      "version": ""
+    },
+    "C022": {
+      "title": "数学公式内联 SVG 样式泄漏、重复 id 与替代文本",
+      "status": "in_progress",
+      "branch": "fix/C022-math-svg-hygiene",
+      "file": "docs/devel/change/C022.json",
       "version": ""
     }
   }

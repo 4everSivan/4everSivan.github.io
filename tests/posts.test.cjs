@@ -152,6 +152,26 @@ function check(name, passed, detail) {
     ''
   );
 
+  // 公式 SVG 不得向页面泄漏全局样式, 整页 id 唯一且每个 <use> 都能解析 (C022).
+  const postIds = Array.from(postHtml.matchAll(/\bid="([^"]+)"/g)).map(
+    (match) => match[1]
+  );
+  const duplicateIds = postIds.filter(
+    (id, index) => postIds.indexOf(id) !== index
+  );
+  const knownIds = new Set(postIds);
+  const danglingRefs = Array.from(postHtml.matchAll(/href="#([^"]+)"/g))
+    .map((match) => match[1])
+    .filter((id) => !knownIds.has(id));
+  check(
+    '公式 SVG 无 <style>、整页 id 唯一且引用全部可解析 (C022)',
+    !postHtml.includes('<style') &&
+      duplicateIds.length === 0 &&
+      danglingRefs.length === 0 &&
+      (postHtml.match(/class="md-math-defs"/g) || []).length === 1,
+    `styles=${(postHtml.match(/<style/g) || []).length}, dupIds=${duplicateIds.slice(0, 3).join(',')}, dangling=${danglingRefs.slice(0, 3).join(',')}`
+  );
+
   // 缺 summary 的文章必须让构建失败 (临时目录, 不触碰仓库).
   const badPosts = fs.mkdtempSync(path.join(os.tmpdir(), 'badposts-'));
   fs.writeFileSync(
@@ -405,6 +425,35 @@ function check(name, passed, detail) {
             const node = document.querySelector('.md-body .md-math');
             return node ? getComputedStyle(node).color : '';
           })(),
+          mathTotal: document.querySelectorAll('.md-body .md-math').length,
+          mathLabelled: Array.from(
+            document.querySelectorAll('.md-body .md-math')
+          ).filter(
+            (node) =>
+              node.getAttribute('role') === 'img' &&
+              (node.getAttribute('aria-label') || '').trim() !== ''
+          ).length,
+          mathGlyphWidth: (() => {
+            const use = document.querySelector('.md-body .md-math use');
+            return use ? use.getBBox().width : 0;
+          })(),
+          mathDefsBox: (() => {
+            const defs = document.querySelector('.md-math-defs');
+            if (!defs) {
+              return '';
+            }
+            const rect = defs.getBoundingClientRect();
+            return rect.width + 'x' + rect.height;
+          })(),
+          iconCaps: [
+            '.search-toggle path',
+            '.icon-sun path',
+            '.icon-moon path',
+            '.code-copy-icon path',
+          ].map((selector) => {
+            const node = document.querySelector(selector);
+            return node ? getComputedStyle(node).strokeLinecap : '';
+          }),
           hasFootnoteRef: Boolean(document.querySelector('.footnote-ref')),
           hasBackref: Boolean(document.querySelector('.footnote-backref')),
           hasTag: /class="[^"]*tag/.test(document.documentElement.outerHTML),
@@ -667,6 +716,19 @@ function check(name, passed, detail) {
       mathGlyphIds.some((id) => id.startsWith('STIX')) &&
         !mathGlyphIds.some((id) => id.startsWith('DejaVu')),
       `glyphs=${mathGlyphIds.length}`
+    );
+    check(
+      '公式带替代文本, 字形经共享定义渲染且定义层不占版面 (C022)',
+      post.mathTotal > 0 &&
+        post.mathLabelled === post.mathTotal &&
+        post.mathGlyphWidth > 0 &&
+        post.mathDefsBox === '0x0',
+      `labelled=${post.mathLabelled}/${post.mathTotal}, glyphWidth=${post.mathGlyphWidth}, defs=${post.mathDefsBox}`
+    );
+    check(
+      '文章页图标线帽保持 round, 不被公式样式改写 (C022)',
+      post.iconCaps.every((cap) => cap === 'round'),
+      post.iconCaps.join(',')
     );
     check(
       '数学公式颜色跟随墨色令牌 (浅色)',
