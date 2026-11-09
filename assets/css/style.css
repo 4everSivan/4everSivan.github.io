@@ -1411,6 +1411,15 @@ html[data-theme="dark"] .foot {
   height: auto;
 }
 
+/* 公式字形定义 (C022): 每篇只输出一次, 供各公式 <use> 引用, 不占版面.
+   不用 display:none, 避免部分浏览器不渲染被引用的字形. */
+.md-math-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 /* 脚注：正文上标强调色，文末次级墨 + 回跳 */
 .md-body .footnote-ref {
   color: var(--accent);

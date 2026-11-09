@@ -85,6 +85,9 @@ def markdown_extensions():
 MATH_COLOR = "#211a15"  # 渲染色, 输出前改写为 currentColor 跟随主题令牌
 SENTINEL_MARK = "\ue000{}\ue001"  # 私用区字符, markdown 不会转义
 
+# mathtext 字形定义: <path id="字体-码位" d="…" transform="…"/>, 同 id 同形 (C022)
+MATH_GLYPH = re.compile(r'<path id="([^"]+)" d="[^"]*"[^>]*/>')
+
 
 def die(errors):
     for item in errors:
@@ -128,8 +131,11 @@ def validate(meta, source, errors):
     return meta["date"]
 
 
-def render_math_svg(expr, display, plt):
-    """单条公式 → 内联 SVG 字符串（fill=currentColor, pt→px，见设计 4.2 规则 14）."""
+def render_math_svg(expr, display, plt, glyphs):
+    """单条公式 → 内联 SVG 字符串（fill=currentColor, pt→px，见设计 4.2 规则 14）.
+
+    字形 <path> 定义按 id 收进 glyphs, 由文章页统一输出一次 (C022).
+    """
     fig = plt.figure()
     fig.text(0, 0, f"${expr}$", fontsize=13 if display else 11, color=MATH_COLOR)
     buf = io.BytesIO()
@@ -141,6 +147,22 @@ def render_math_svg(expr, display, plt):
     svg = re.sub(r"<\?xml[^>]*\?>|<!DOCTYPE[^>]*>", "", svg)
     svg = re.sub(r"<!--.*?-->", "", svg, flags=re.DOTALL)
     svg = re.sub(r"<metadata>.*?</metadata>", "", svg, flags=re.DOTALL)
+    # 内联 SVG 里的 <style> 在 HTML 中作用于整页, 会把页面图标的
+    # stroke-linecap 改成 butt; 公式只用填充, 直接移除.
+    svg = re.sub(r"<style[^>]*>.*?</style>", "", svg, flags=re.DOTALL)
+    # 透明背景矩形与 figure_1/text_1 等分组 id 每个公式都一样, 保留会整页重复.
+    svg = re.sub(r'<g id="patch_\d+">.*?</g>', "", svg, flags=re.DOTALL)
+    svg = re.sub(r'<g id="[a-z]+_\d+">', "<g>", svg)
+
+    def hoist(match):
+        known = glyphs.setdefault(match.group(1), match.group(0))
+        if known != match.group(0):
+            raise ValueError(f"字形 {match.group(1)} 定义不一致")
+        return ""
+
+    svg = MATH_GLYPH.sub(hoist, svg)
+    svg = re.sub(r"<defs>\s*</defs>", "", svg)
+    svg = re.sub(r">\s+<", "><", svg)
     # pt 尺寸换算 px (1pt = 4/3px), 保留 viewBox 供窄屏等比收缩
     def px(match):
         return f'{match.group(1)}="{float(match.group(2)) * 4 / 3:.1f}"'
@@ -148,11 +170,27 @@ def render_math_svg(expr, display, plt):
     svg = re.sub(r'\b(width|height)="([\d.]+)pt"', px, svg, count=2)
     svg = svg.replace(MATH_COLOR, "currentColor")
     cls = "md-math md-math-block" if display else "md-math"
-    return f'<span class="{cls}">{svg.strip()}</span>'
+    # SVG 本身没有可读文本, 以 TeX 原文作为辅助技术的替代文本.
+    label = html.escape(expr)
+    return f'<span class="{cls}" role="img" aria-label="{label}">{svg.strip()}</span>'
+
+
+def math_defs_html(glyphs):
+    """全文公式共用的字形定义: 零尺寸隐藏 SVG, 供各公式 <use> 引用."""
+    if not glyphs:
+        return ""
+    return (
+        '<svg class="md-math-defs" aria-hidden="true" focusable="false"><defs>'
+        + "".join(glyphs.values())
+        + "</defs></svg>\n"
+    )
 
 
 def extract_math(body, source):
-    """提取公式渲染为 SVG, 正文以哨兵占位; 返回 (正文, {哨兵: svg html})."""
+    """提取公式渲染为 SVG, 正文以哨兵占位.
+
+    返回 (正文, {哨兵: svg html}, 字形定义 html).
+    """
     protected = []
 
     def stash_code(match):
@@ -189,7 +227,7 @@ def extract_math(body, source):
         SENTINEL_MARK.format(r"K(\d+)"), lambda m: protected[int(m.group(1))], body
     )
     if not pending:
-        return body, {}
+        return body, {}, ""
 
     try:
         import matplotlib
@@ -202,20 +240,23 @@ def extract_math(body, source):
     except ImportError:
         die([f"{source}: 文章含数学公式, 构建需安装 matplotlib"])
 
-    rendered, errors = {}, []
+    rendered, glyphs, errors = {}, {}, []
     for token, expr, display in pending:
         try:
-            rendered[token] = render_math_svg(expr, display, plt)
+            rendered[token] = render_math_svg(expr, display, plt, glyphs)
         except Exception as error:  # noqa: BLE001
             errors.append(f"{source}: 公式渲染失败: {expr[:60]}… ({error})")
     if errors:
         die(errors)
-    return body, rendered
+    return body, rendered, math_defs_html(glyphs)
 
 
 def render_markdown(body, source=""):
-    """md → HTML；# / ## 都落为 h2，### 落为 h3，更深收拢到 h4。"""
-    body, math_html = extract_math(body, source)
+    """md → (正文 HTML, 公式字形定义 HTML)。
+
+    # / ## 都落为 h2，### 落为 h3，更深收拢到 h4。
+    """
+    body, math_html, math_defs = extract_math(body, source)
     rendered = markdown.markdown(body, extensions=markdown_extensions())
     # 行号只是排版辅助, 不进入辅助技术阅读顺序.
     rendered = rendered.replace(
@@ -227,7 +268,7 @@ def render_markdown(body, source=""):
     rendered = re.sub(r"</h1>", "</h2>", rendered)
     rendered = re.sub(r"<h[56]\b", "<h4", rendered)
     rendered = re.sub(r"</h[56]>", "</h4>", rendered)
-    return rendered
+    return rendered, math_defs
 
 
 def slice_between(text, start_pat, end_pat):
@@ -310,6 +351,7 @@ def build_post_page(post, layout, prev_post):
         f'<p class="post-meta"><time datetime="{post["meta"]["date"]}">'
         f'{post["meta"]["date"]}</time></p>\n'
         f"</header>\n"
+        f'{post["math_defs"]}'
         f'<div class="md-body">\n{post["html"]}\n</div>\n'
         f"{nav}\n"
         f"</article>"
@@ -380,11 +422,13 @@ def main():
             date = validate(meta, path.name, errors)
             if date is None:
                 continue
+            body_html, math_defs = render_markdown(body, path.name)
             posts.append(
                 {
                     "slug": path.stem,
                     "meta": meta,
-                    "html": render_markdown(body, path.name),
+                    "html": body_html,
+                    "math_defs": math_defs,
                 }
             )
     if errors:
