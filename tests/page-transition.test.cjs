@@ -121,6 +121,27 @@ async function evaluate(client, expression) {
   return result.result.value;
 }
 
+// 轮询直到表达式为真: 导航时长随机器负载波动, 固定 sleep 会偶发失败 (C025).
+async function waitFor(client, expression, timeout = 5000) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    try {
+      if (await evaluate(client, expression)) {
+        return true;
+      }
+    } catch (error) {
+      // 导航进行中, 旧页面的执行上下文可能已销毁.
+    }
+    await sleep(50);
+  }
+  return false;
+}
+
+const onPost = `location.pathname.endsWith('/posts/${POST_SLUG}/') &&
+  document.readyState === 'complete' && Boolean(document.querySelector('.post'))`;
+const onHome = `location.pathname === '/' && document.readyState === 'complete' &&
+  !document.querySelector('.post')`;
+
 const results = [];
 function check(name, passed, detail) {
   results.push({ name, passed, detail });
@@ -205,7 +226,7 @@ function check(name, passed, detail) {
     });
 
     await client.send('Page.navigate', { url: BASE_URL });
-    await sleep(900);
+    await waitFor(client, onHome);
 
     const home = await evaluate(
       client,
@@ -276,14 +297,15 @@ function check(name, passed, detail) {
       `opacity=${mid.opacity}, transform=${mid.transform}`
     );
 
-    await sleep(900);
+    await waitFor(client, onPost);
+    // 入场动画以 finished 为准再读终态, 不依赖固定等待时长.
     const post = await evaluate(
       client,
-      `(() => {
+      `(async () => {
         const node = document.querySelector('.post');
         const foot = document.querySelector('.foot');
         const style = node ? getComputedStyle(node) : null;
-        return {
+        const state = {
           path: location.pathname,
           bodyClass: document.body.className,
           hasPost: Boolean(node),
@@ -291,10 +313,15 @@ function check(name, passed, detail) {
           animationDuration: style ? style.animationDuration : '',
           footAnimation: foot ? getComputedStyle(foot).animationName : '',
           footDelay: foot ? getComputedStyle(foot).animationDelay : '',
-          opacity: style ? style.opacity : '',
-          transform: style ? style.transform : '',
           leaving: document.documentElement.classList.contains('is-page-leaving'),
         };
+        const running = [node, foot]
+          .filter(Boolean)
+          .flatMap((element) => element.getAnimations());
+        await Promise.all(running.map((animation) => animation.finished));
+        state.opacity = style ? style.opacity : '';
+        state.transform = style ? style.transform : '';
+        return state;
       })()`
     );
     check(
@@ -325,7 +352,7 @@ function check(name, passed, detail) {
         return document.documentElement.classList.contains('is-page-leaving');
       })()`
     );
-    await sleep(900);
+    await waitFor(client, onHome);
     const back = await evaluate(
       client,
       `({ path: location.pathname, hasPost: Boolean(document.querySelector('.post')) })`
@@ -351,7 +378,7 @@ function check(name, passed, detail) {
         return document.documentElement.classList.contains('is-page-leaving');
       })()`
     );
-    await sleep(900);
+    await waitFor(client, onPost);
     const reducedPost = await evaluate(
       client,
       `(() => {

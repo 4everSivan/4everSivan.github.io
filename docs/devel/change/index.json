@@ -34,7 +34,8 @@
         "C020",
         "C021",
         "C022",
-        "C023"
+        "C023",
+        "C025"
       ]
     }
   },
@@ -188,23 +189,30 @@
     },
     "C022": {
       "title": "数学公式内联 SVG 样式泄漏、重复 id 与替代文本",
-      "status": "in_progress",
+      "status": "verified",
       "branch": "fix/C022-math-svg-hygiene",
       "file": "docs/devel/change/C022.json",
       "version": ""
     },
     "C023": {
       "title": "文章页「上一篇」方向与构建脚本转义缺陷",
-      "status": "in_progress",
+      "status": "verified",
       "branch": "fix/C023-build-nav-escape",
       "file": "docs/devel/change/C023.json",
       "version": ""
     },
     "C024": {
       "title": "技能轮播键盘聚焦居中与视窗滚动错位",
-      "status": "in_progress",
+      "status": "verified",
       "branch": "fix/C024-carousel-keyboard",
       "file": "docs/devel/change/C024.json",
+      "version": ""
+    },
+    "C025": {
+      "title": "切页过渡测试偶发失败与文档失真",
+      "status": "verified",
+      "branch": "fix/C025-test-doc-drift",
+      "file": "docs/devel/change/C025.json",
       "version": ""
     }
   }
