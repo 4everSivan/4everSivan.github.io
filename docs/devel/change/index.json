@@ -162,7 +162,7 @@
     },
     "C019": {
       "title": "文章页内容列背景模糊带",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C019-article-blur",
       "file": "docs/devel/change/C019.json",
       "version": ""
