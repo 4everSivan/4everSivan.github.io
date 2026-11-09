@@ -28,7 +28,8 @@
         "C015",
         "C016",
         "C017",
-        "C018"
+        "C018",
+        "C019"
       ]
     }
   },
@@ -157,6 +158,13 @@
       "status": "closed",
       "branch": "fix/C018-code-block",
       "file": "docs/devel/change/C018.json",
+      "version": ""
+    },
+    "C019": {
+      "title": "文章页内容列背景模糊带",
+      "status": "verified",
+      "branch": "fix/C019-article-blur",
+      "file": "docs/devel/change/C019.json",
       "version": ""
     }
   }

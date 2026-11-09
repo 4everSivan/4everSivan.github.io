@@ -28,6 +28,7 @@
 - [C016](docs/devel/change/C016.json)：新增博客切页过渡：点击首页列表标题（及文章页上一篇/返回首页/字标）时，内容层 200ms 淡出上移后导航；文章页标题与正文、页脚加载时 560ms 自下方淡入归位；顶栏与字符画保持静止，禁用 JS 时退回普通跳转。
 - [C017](docs/devel/change/C017.json)：数学公式字体由 matplotlib 默认 DejaVu Sans 改为 STIX 衬线（Times 风格），与正文 Times New Roman + 宋体统一；字形随 matplotlib 内置分发，本地与 CI 构建一致。
 - [C018](docs/devel/change/C018.json)：文章代码块左上角显示围栏语言；行号距左边框收紧到 8px 并默认隐藏，鼠标悬停、键盘聚焦或触屏轻触代码块时淡入，点按外部/移出后隐藏；横向溢出改用 10px 透明轨道 + 强调色胶囊滑块的自定义滚动条，悬停加深；右上角新增复制按钮（复制时剔除行号，成功后 1.6s 对勾反馈，Clipboard API 失败回退 execCommand）；Firefox 以 thin/scrollbar-color 降级。
+- [C019](docs/devel/change/C019.json)：文章页新增内容列背景模糊带：固定层比 36rem 正文列左右各宽 40px，1px 高斯模糊 + 55% 纸面提亮，左右 72px 羽化淡出；列外字符画保持清晰，首页不出现，打印隐藏。
 
 ### Fixed
 

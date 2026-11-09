@@ -144,6 +144,13 @@ function check(name, passed, detail) {
     builtIndex.includes('post-list--summary') && !builtIndex.includes('blog-placeholder'),
     ''
   );
+  check(
+    '背景模糊层仅出现在文章页 (C019)',
+    !sourceIndex.includes('article-blur') &&
+      !builtIndex.includes('article-blur') &&
+      postHtml.includes('class="article-blur"'),
+    ''
+  );
 
   // 缺 summary 的文章必须让构建失败 (临时目录, 不触碰仓库).
   const badPosts = fs.mkdtempSync(path.join(os.tmpdir(), 'badposts-'));
@@ -281,6 +288,13 @@ function check(name, passed, detail) {
         const langLabel = document.querySelector(
           '.md-body .codehilite .code-lang'
         );
+        const articleBlur = document.querySelector('.article-blur');
+        const articleBlurStyle = articleBlur
+          ? getComputedStyle(articleBlur)
+          : null;
+        const articleBlurRect = articleBlur
+          ? articleBlur.getBoundingClientRect()
+          : null;
         const firstBlockRect = blocks[0]
           ? blocks[0].getBoundingClientRect()
           : null;
@@ -369,6 +383,26 @@ function check(name, passed, detail) {
           hasTag: /class="[^"]*tag/.test(document.documentElement.outerHTML),
           navBack: document.querySelector('.post-nav a[href="../../"]')?.textContent || '',
           theme: document.documentElement.getAttribute('data-theme'),
+          hasArticleBlur: Boolean(articleBlur),
+          articleBlurWidth: articleBlurRect
+            ? Math.round(articleBlurRect.width)
+            : 0,
+          articleBlurPosition: articleBlurStyle
+            ? articleBlurStyle.position
+            : '',
+          articleBlurZ: articleBlurStyle ? articleBlurStyle.zIndex : '',
+          articleBlurBackdrop: articleBlurStyle
+            ? articleBlurStyle.backdropFilter
+            : '',
+          articleBlurBackground: articleBlurStyle
+            ? articleBlurStyle.backgroundColor
+            : '',
+          articleBlurMask: articleBlurStyle
+            ? articleBlurStyle.maskImage ||
+              articleBlurStyle.webkitMaskImage
+            : '',
+          pageZ: read('.page', 'zIndex'),
+          artZ: read('.page-art', 'zIndex'),
         };
       })()`
     );
@@ -382,6 +416,19 @@ function check(name, passed, detail) {
       `h1=${post.h1Count}, wordmark=${post.wordmarkTag}@${post.wordmarkHref}`
     );
     check('日期 time[datetime]', post.time === '2026-11-08', post.time);
+    check(
+      '文章页内容列背景模糊带 (C019)',
+      post.hasArticleBlur &&
+        post.articleBlurWidth === 656 &&
+        post.articleBlurPosition === 'fixed' &&
+        post.articleBlurZ === '0' &&
+        post.articleBlurBackdrop === 'blur(1px)' &&
+        post.articleBlurBackground === 'rgba(252, 241, 226, 0.55)' &&
+        post.articleBlurMask.includes('72px') &&
+        post.pageZ === '1' &&
+        post.artZ === '0',
+      `blur=${post.hasArticleBlur}, width=${post.articleBlurWidth}, pos=${post.articleBlurPosition}/${post.articleBlurZ}, backdrop=${post.articleBlurBackdrop}, bg=${post.articleBlurBackground}, mask=${post.articleBlurMask.slice(0, 80)}, z=${post.artZ}/${post.pageZ}`
+    );
     check(
       '正文 15px, h2 17.5px, h3 15.5px',
       post.bodySize === '15px' &&
@@ -617,6 +664,9 @@ function check(name, passed, detail) {
           ).color,
           codeThumb: getComputedStyle(pre, '::-webkit-scrollbar-thumb')
             .backgroundColor,
+          articleBlurBg: getComputedStyle(
+            document.querySelector('.article-blur')
+          ).backgroundColor,
         };
       })()`
     );
@@ -631,11 +681,12 @@ function check(name, passed, detail) {
       toggled.mathColor
     );
     check(
-      '语言标签/行号/滚动条颜色跟随深色令牌 (C018)',
+      '语言标签/行号/滚动条/模糊带颜色跟随深色令牌 (C018/C019)',
       toggled.lineNumberColor === 'rgb(140, 127, 112)' &&
         toggled.langColor === 'rgb(140, 127, 112)' &&
-        toggled.codeThumb === 'rgba(217, 133, 95, 0.42)',
-      `lineno=${toggled.lineNumberColor}, lang=${toggled.langColor}, thumb=${toggled.codeThumb}`
+        toggled.codeThumb === 'rgba(217, 133, 95, 0.42)' &&
+        toggled.articleBlurBg === 'rgba(33, 27, 22, 0.55)',
+      `lineno=${toggled.lineNumberColor}, lang=${toggled.langColor}, thumb=${toggled.codeThumb}, blur=${toggled.articleBlurBg}`
     );
 
     // 窄屏无横向滚动.
