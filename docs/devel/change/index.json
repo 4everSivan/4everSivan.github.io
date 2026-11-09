@@ -210,7 +210,7 @@
     },
     "C025": {
       "title": "切页过渡测试偶发失败与文档失真",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C025-test-doc-drift",
       "file": "docs/devel/change/C025.json",
       "version": ""
