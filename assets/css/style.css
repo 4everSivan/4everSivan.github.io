@@ -14,6 +14,7 @@
   --paper: #f7e5d1;
   --paper-rgb: 247, 229, 209;
   --paper-raise: #fcf1e2;
+  --paper-raise-rgb: 252, 241, 226;
   --ink: #211a15;
   --ink-soft: #5d5045;
   --ink-faint: #6f6054;
@@ -40,6 +41,7 @@ html[data-theme="dark"] {
   --paper: #17130f;
   --paper-rgb: 23, 19, 15;
   --paper-raise: #211b16;
+  --paper-raise-rgb: 33, 27, 22;
   --ink: #ece4d8;
   --ink-soft: #b5a898;
   --ink-faint: #8c7f70;
@@ -135,6 +137,45 @@ body {
 
 .page-art-right {
   transform: translate(50vw, 0);
+}
+
+/* 文章页背景模糊带 (C019): 只柔化 36rem 内容列左右各 40px 的背景,
+   列外字符画保持清晰; 72px 羽化让带体左右淡入淡出. */
+.article-blur {
+  --article-feather: 72px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 0;
+  width: calc(var(--measure) + 80px);
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: rgba(var(--paper-raise-rgb), 0.55);
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    rgba(0, 0, 0, 0.35) calc(var(--article-feather) * 0.35),
+    rgba(0, 0, 0, 0.85) calc(var(--article-feather) * 0.7),
+    #000 var(--article-feather),
+    #000 calc(100% - var(--article-feather)),
+    rgba(0, 0, 0, 0.85) calc(100% - var(--article-feather) * 0.7),
+    rgba(0, 0, 0, 0.35) calc(100% - var(--article-feather) * 0.35),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    rgba(0, 0, 0, 0.35) calc(var(--article-feather) * 0.35),
+    rgba(0, 0, 0, 0.85) calc(var(--article-feather) * 0.7),
+    #000 var(--article-feather),
+    #000 calc(100% - var(--article-feather)),
+    rgba(0, 0, 0, 0.85) calc(100% - var(--article-feather) * 0.7),
+    rgba(0, 0, 0, 0.35) calc(100% - var(--article-feather) * 0.35),
+    transparent 100%
+  );
 }
 
 .skip-link {
@@ -1473,6 +1514,10 @@ html.is-page-leaving .page {
 
   .md-body .codehilite .linenos {
     opacity: 1;
+  }
+
+  .article-blur {
+    display: none;
   }
 
   .code-copy {

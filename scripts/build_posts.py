@@ -322,7 +322,7 @@ def build_post_page(post, layout, prev_post):
         + '\n<body id="top" class="post-page">\n'
         + '  <a class="skip-link" href="#main">跳到正文</a>\n\n  '
         + page_art
-        + "\n\n  "
+        + '\n\n  <div class="article-blur" aria-hidden="true"></div>\n\n  '
         + masthead_part
         + '\n\n  <div class="page">\n    <main id="main">\n      '
         + article

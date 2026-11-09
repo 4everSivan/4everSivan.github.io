@@ -1,0 +1,109 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C019",
+  "title": "文章页内容列背景模糊带",
+  "version": "",
+  "type": "Enhancement",
+  "status": "verified",
+  "branch": "fix/C019-article-blur",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "文章页背景",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "用户希望进入文章页时，只对文章内容列范围内的背景做高斯模糊，列外左右字符画保持清晰。已在 local/site/blur-demo 高保真 demo 中确认：模糊带比 36rem 内容列左右各外扩 40px、左右羽化 72px、模糊强度 1px，并叠一层 55% 纸面提亮让带体在桌面宽度下可见。demo 里用 .page 伪元素挂 backdrop-filter 实测不会真正模糊固定字符画，因此正式实现改为根层级的固定 .article-blur 层。",
+  "precheck": {
+    "description": "确认文章页尚无内容列背景模糊层。",
+    "command": "grep -c 'article-blur' scripts/build_posts.py assets/css/style.css tests/posts.test.cjs; grep -c 'paper-raise-rgb' assets/css/style.css",
+    "expected": "开工前均为 0",
+    "is_completed": true,
+    "evidence": "开工前 scripts/build_posts.py、assets/css/style.css、tests/posts.test.cjs 均无 article-blur，CSS 无 paper-raise-rgb；文章页只有固定字符画 .page-art 与正文层。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C019-article-blur"
+    ],
+    "after": [
+      "node tests/posts.test.cjs",
+      "node tests/page-transition.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "文章页结构（scripts/build_posts.py）",
+      "before": "文章页 body 只有 .page-art、masthead、.page 内容层。",
+      "after": "在 .page-art 之后输出根层级装饰层 <div class=\"article-blur\" aria-hidden=\"true\"></div>，仅文章页存在；首页产物不出现。",
+      "impact": "全部文章页 HTML"
+    },
+    {
+      "scope": "模糊层样式（assets/css/style.css）",
+      "before": "无内容列背景模糊样式。",
+      "after": "新增 --paper-raise-rgb 双主题令牌；.article-blur 固定居中，宽 calc(--measure + 80px)，z-index 0（字符画之上、正文之下），backdrop-filter:blur(1px)，背景 rgba(--paper-raise-rgb,.55)，左右 72px 多段羽化淡出；pointer-events:none、aria-hidden、打印隐藏。",
+      "impact": "文章页背景层；缓存版本 ?v= 同步升位"
+    },
+    {
+      "scope": "回归测试（tests/posts.test.cjs）",
+      "before": "只校验文章内容、公式、代码块与主题。",
+      "after": "新增断言：文章页存在 .article-blur 且首页产物没有；层为 fixed、宽 656px（36rem+80px）、z-index 0、blur(1px)、浅色 rgba(252,241,226,.55)/深色 rgba(33,27,22,.55)、mask 含 72px 羽化；文章正文仍在层之上。",
+      "impact": "文章构建回归测试"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "文章页背景只有固定字符画，正文列区域无单独处理。",
+      "after": "文章页在根层级增加 .article-blur 固定装饰层：宽度为 36rem 内容列左右各外扩 40px，1px 背景模糊 + 55% 纸面提亮，左右 72px 羽化淡出；列外字符画保持清晰，首页不出现、打印隐藏。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261109-7",
+    "user_quote": "合并所有分支，推送",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "node tests/posts.test.cjs 全绿且退出码 0，新增 .article-blur 断言通过，既有文章/代码块/公式断言不回归",
+        "false_if": "存在任何测试失败、报错或未覆盖回归用例",
+        "evidence": "node tests/posts.test.cjs 33/33（首页源文件与产物均无 article-blur，文章页有；层为 fixed、宽 656px、z-index 0、backdrop-filter blur(1px)、浅色 rgba(252,241,226,.55)、深色 rgba(33,27,22,.55)、mask 含 72px 羽化；.page z-index 1 在层上；既有代码块/公式/排印断言全部 PASS）；node tests/page-transition.test.cjs 10/10；tests/ 下 13 个测试文件全部 EXIT=0。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "文章页内容列出现左右各外扩 40px、72px 羽化的柔和背景带；列外字符画清晰；浅深主题颜色正确；首页无此层",
+        "false_if": "模糊带缺失/过宽、边缘生硬、主题色错误或首页出现",
+        "evidence": "构建产物经 headless Chrome 1440×900 浅色/深色与 390×844 截图核对：文章内容列背后出现一条比 36rem 列左右各宽 40px 的纸面提亮带，左右 72px 自然淡出；正文与代码块保持清晰，列外左右字符画未被模糊；深色主题带体为 rgba(33,27,22,.55)，与暖黑纸面协调；首页无该层。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "正文/代码块/公式可读性、C016 切页过渡、首页字符画与打印样式不受影响",
+        "false_if": "破坏正文层叠、切页过渡、首页或打印",
+        "evidence": "层位于 page-art 之上、.page 之下（z-index 0/1），正文可读性无变化；首页产物不含 article-blur，page-art 16/16、C016 切页过渡 10/10；打印媒体查询隐藏 article-blur；构建同输入同输出。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "2026-11-09",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "verified",
+    "signed_quote": "合并所有分支，推送",
+    "signed_rejection_count": 0
+  }
+}
