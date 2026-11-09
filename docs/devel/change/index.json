@@ -30,7 +30,8 @@
         "C017",
         "C018",
         "C019",
-        "C020"
+        "C020",
+        "C021"
       ]
     }
   },
@@ -173,6 +174,13 @@
       "status": "closed",
       "branch": "fix/C020-blur-no-tint",
       "file": "docs/devel/change/C020.json",
+      "version": ""
+    },
+    "C021": {
+      "title": "文章标题字号阶梯与 h2 序号",
+      "status": "verified",
+      "branch": "fix/C021-headings",
+      "file": "docs/devel/change/C021.json",
       "version": ""
     }
   }

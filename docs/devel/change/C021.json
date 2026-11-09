@@ -1,0 +1,109 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C021",
+  "title": "文章标题字号阶梯与 h2 序号",
+  "version": "",
+  "type": "Enhancement",
+  "status": "verified",
+  "branch": "fix/C021-headings",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客文章",
+    "component": "正文标题排印",
+    "design_doc": "docs/devel/design/02-博客文章.md",
+    "design_topic": "BlogPosts"
+  },
+  "why": "文章页 h2 仅 17.5px / 700，与 15px 正文差距偏小；h3 15.5px 且用浅墨，在当前宋体排版下难以快速分辨章节层级。用户在标题样式 demo 中选择「字号＋序号」：h2 提升到 20px/700 并加两位序号，h3 17px/700，h4 15.5px/700。",
+  "precheck": {
+    "description": "确认当前标题仍为 17.5/15.5/15px 且无序号。",
+    "command": "sed -n '/\\.md-body h2/,/\\.md-body h4/p' assets/css/style.css; grep -c 'counter(' assets/css/style.css",
+    "expected": "h2 17.5px、h3 15.5px、h4 15px，counter 计数为 0",
+    "is_completed": true,
+    "evidence": "开工前 .md-body h2 为 17.5px/700，h3 15.5px/700 次级墨，h4 15px/700 次级墨；CSS 无 title 序号 counter；用户 demo 确认改为 20/17/15.5px + h2 序号。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C021-headings"
+    ],
+    "after": [
+      "node tests/posts.test.cjs",
+      "node tests/page-transition.test.cjs",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "标题排印（assets/css/style.css）",
+      "before": ".md-body h2 17.5px/700，h3 15.5px/700 次级墨，h4 15px/700 次级墨，无序号。",
+      "after": "h2 20px/700、行高 1.45、上下距 2.2em/0.85em，并以 CSS counter 在标题前输出两位序号（Times 数字、--accent、0.8em、400、`01 / `）；h3 17px/700 墨色，h4 15.5px/700 次级墨；序号不写入 Markdown 正文。",
+      "impact": "全部文章页标题层级；缓存版本 ?v= 同步升位"
+    },
+    {
+      "scope": "回归测试（tests/posts.test.cjs）",
+      "before": "断言 h2 17.5px、h3 15.5px。",
+      "after": "改为 h2 20px、h3 17px、h4 15.5px；断言 h2::before 存在 counter、强调色、Times 数字与 0.8em 字号，文章 8 个 h2 均获得序号。",
+      "impact": "文章构建回归测试"
+    },
+    {
+      "scope": "设计基线（docs/devel/design/02-博客文章.md）",
+      "before": "规则 5 规定 h2 17.5px/700、h3 15.5px 次级灰，层级只用字号与字重、不编号。",
+      "after": "规则 5 改为 h2 20px/700 + 两位序号（accent/Times）、h3 17px/700 墨色、h4 15.5px/700 次级墨；序号由 CSS counter 生成，不写入正文。",
+      "impact": "博客文章设计基线"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/02-博客文章.md",
+    "topic": "BlogPosts",
+    "modified": true,
+    "rule_diff": {
+      "before": "文章 h2 17.5px/700、h3 15.5px/700 次级灰，层级只用字号与字重，不编号。",
+      "after": "文章 h2 20px/700 并在标题前输出两位强调色序号，h3 17px/700 墨色，h4 15.5px/700 次级墨；序号由 CSS counter 生成，不改变 Markdown 正文。"
+    }
+  },
+  "verification": {
+    "result": true,
+    "run_id": "local-20261109-9",
+    "user_quote": "确认，字号加序号",
+    "signoff": "sivan (AI代签)",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "node tests/posts.test.cjs 全绿且退出码 0，标题字号与序号断言通过，既有文章/代码块/公式断言不回归",
+        "false_if": "存在任何测试失败、报错或未覆盖回归用例",
+        "evidence": "node tests/posts.test.cjs 35/35（h2 20px、h3 17px、h4 15.5px；文章 8 个 h2 的 ::before 均为 counter(section, decimal-leading-zero)、强调色 rgb(155,58,36)、Times、16px、400；深色序号 rgb(217,133,95)；既有代码块/公式/排印断言全部保持 PASS）；node tests/page-transition.test.cjs 10/10；tests/ 下 13 个测试文件全部 EXIT=0。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "8 个 h2 依次显示 01/02… 序号，20px 与正文区分明显；h3/h4 阶梯正确；浅深主题序号为强调色",
+        "false_if": "序号缺失/重复、字号未生效或主题色错误",
+        "evidence": "构建产物经 headless Chrome 1440×900 与 390×844 截图核对：首个 h2 显示 `01 / 机器学习的数学本质…`，20px/700 与 15px 正文区分明显，390px 下标题自然换行且无横向溢出；h3/h4 探针分别 17px/15.5px；深色主题序号随令牌变为 rgb(217,133,95)。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "文章标题、正文、代码块、公式、脚注、表格与 C016 切页过渡不受影响",
+        "false_if": "破坏既有排印或交互",
+        "evidence": "文章 h1 仍 22px/700，正文 15px/1.85；代码块 33 项断言、公式 71 处、脚注、表格与 390px 页面宽度全部保持 PASS；C016 切页过渡 10/10；序号由 CSS counter 生成，Markdown 正文与复制内容不含编号。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "2026-11-09",
+    "exit_code": 0,
+    "from_status": "in_progress",
+    "target_status": "verified",
+    "signed_quote": "确认，字号加序号",
+    "signed_rejection_count": 0
+  }
+}

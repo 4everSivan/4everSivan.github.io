@@ -299,15 +299,42 @@ function check(name, passed, detail) {
           ? blocks[0].getBoundingClientRect()
           : null;
         const linenoRect = lineno ? lineno.getBoundingClientRect() : null;
+        const h2Before = (() => {
+          const node = document.querySelector('.md-body h2');
+          if (!node) {
+            return null;
+          }
+          const style = getComputedStyle(node, '::before');
+          return {
+            content: style.content,
+            color: style.color,
+            fontFamily: style.fontFamily,
+            fontSize: style.fontSize,
+            fontWeight: style.fontWeight,
+          };
+        })();
         return {
           h1Count: document.querySelectorAll('h1').length,
           title: document.querySelector('h1.post-title')?.textContent || '',
           time: document.querySelector('time')?.getAttribute('datetime') || '',
           bodySize: read('.md-body', 'fontSize'),
           h2Size: read('.md-body h2', 'fontSize'),
-          // h3 排印探针: 文章可以不含 ###, 注入临时节点量 CSS 契约后移除.
+          h2Count: document.querySelectorAll('.md-body h2').length,
+          h2BeforeContent: h2Before ? h2Before.content : '',
+          h2BeforeColor: h2Before ? h2Before.color : '',
+          h2BeforeFont: h2Before ? h2Before.fontFamily : '',
+          h2BeforeSize: h2Before ? h2Before.fontSize : '',
+          h2BeforeWeight: h2Before ? h2Before.fontWeight : '',
+          // h3/h4 排印探针: 文章可以不含 ###/####, 注入临时节点量 CSS 契约后移除.
           h3Size: (() => {
             const probe = document.createElement('h3');
+            document.querySelector('.md-body').appendChild(probe);
+            const size = getComputedStyle(probe).fontSize;
+            probe.remove();
+            return size;
+          })(),
+          h4Size: (() => {
+            const probe = document.createElement('h4');
             document.querySelector('.md-body').appendChild(probe);
             const size = getComputedStyle(probe).fontSize;
             probe.remove();
@@ -430,11 +457,22 @@ function check(name, passed, detail) {
       `blur=${post.hasArticleBlur}, width=${post.articleBlurWidth}, pos=${post.articleBlurPosition}/${post.articleBlurZ}, backdrop=${post.articleBlurBackdrop}, bg=${post.articleBlurBackground}, mask=${post.articleBlurMask.slice(0, 80)}, z=${post.artZ}/${post.pageZ}`
     );
     check(
-      '正文 15px, h2 17.5px, h3 15.5px',
+      '正文 15px, h2 20px, h3 17px, h4 15.5px (C021)',
       post.bodySize === '15px' &&
-        post.h2Size === '17.5px' &&
-        post.h3Size === '15.5px',
-      `body=${post.bodySize}, h2=${post.h2Size}, h3=${post.h3Size}`
+        post.h2Size === '20px' &&
+        post.h3Size === '17px' &&
+        post.h4Size === '15.5px',
+      `body=${post.bodySize}, h2=${post.h2Size}, h3=${post.h3Size}, h4=${post.h4Size}`
+    );
+    check(
+      'h2 显示两位序号且为强调色 Times 数字 (C021)',
+      post.h2Count === 8 &&
+        /counter\(section/.test(post.h2BeforeContent) &&
+        post.h2BeforeColor === 'rgb(155, 58, 36)' &&
+        post.h2BeforeFont.includes('Times New Roman') &&
+        post.h2BeforeSize === '16px' &&
+        post.h2BeforeWeight === '400',
+      `h2=${post.h2Count}, content=${post.h2BeforeContent}, color=${post.h2BeforeColor}, font=${post.h2BeforeFont}, size=${post.h2BeforeSize}, weight=${post.h2BeforeWeight}`
     );
     check(
       '资源相对路径且 ?v= 与首页一致',
@@ -664,6 +702,10 @@ function check(name, passed, detail) {
           ).color,
           codeThumb: getComputedStyle(pre, '::-webkit-scrollbar-thumb')
             .backgroundColor,
+          h2NumberColor: getComputedStyle(
+            document.querySelector('.md-body h2'),
+            '::before'
+          ).color,
         };
       })()`
     );
@@ -683,6 +725,11 @@ function check(name, passed, detail) {
         toggled.langColor === 'rgb(140, 127, 112)' &&
         toggled.codeThumb === 'rgba(217, 133, 95, 0.42)',
       `lineno=${toggled.lineNumberColor}, lang=${toggled.langColor}, thumb=${toggled.codeThumb}`
+    );
+    check(
+      'h2 序号颜色跟随深色令牌 (C021)',
+      toggled.h2NumberColor === 'rgb(217, 133, 95)',
+      toggled.h2NumberColor
     );
 
     // 窄屏无横向滚动.
