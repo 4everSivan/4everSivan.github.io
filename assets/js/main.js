@@ -353,6 +353,22 @@
     });
   });
 
+  // 键盘聚焦: Tab 到的卡片滑到正中, 回车即按普通链接打开.
+  // 只响应 :focus-visible, 鼠标按下带来的聚焦仍交给上面的点击逻辑.
+  cards.forEach((card, position) => {
+    card.addEventListener('focus', () => {
+      if (card.matches(':focus-visible')) {
+        go(count + position - index);
+      }
+    });
+  });
+
+  // 轨道只靠 transform 定位; 不支持 overflow: clip 的浏览器在聚焦时
+  // 仍会滚动视窗, 立即归零, 否则视觉位置与索引永久错开.
+  carousel.addEventListener('scroll', () => {
+    carousel.scrollLeft = 0;
+  });
+
   setOffset(offsetOf(index));
 
   let resizeFrame = 0;

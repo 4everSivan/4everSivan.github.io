@@ -641,6 +641,8 @@ main {
   margin-block: -6px;
   padding-block: 6px;
   overflow: hidden;
+  /* clip 不形成滚动容器: 键盘聚焦侧边卡片时浏览器无法滚动视窗 (C024) */
+  overflow: clip;
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
