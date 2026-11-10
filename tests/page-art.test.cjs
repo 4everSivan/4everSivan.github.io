@@ -174,6 +174,92 @@ async function read(client) {
   return evaluate(client, READ);
 }
 
+// C026: 固定装饰层的纵向几何不得绑定可变视口. 移动端工具栏伸缩时 fixed + inset:0
+// 的层高逐帧变化, 居中的字符画随之上下抖动. headless 下 lvh 恒等于 innerHeight,
+// 无法仿真动态工具栏, 因此核对当前生效的样式规则: 声明 height 为 lvh 且不声明 bottom.
+const READ_GEOMETRY = `
+(() => {
+  const selectors = ['.page-art', '.article-blur'];
+  const rules = Object.fromEntries(selectors.map((s) => [s, []]));
+  function walk(list) {
+    for (const rule of list) {
+      if (rule.type === CSSRule.MEDIA_RULE) {
+        if (window.matchMedia(rule.conditionText).matches) {
+          walk(rule.cssRules);
+        }
+        continue;
+      }
+      if (rule.type !== CSSRule.STYLE_RULE) {
+        continue;
+      }
+      for (const part of rule.selectorText.split(',')) {
+        const selector = part.trim();
+        if (rules[selector]) {
+          rules[selector].push({
+            height: rule.style.getPropertyValue('height'),
+            bottom: rule.style.getPropertyValue('bottom'),
+            top: rule.style.getPropertyValue('top'),
+          });
+        }
+      }
+    }
+  }
+  for (const sheet of document.styleSheets) {
+    walk(sheet.cssRules);
+  }
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;width:1px;height:100lvh';
+  document.body.append(probe);
+  const lvh = probe.getBoundingClientRect().height;
+  probe.remove();
+  function measure(selector) {
+    let node = document.querySelector(selector);
+    const injected = !node;
+    if (injected) {
+      node = document.createElement('div');
+      node.className = selector.slice(1);
+      node.setAttribute('aria-hidden', 'true');
+      document.body.append(node);
+    }
+    const rect = node.getBoundingClientRect();
+    if (injected) {
+      node.remove();
+    }
+    return { top: rect.top, height: rect.height };
+  }
+  const result = { lvh };
+  for (const selector of selectors) {
+    const declared = rules[selector];
+    const heights = declared.map((r) => r.height).filter(Boolean);
+    result[selector] = {
+      ruleCount: declared.length,
+      height: heights[heights.length - 1] || '',
+      bottoms: declared.map((r) => r.bottom).filter(Boolean),
+      tops: declared.map((r) => r.top).filter(Boolean),
+      rect: measure(selector),
+    };
+  }
+  return result;
+})()
+`;
+
+function checkGeometry(label, geometry) {
+  for (const selector of ['.page-art', '.article-blur']) {
+    const info = geometry[selector];
+    check(
+      `${label} ${selector} 纵向几何不绑定可变视口`,
+      info.ruleCount > 0 &&
+        /lvh$/.test(info.height) &&
+        info.bottoms.length === 0 &&
+        info.tops.includes('0px') &&
+        Math.abs(info.rect.top) < 1 &&
+        Math.abs(info.rect.height - geometry.lvh) < 1,
+      `height=${info.height || '(未声明)'}, bottom=${info.bottoms.join('/') || '(未声明)'}, ` +
+        `rect=${Math.round(info.rect.height)}px, lvh=${Math.round(geometry.lvh)}px`
+    );
+  }
+}
+
 (async () => {
   const profile = path.join(ROOT, 'local', 'chrome-page-art-profile');
   fs.rmSync(profile, { recursive: true, force: true });
@@ -249,6 +335,7 @@ async function read(client) {
     );
     check('无横向滚动', light.noHorizontalScroll, `width=${light.innerWidth}`);
     check('中心点未被底图拦截', light.insideArt === false, '');
+    checkGeometry('1440px', await evaluate(client, READ_GEOMETRY));
 
     const lightColor = parseColor(light.right.color);
     check(
@@ -320,6 +407,7 @@ async function read(client) {
         Math.abs(mobile.left.centerOffsetY) <= 2,
       `left=(${mobile.left.centerOffsetX}, ${mobile.left.centerOffsetY}), right=(${mobile.right.centerOffsetX}, ${mobile.right.centerOffsetY})`
     );
+    checkGeometry('390px', await evaluate(client, READ_GEOMETRY));
 
     client.close();
   } finally {

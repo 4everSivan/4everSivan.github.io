@@ -20,7 +20,8 @@
         "C012",
         "C013",
         "C014",
-        "C024"
+        "C024",
+        "C026"
       ]
     },
     "BlogPosts": {
@@ -213,6 +214,13 @@
       "status": "closed",
       "branch": "fix/C025-test-doc-drift",
       "file": "docs/devel/change/C025.json",
+      "version": ""
+    },
+    "C026": {
+      "title": "移动端滚动时字符画底图随工具栏伸缩上下抖动",
+      "status": "in_progress",
+      "branch": "fix/C026-art-viewport-jitter",
+      "file": "docs/devel/change/C026.json",
       "version": ""
     }
   }
