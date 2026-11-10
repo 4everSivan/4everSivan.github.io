@@ -1,0 +1,118 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C026",
+  "title": "移动端滚动时字符画底图随工具栏伸缩上下抖动",
+  "version": "",
+  "type": "BugFix",
+  "status": "in_progress",
+  "branch": "fix/C026-art-viewport-jitter",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "字符画底图",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "用户在手机上阅读文章时上下滑动，左右两侧字符画跟着上下抖动。根因：.page-art 为 position: fixed; inset: 0 并以 grid place-items: center 垂直居中。移动浏览器滚动时地址栏/工具栏收起或展开，fixed 层的高度随可见视口逐帧变化，两幅字符画每次都被重新居中，纵向位置随高度差的一半来回移动；文章页 .article-blur 同为 top: 0; bottom: 0，模糊层在工具栏动画期间同步逐帧改尺寸。",
+  "precheck": {
+    "description": "headless Chrome 390px 移动端仿真下加载首页，不重载、仅把视口高度 844 → 764 模拟工具栏展开，记录 .page-art 高度与右侧字符画 top。",
+    "command": "node local/c026-probe/probe.cjs \"$PWD\"  # 修复前在 main@2f18efd 上运行",
+    "expected": "修复前字符画 top 随视口高度变化移动（约为高度差的一半），说明位置绑定在 fixed 层可变高度上",
+    "is_completed": true,
+    "evidence": "main@2f18efd：视口 844 时 .page-art 高 844、右侧字符画 top=302；改为 764 后 .page-art 高 764、top=262，偏移 40px（= 80px 高度差 / 2）。headless 下 100lvh 与 100svh 都等于 innerHeight，无法仿真真机的动态工具栏，回归测试改为核对布局契约。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C026-art-viewport-jitter"
+    ],
+    "after": [
+      "node tests/page-art.test.cjs",
+      "node tests/posts.test.cjs",
+      "for f in tests/*.test.cjs; do node \"$f\"; done",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "字符画底图样式（assets/css/style.css）",
+      "before": ".page-art 为 position: fixed; inset: 0，高度跟随可见视口，移动端工具栏伸缩时逐帧重新居中。",
+      "after": ".page-art 改为 top/left/right: 0 + height: 100vh，并以 height: 100lvh 覆盖（大视口高度，不随工具栏伸缩变化）；不再声明 bottom，字符画位置与工具栏状态脱钩。",
+      "impact": "首页与文章页两侧字符画；桌面端位置不变"
+    },
+    {
+      "scope": "文章页模糊带样式（assets/css/style.css）",
+      "before": ".article-blur 为 top: 0; bottom: 0，工具栏动画期间 backdrop-filter 层逐帧改尺寸。",
+      "after": ".article-blur 同样改为 top: 0 + height: 100vh / 100lvh，宽度、模糊与羽化不变。",
+      "impact": "文章页内容列模糊带；视觉不变"
+    },
+    {
+      "scope": "缓存版本（index.html）",
+      "before": "资源版本串 20261109j。",
+      "after": "资源版本串升至 20261109k，确保手机端拿到新样式。",
+      "impact": "首页与文章页资源缓存"
+    },
+    {
+      "scope": "回归测试（tests/page-art.test.cjs）",
+      "before": "只覆盖存在性、居中、主题配色、交互隔离、打印隐藏与 390px 无横向滚动。",
+      "after": "新增 4 项（1440px 与 390px 各 2 项）：遍历当前生效的样式规则（含命中的 @media），.page-art 与 .article-blur 须声明 height: 100lvh、不声明 bottom/inset、top 为 0，且实测层高等于 100lvh 探针；.article-blur 在首页注入同类元素核对（共用 style.css）。",
+      "impact": "底图回归测试"
+    },
+    {
+      "scope": "设计基线（docs/devel/design/01-博客首页.md、02-博客文章.md）",
+      "before": "字符画底图只写「固定在视口垂直居中」，未约束移动端工具栏伸缩；模糊带未约束高度来源。",
+      "after": "01 的 3.3、交互、核心规则 12 增补：按大视口高度 100lvh 垂直居中，移动端工具栏伸缩时位置不变；4.3 与 4.4 登记 C026；02 规则 16 同步模糊带高度为 100lvh。",
+      "impact": "博客首页与文章设计基线"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "两幅字符画固定在视口垂直居中，随视口缩放。",
+      "after": "两幅字符画固定在大视口（100lvh，不支持时回退 100vh）内垂直居中，层高不随移动端地址栏/工具栏伸缩变化，滚动时位置保持静止；横向随视口宽度缩放不变。"
+    }
+  },
+  "verification": {
+    "result": null,
+    "run_id": "local-20261109-14",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "page-art 测试含 C026 新断言全绿，且新断言在修复前代码上失败；posts 及其余测试不回归",
+        "false_if": "存在任何测试失败、报错，或新断言在修复前同样通过",
+        "evidence": "修复前 style.css：page-art 16/20，C026 新增 4 项全部 FAIL（.page-art 与 .article-blur 均 height 未声明、bottom=0px）。修复后 node tests/page-art.test.cjs 20/20 EXIT=0；tests/ 下 13 个测试文件全部 EXIT=0（blogs 14/14、card-layout 17/17、carousel 14/14、footer 13/13、intro 5/5、page-art 20/20、page-transition 10/10、posts 41/41、scroll 4/4、search 16/16、theme 19/19、verse-panel 9/9、wordmark-scroll 6/6）。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "1440px 与 390px 下字符画仍垂直居中、左右半露；层高等于 100lvh 且不依赖 bottom",
+        "false_if": "字符画位置变化、出现横向滚动，或层高仍由 bottom 决定",
+        "evidence": "headless Chrome：1440px 下左右字符画垂直偏移 0、左侧半露右移 1ch（-712.8）、右侧 +720；390px 下偏移 0、无横向滚动。构建 local/site 后在文章页 390×844 仿真：.page-art 与 .article-blur 均 top=0、高 844（=100lvh），滚动到 scrollY=2400 后位置与高度不变、两幅字符画垂直偏移仍为 0，样式链接为 ../../assets/css/style.css?v=20261109k。真机动态工具栏未在 headless 中仿真（lvh 恒等于 innerHeight）。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "文章页模糊带宽度、模糊与羽化不变；打印隐藏、主题配色与其他测试不受影响",
+        "false_if": "模糊带或其他页面元素视觉变化、测试回归",
+        "evidence": "posts 41/41 含 C019/C020 模糊带断言（fixed、宽 656px、z-index 0、blur(1px)、72px 羽化、透明背景、首页不含该层）全部通过；打印隐藏、浅深主题配色、主题切换后位置不变均 PASS；桌面端 lvh=vh=innerHeight，层高与修复前一致（900px）。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

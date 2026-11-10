@@ -105,11 +105,18 @@ body {
   padding: 0 20px 24px;
 }
 
-/* 字符画底图: 固定在视口居中, 始终位于内容之后. */
+/* 字符画底图: 固定在视口居中, 始终位于内容之后.
+   高度取大视口 100lvh 而非 inset:0 (C026): 移动端滚动时地址栏/工具栏伸缩
+   会让 fixed 层高度逐帧变化, 居中的字符画随之上下抖动; 不声明 bottom,
+   层高与工具栏状态脱钩. 100vh 为不支持 lvh 时的回退 (移动端同为大视口). */
 .page-art {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  left: 0;
   z-index: 0;
+  height: 100vh;
+  height: 100lvh;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -138,15 +145,17 @@ body {
 }
 
 /* 文章页背景模糊带 (C019): 只柔化 36rem 内容列左右各 40px 的背景,
-   列外字符画保持清晰; 72px 羽化让带体左右淡入淡出. */
+   列外字符画保持清晰; 72px 羽化让带体左右淡入淡出.
+   高度同字符画取 100lvh (C026), 避免工具栏伸缩时模糊层逐帧改尺寸. */
 .article-blur {
   --article-feather: 72px;
   position: fixed;
   top: 0;
-  bottom: 0;
   left: 50%;
   z-index: 0;
   width: calc(var(--measure) + 80px);
+  height: 100vh;
+  height: 100lvh;
   transform: translateX(-50%);
   pointer-events: none;
   -webkit-backdrop-filter: blur(1px);
