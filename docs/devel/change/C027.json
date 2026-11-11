@@ -4,7 +4,7 @@
   "title": "SKILLS 技能轮播支持鼠标/触摸拖动翻阅",
   "version": "",
   "type": "Enhancement",
-  "status": "verified",
+  "status": "closed",
   "branch": "fix/C027-skill-drag",
   "is_hotfix": false,
   "target": {
@@ -106,14 +106,14 @@
   "sync": {
     "design_pinned": true,
     "changelog": true,
-    "commit": "",
+    "commit": "01d0086ce29c56e6f0c3a195f4465ff3dc839bd9",
     "tag": ""
   },
   "gate": {
     "tool": "adflow-verify",
     "version": "1.7.0",
     "ran_at": "2026-11-11",
-    "exit_code": 4,
+    "exit_code": 0,
     "from_status": "verified",
     "target_status": "closed",
     "signed_quote": "合并，清理分支，推送",

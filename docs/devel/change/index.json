@@ -226,7 +226,7 @@
     },
     "C027": {
       "title": "SKILLS 技能轮播支持鼠标/触摸拖动翻阅",
-      "status": "verified",
+      "status": "closed",
       "branch": "fix/C027-skill-drag",
       "file": "docs/devel/change/C027.json",
       "version": ""
