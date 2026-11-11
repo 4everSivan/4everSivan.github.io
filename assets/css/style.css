@@ -652,6 +652,9 @@ main {
   overflow: hidden;
   /* clip 不形成滚动容器: 键盘聚焦侧边卡片时浏览器无法滚动视窗 (C024) */
   overflow: clip;
+  /* 横向手势归轮播拖拽, 纵向仍归页面滚动 (C027) */
+  touch-action: pan-y;
+  cursor: grab;
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
@@ -666,6 +669,11 @@ main {
     #000 calc(100% - var(--skill-fade)),
     transparent 100%
   );
+}
+
+.skill-carousel.is-dragging,
+.skill-carousel.is-dragging .skill-card {
+  cursor: grabbing;
 }
 
 .skill-track {
@@ -686,6 +694,10 @@ main {
 .skill-card {
   flex: none;
   width: var(--skill-card-width);
+  /* 拖拽翻阅时不得选中文本或原生拖出链接 (C027) */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://ad-flow.org/schemas/change-index.v1.json",
   "version": "1.0",
-  "updated_at": "2026-11-09",
+  "updated_at": "2026-11-11",
   "topics": {
     "BlogHome": {
       "design_doc": "docs/devel/design/01-博客首页.md",
@@ -21,7 +21,8 @@
         "C013",
         "C014",
         "C024",
-        "C026"
+        "C026",
+        "C027"
       ]
     },
     "BlogPosts": {
@@ -221,6 +222,13 @@
       "status": "in_progress",
       "branch": "fix/C026-art-viewport-jitter",
       "file": "docs/devel/change/C026.json",
+      "version": ""
+    },
+    "C027": {
+      "title": "SKILLS 技能轮播支持鼠标/触摸拖动翻阅",
+      "status": "in_progress",
+      "branch": "fix/C027-skill-drag",
+      "file": "docs/devel/change/C027.json",
       "version": ""
     }
   }

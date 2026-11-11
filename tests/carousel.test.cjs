@@ -117,6 +117,37 @@ async function click(client, x, y) {
   await mouse(client, 'mouseReleased', x, y);
 }
 
+// 按住左键水平拖动 (C027): 拖动中的 moves 必须带 buttons:1,
+// 否则页面收到的 pointermove 不处于按下状态.
+async function dragMouse(client, x0, y0, dx, { steps = 10, gapMs = 60 } = {}) {
+  await client.send('Input.dispatchMouseEvent', {
+    type: 'mousePressed',
+    x: x0,
+    y: y0,
+    button: 'left',
+    buttons: 1,
+    clickCount: 1,
+  });
+  for (let i = 1; i <= steps; i += 1) {
+    await client.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      x: Math.round(x0 + (dx * i) / steps),
+      y: y0,
+      button: 'left',
+      buttons: 1,
+    });
+    await sleep(gapMs);
+  }
+  await client.send('Input.dispatchMouseEvent', {
+    type: 'mouseReleased',
+    x: Math.round(x0 + dx),
+    y: y0,
+    button: 'left',
+    buttons: 0,
+    clickCount: 1,
+  });
+}
+
 const PAGE_HELPERS = `
 (() => {
   const carousel = document.querySelector('[data-skill-carousel]');
@@ -563,6 +594,119 @@ async function scenario(client, { label, hoverMs, clicks, gapMs }) {
         (stop) => Math.abs(stop.offset) <= 3 && stop.scrollLeft === 0
       ),
       describe(fallback)
+    );
+
+    // 场景 6 (C027): 慢速拖拽 1.4 步, 吸附到最近的整格且不触发卡片点击.
+    // 慢速 (约 0.3px/ms) 低于 0.5px/ms 的轻甩阈值, 只按位移吸附.
+    await resetTo(client, 3);
+    await move(client, 700, 80);
+    await sleep(SETTLE_MS);
+    await evaluate(
+      client,
+      `(() => {
+        const carousel = document.querySelector('[data-skill-carousel]');
+        const view = carousel.getBoundingClientRect();
+        const center = view.left + view.width / 2;
+        window.__cardClicks = 0;
+        carousel.querySelectorAll('.skill-card').forEach((card) => {
+          const box = card.getBoundingClientRect();
+          if (Math.abs(box.left + box.width / 2 - center) <= 2) {
+            card.addEventListener('click', () => {
+              window.__cardClicks += 1;
+            });
+          }
+        });
+        return true;
+      })()`
+    );
+    const dragPoint = await evaluate(
+      client,
+      `(() => {
+        const view = document
+          .querySelector('[data-skill-carousel]')
+          .getBoundingClientRect();
+        return {
+          x: Math.round(view.left + view.width / 2),
+          y: Math.round(view.top + view.height / 2),
+        };
+      })()`
+    );
+    const slowBefore = await evaluate(client, 'window.__carouselTest.info()');
+    await dragMouse(client, dragPoint.x, dragPoint.y, -slowBefore.step * 1.4, {
+      steps: 20,
+      gapMs: 70,
+    });
+    await sleep(SETTLE_MS + 400);
+    const slowAfter = await evaluate(client, 'window.__carouselTest.info()');
+    const slowClicks = await evaluate(client, 'window.__cardClicks');
+    check(
+      '慢速拖拽 1.4 步吸附到最近整格并居中 (C027)',
+      slowAfter.index === 4 && slowAfter.centered,
+      `index=${slowAfter.index}, centered=${slowAfter.centered}`
+    );
+    check(
+      '拖拽后不触发卡片点击 (C027)',
+      slowClicks === 0,
+      `cardClicks=${slowClicks}`
+    );
+
+    // 场景 7 (C027): 快速轻甩 0.4 步 (约 1.5px/ms): 位移四舍五入回原格,
+    // 轻甩按速度多走一格; 没有轻甩判定时会弹回 index 3.
+    await resetTo(client, 3);
+    await move(client, 700, 80);
+    await sleep(SETTLE_MS);
+    await dragMouse(client, dragPoint.x, dragPoint.y, -slowBefore.step * 0.4, {
+      steps: 6,
+      gapMs: 12,
+    });
+    await sleep(SETTLE_MS + 400);
+    const flickAfter = await evaluate(client, 'window.__carouselTest.info()');
+    check(
+      '快速轻甩 0.4 步多走一格 (C027)',
+      flickAfter.index === 4 && flickAfter.centered,
+      `index=${flickAfter.index}, centered=${flickAfter.centered}`
+    );
+
+    // 场景 8 (C027): 向右慢拖 2.6 步越过缓冲边界, 橡皮筋衰减后弹回并吸附首张.
+    // 期望吸附到 MIN_INDEX(1), normalize 后回到 index 4, 逻辑位置为首张卡.
+    await resetTo(client, 3);
+    await move(client, 700, 80);
+    await sleep(SETTLE_MS);
+    await dragMouse(client, dragPoint.x, dragPoint.y, slowBefore.step * 2.6, {
+      steps: 24,
+      gapMs: 70,
+    });
+    await sleep(SETTLE_MS + 400);
+    const rubberAfter = await evaluate(client, 'window.__carouselTest.info()');
+    check(
+      '右拖越界橡皮筋弹回并吸附首张 (C027)',
+      rubberAfter.index === 4 &&
+        rubberAfter.logical === 1 &&
+        rubberAfter.centered,
+      `index=${rubberAfter.index}, logical=${rubberAfter.logical}, centered=${rubberAfter.centered}`
+    );
+
+    // 场景 9 (C027): 亚阈值位移 (4px) 在右侧半卡上松手仍是点击翻页.
+    await resetTo(client, 3);
+    await move(client, 700, 80);
+    await sleep(SETTLE_MS);
+    const subPoint = await evaluate(
+      client,
+      'window.__carouselTest.rightPoint()'
+    );
+    if (!subPoint) {
+      throw new Error('找不到右侧半卡');
+    }
+    await dragMouse(client, subPoint.x, subPoint.y, 4, {
+      steps: 2,
+      gapMs: 30,
+    });
+    await sleep(SETTLE_MS);
+    const subAfter = await evaluate(client, 'window.__carouselTest.info()');
+    check(
+      '亚阈值 4px 位移仍是点击翻页 (C027)',
+      subAfter.index === 4 && subAfter.centered,
+      `index=${subAfter.index}, centered=${subAfter.centered}`
     );
 
     client.close();

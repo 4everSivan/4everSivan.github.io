@@ -1,0 +1,118 @@
+{
+  "$schema": "https://ad-flow.org/schemas/change-card.v1.json",
+  "id": "C027",
+  "title": "SKILLS 技能轮播支持鼠标/触摸拖动翻阅",
+  "version": "",
+  "type": "Enhancement",
+  "status": "in_progress",
+  "branch": "fix/C027-skill-drag",
+  "is_hotfix": false,
+  "target": {
+    "module": "博客首页",
+    "component": "SKILLS 技能轮播",
+    "design_doc": "docs/devel/design/01-博客首页.md",
+    "design_topic": "BlogHome"
+  },
+  "why": "SKILLS 轮播目前只有点击左右半卡和键盘 Tab 两种翻页方式，鼠标用户按住卡片向两侧拖动是轮播的直觉操作，现在毫无响应，需要补上指针拖拽翻阅。",
+  "precheck": {
+    "description": "确认 main 分支上轮播无任何指针拖拽实现（无 pointerdown 监听、无 setPointerCapture、无 touch-action）",
+    "command": "grep -n \"data-skill-carousel\" assets/js/main.js | head -3; grep -n \"setPointerCapture\\|touch-action\" assets/js/main.js assets/css/style.css; echo EXIT=$?",
+    "expected": "main@2f18efd：main.js 中 [data-skill-carousel] 仅有 querySelector 引用，无 setPointerCapture / touch-action，轮播不支持拖拽",
+    "is_completed": true,
+    "evidence": "grep 无 setPointerCapture 与 touch-action 命中（EXIT=1）；已有两处 document 级 pointerdown 分别属于搜索栏外点收起（main.js:117）与文章代码块行号（main.js:567），与轮播无关。"
+  },
+  "callback": {
+    "before": [
+      "git checkout -b fix/C027-skill-drag"
+    ],
+    "after": [
+      "node tests/carousel.test.cjs",
+      "node tests/card-layout.test.cjs",
+      "for f in tests/*.test.cjs; do node \"$f\"; done",
+      "scripts/adflow-verify"
+    ]
+  },
+  "changes": [
+    {
+      "scope": "轮播拖拽交互（assets/js/main.js）",
+      "before": "轨道只由点击与键盘聚焦驱动，鼠标/手指按住拖动无任何响应。",
+      "after": "轮播支持指针拖拽翻阅：pointerdown 记录起点，水平位移超过 6px 才 setPointerCapture 接管为拖拽（更小位移仍按普通点击翻页/开链接）；拖拽中轨道 1:1 跟随指针、暂停动画，超出两端缓冲卡的部分按 0.3 系数橡皮筋衰减；松手按最近卡片吸附，最近 100ms 速度超过 0.5px/ms 的轻甩在吸附方向多走一格；拖拽结束吞掉随后的 click（capture 拦截 + 0ms 超时复位），不误触发翻页或打开链接；dragstart 一律 preventDefault 阻止原生链接拖拽。",
+      "impact": "首页 SKILLS 区交互；点击翻页、键盘 Tab、回绕与居中判定行为不变"
+    },
+    {
+      "scope": "轮播样式（assets/css/style.css）",
+      "before": "无 touch-action 声明，触摸横向滑动被浏览器当作页面滚动抢占；无拖拽光标提示；卡片文字与链接可被选中/原生拖出。",
+      "after": ".skill-carousel 声明 touch-action: pan-y（横向手势归轮播、纵向仍归页面滚动）与 cursor: grab，拖拽中 is-dragging 类切换 grabbing（含卡片）；.skill-card 增加 user-select: none 与 -webkit-user-drag: none。",
+      "impact": "首页 SKILLS 区；触屏纵向滚动不受影响"
+    },
+    {
+      "scope": "缓存版本（index.html）",
+      "before": "资源版本串 20261109k。",
+      "after": "资源版本串升至 20261111a。",
+      "impact": "首页资源缓存"
+    },
+    {
+      "scope": "回归测试（tests/carousel.test.cjs）",
+      "before": "只覆盖点击翻页、连续点击、回绕、点击判定与键盘聚焦。",
+      "after": "新增 4 项拖拽场景：慢速拖拽 1.4 步吸附到最近卡且居中卡 click 计数为 0；快速轻甩 0.4 步按速度多走一格（无轻甩应弹回原位）；向右拖出缓冲区橡皮筋衰减后弹回并吸附 MIN_INDEX；亚阈值 4px 位移在侧卡上释放仍是点击翻页。",
+      "impact": "轮播回归测试"
+    },
+    {
+      "scope": "设计基线（docs/devel/design/01-博客首页.md）",
+      "before": "3.5/3.6/规则 9 只描述点击与键盘翻页，未约束拖拽。",
+      "after": "3.5 技能轮播、3.6 可访问性、4.2 规则 9 增补拖拽翻阅契约（阈值、吸附、轻甩、橡皮筋、click 吞掉、touch-action: pan-y）；4.3 登记 C027 测试覆盖；4.4 登记 C027 行。",
+      "impact": "博客首页设计基线"
+    }
+  ],
+  "design": {
+    "doc": "docs/devel/design/01-博客首页.md",
+    "topic": "BlogHome",
+    "modified": true,
+    "rule_diff": {
+      "before": "技能轮播直接点击左右半卡切换，键盘 Tab 聚焦居中；无拖拽交互约束。",
+      "after": "技能轮播在点击与键盘之外支持指针/触摸水平拖拽翻阅：水平位移超过 6px 才接管为拖拽并捕获指针（更小位移仍是点击），拖拽中轨道 1:1 跟随，两端之外橡皮筋衰减，松手吸附最近卡片、快速轻甩多走一格；拖拽后的 click 被吞掉；触摸横向手势归轮播、纵向归页面（touch-action: pan-y）。"
+    }
+  },
+  "verification": {
+    "result": null,
+    "run_id": "local-20261111-01",
+    "user_quote": "",
+    "signoff": "",
+    "checks": [
+      {
+        "item": "自动化测试",
+        "true_if": "carousel 测试含 C027 拖拽新断言全绿，且新断言在改动前代码上失败；其余测试不回归",
+        "false_if": "存在任何测试失败、报错，或拖拽断言在改动前同样通过",
+        "evidence": "改动后 node tests/carousel.test.cjs 19/19 EXIT=0（1440×900 与 390×844 两视口均通过）；对旧代码（stash 还原 main.js/style.css 后）同为 19 项中 15 通过，4 项拖拽行为断言 FAIL（慢拖 index=3 未动、轻甩 index=3、越界 logical=0、亚阈值 index=3），「拖拽后不触发卡片点击」在旧代码上也通过——旧代码轨道不动、松手落在另一张卡上 click 本就到不了被监听卡片，该断言守护的是新代码 1:1 跟随时松手必落在原卡的情形；tests/ 下 13 个测试文件全部 EXIT=0（blogs 14/14、card-layout 17/17、carousel 19/19、footer 13/13、intro 5/5、page-art 20/20、page-transition 10/10、posts 41/41、scroll 4/4、search 16/16、theme 19/19、verse-panel 9/9、wordmark-scroll 6/6）。",
+        "result": true
+      },
+      {
+        "item": "行为实测",
+        "true_if": "慢拖吸附居中、轻甩多走一格、边界弹回、亚阈值位移仍是点击；拖拽不触发卡片链接",
+        "false_if": "吸附错位、点击被误吞或未被吞、拖拽中轨道不跟随或出现横向页面滚动",
+        "evidence": "headless Chrome CDP 按住左键拖动（moves 带 buttons:1）：慢速拖 1.4 步（≈0.3px/ms）松手吸附 index 3→4 且 centered=true、居中卡 click 计数 0；快速轻甩 0.4 步（≈1.5px/ms）多走一格到 index 4（无轻甩判定会弹回 3）；右拖 2.6 步越过缓冲区橡皮筋衰减后弹回吸附首张（logical=1）并居中；侧卡上 4px 亚阈值位移释放仍是点击翻页（index 4）。390px 窄屏视口同样全部通过。",
+        "result": true
+      },
+      {
+        "item": "反向影响排查",
+        "true_if": "点击翻页、连续点击合并、回绕、键盘 Tab 聚焦居中与回车开链接行为不变；触屏纵向滚动保留；打印/禁用 JS 不受影响",
+        "false_if": "既有轮播行为回归、页面出现横向滚动或其他测试失败",
+        "evidence": "carousel 既有断言（悬停单击、连续两次点击不丢失、回绕无中途吸附、居中开链接/侧卡拦截、C024 Tab 三站居中 + 回车 + overflow 降级）全部 PASS；scroll 4/4 无横向滚动、card-layout 17/17、page-art 20/20（C026 规则断言不受影响）、posts 41/41 等其余 12 个测试文件均 EXIT=0；打印样式的 .skill-track transform: none !important 不受拖拽样式影响；禁用 JS 时拖拽代码不加载，CSS 仅增加 touch-action/光标/禁选声明，无布局影响。",
+        "result": true
+      }
+    ]
+  },
+  "rejections": [],
+  "sync": {
+    "design_pinned": true,
+    "changelog": true,
+    "commit": "",
+    "tag": ""
+  },
+  "gate": {
+    "tool": "adflow-verify",
+    "version": "1.7.0",
+    "ran_at": "",
+    "exit_code": null
+  }
+}

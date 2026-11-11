@@ -194,7 +194,8 @@
   });
 })();
 
-// 技能轮播: 中间一张完整卡, 两侧露出半张并淡出; 点击左右半卡切换.
+// 技能轮播: 中间一张完整卡, 两侧露出半张并淡出; 点击左右半卡切换,
+// 按住可水平拖拽翻阅 (C027).
 // 动画由 Web Animations API 驱动: 卡片 hover 过渡的 transitionend 会冒泡到
 // track, 若把它当作翻页结束信号, 翻页动画会在中途被提前截断.
 (function () {
@@ -362,6 +363,121 @@
         go(count + position - index);
       }
     });
+  });
+
+  // 指针拖拽 (C027): 按住轮播水平拖动, 轨道 1:1 跟随, 松手吸附到最近卡片.
+  // 位移超过阈值才捕获指针接管为拖拽; 未达阈值的松手仍是普通点击翻页.
+  const DRAG_START = 6;
+  const FLICK_VELOCITY = 0.5;
+  const RUBBER = 0.3;
+  let drag = null;
+  let swallowClick = false;
+
+  function releaseDrag(event) {
+    if (!drag || event.pointerId !== drag.pointerId) {
+      return;
+    }
+    const info = drag;
+    drag = null;
+    carousel.classList.remove('is-dragging');
+    if (!info.moved) {
+      return;
+    }
+    // 捕获指针后 click 会重定向到轮播本身; 再显式吞掉一次, 双保险.
+    swallowClick = true;
+    window.setTimeout(() => {
+      swallowClick = false;
+    }, 0);
+    // 最近 100ms 的速度超过阈值视为轻甩, 在吸附方向上多走一格.
+    let velocity = 0;
+    const samples = info.samples;
+    if (samples.length > 1) {
+      const dt = samples[samples.length - 1].t - samples[0].t;
+      if (dt > 0) {
+        velocity =
+          (samples[samples.length - 1].x - samples[0].x) / dt;
+      }
+    }
+    const { center, step } = metrics();
+    const position = (center - currentOffset()) / step;
+    let target = Math.round(position);
+    if (velocity < -FLICK_VELOCITY) {
+      target += 1;
+    } else if (velocity > FLICK_VELOCITY) {
+      target -= 1;
+    }
+    target = Math.min(MAX_INDEX, Math.max(MIN_INDEX, target));
+    go(target - index);
+  }
+
+  carousel.addEventListener('pointerdown', (event) => {
+    if (drag || !event.isPrimary || event.button !== 0) {
+      return;
+    }
+    swallowClick = false;
+    drag = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      base: currentOffset(),
+      samples: [{ t: event.timeStamp, x: event.clientX }],
+      moved: false,
+    };
+  });
+
+  carousel.addEventListener('pointermove', (event) => {
+    if (!drag || event.pointerId !== drag.pointerId) {
+      return;
+    }
+    const dx = event.clientX - drag.startX;
+    if (!drag.moved) {
+      if (Math.abs(dx) < DRAG_START) {
+        return;
+      }
+      drag.moved = true;
+      // 接管瞬间重新取当前视觉位置: 上一次翻页动画可能还在进行.
+      drag.base = currentOffset();
+      carousel.setPointerCapture(drag.pointerId);
+      carousel.classList.add('is-dragging');
+    }
+    event.preventDefault();
+    let offset = drag.base + dx;
+    // 两端缓冲卡之外的拖出量按橡皮筋衰减, 保证松手能弹回.
+    const maxOffset = offsetOf(MIN_INDEX);
+    const minOffset = offsetOf(MAX_INDEX);
+    if (offset > maxOffset) {
+      offset = maxOffset + (offset - maxOffset) * RUBBER;
+    } else if (offset < minOffset) {
+      offset = minOffset + (offset - minOffset) * RUBBER;
+    }
+    setOffset(offset);
+    drag.samples.push({ t: event.timeStamp, x: event.clientX });
+    while (
+      drag.samples.length > 2 &&
+      event.timeStamp - drag.samples[0].t > 100
+    ) {
+      drag.samples.shift();
+    }
+  });
+
+  carousel.addEventListener('pointerup', releaseDrag);
+  carousel.addEventListener('pointercancel', releaseDrag);
+
+  // 拖拽后紧跟的 click 不再触发翻页或打开链接.
+  carousel.addEventListener(
+    'click',
+    (event) => {
+      if (swallowClick) {
+        swallowClick = false;
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+    true
+  );
+
+  // 链接原生拖拽一律禁止, 拖动手势只属于轮播.
+  carousel.addEventListener('dragstart', (event) => {
+    event.preventDefault();
   });
 
   // 轨道只靠 transform 定位; 不支持 overflow: clip 的浏览器在聚焦时
